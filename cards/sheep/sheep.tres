@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="Blueprint" load_steps=2 format=3 uid="uid://dj0t10srx51e8"]
+
+[ext_resource type="Script" path="res://resources/Blueprint.gd" id="1_aw60q"]
+
+[resource]
+script = ExtResource("1_aw60q")
+name = "Sheep"
+text = ""
+cost = 1
+type = 1
+classes = Array[int]([0])
+rarities = Array[int]([0])
+collectible = false
+id = 1
+abilities = Array[Resource("res://resources/Ability.gd")]([])
+tribes = Array[int]([1])
+attack = 1
+health = 1
+durability = 0
+spell_schools = Array[int]([])
+heropower_id = 0
+cooldown = 0

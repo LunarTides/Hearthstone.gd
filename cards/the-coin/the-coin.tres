@@ -1,0 +1,29 @@
+[gd_resource type="Resource" script_class="Blueprint" load_steps=5 format=3 uid="uid://in55r33uqyo"]
+
+[ext_resource type="Script" path="res://cards/the-coin/cast.gd" id="1_4n32n"]
+[ext_resource type="Script" path="res://resources/Blueprint.gd" id="1_7cnmm"]
+[ext_resource type="Script" path="res://resources/Ability.gd" id="2_guw8j"]
+
+[sub_resource type="Resource" id="Resource_p6q6n"]
+script = ExtResource("2_guw8j")
+name = 2
+_script = ExtResource("1_4n32n")
+
+[resource]
+script = ExtResource("1_7cnmm")
+name = "The Coin"
+text = "Gain 1 Mana Crystal this turn only."
+cost = 0
+type = 2
+classes = Array[int]([0])
+rarities = Array[int]([0])
+collectible = false
+id = 2
+abilities = Array[ExtResource("2_guw8j")]([SubResource("Resource_p6q6n")])
+tribes = Array[int]([])
+attack = 0
+health = 0
+durability = 0
+spell_schools = Array[int]([0])
+heropower_id = 0
+cooldown = 0

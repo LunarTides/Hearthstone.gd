@@ -1,0 +1,31 @@
+enum TYPE {
+	NONE,
+	MINION,
+	SPELL
+}
+
+enum TRIBE {
+	NONE,
+	BEAST
+}
+
+enum SPELL_SCHOOL {
+	NONE,
+	FIRE
+}
+
+enum CLASS {
+	NEUTRAL,
+	MAGE
+}
+
+enum RARITY {
+	FREE,
+	COMMON
+}
+
+enum ABILITY {
+	BATTLECRY,
+	DEATHRATTLE,
+	CAST
+}

@@ -1,0 +1,21 @@
+[gd_scene load_steps=8 format=3 uid="uid://cra48m17ld83w"]
+
+[ext_resource type="Script" path="res://scripts/Card.gd" id="1_hvgbs"]
+[ext_resource type="Resource" uid="uid://in55r33uqyo" path="res://cards/the-coin/the-coin.tres" id="2_nch2k"]
+[ext_resource type="Script" path="res://resources/Card.gd" id="2_yyrt0"]
+[ext_resource type="Script" path="res://resources/Player.gd" id="3_l76pf"]
+
+[sub_resource type="Resource" id="Resource_qu2q3"]
+script = ExtResource("3_l76pf")
+
+[sub_resource type="PackedScene" id="PackedScene_3uapl"]
+
+[sub_resource type="Resource" id="Resource_fs68q"]
+script = ExtResource("2_yyrt0")
+player = SubResource("Resource_qu2q3")
+blueprint = ExtResource("2_nch2k")
+scene = SubResource("PackedScene_3uapl")
+
+[node name="Card" type="Area3D"]
+script = ExtResource("1_hvgbs")
+card = SubResource("Resource_fs68q")
