@@ -1,21 +1,21 @@
-[gd_scene load_steps=8 format=3 uid="uid://cra48m17ld83w"]
+[gd_scene load_steps=8 format=3 uid="uid://ccmb7s7hsvhju"]
 
-[ext_resource type="Script" path="res://scripts/Card.gd" id="1_hvgbs"]
-[ext_resource type="Resource" uid="uid://in55r33uqyo" path="res://cards/the-coin/the-coin.tres" id="2_nch2k"]
+[ext_resource type="Script" path="res://scripts/Card.gd" id="1_iu1xa"]
 [ext_resource type="Script" path="res://resources/Card.gd" id="2_yyrt0"]
+[ext_resource type="Resource" uid="uid://ddtglwgoe0a6t" path="res://cards/the-coin/the-coin.tres" id="3_dfrnc"]
 [ext_resource type="Script" path="res://resources/Player.gd" id="3_l76pf"]
 
-[sub_resource type="Resource" id="Resource_qu2q3"]
+[sub_resource type="Resource" id="Resource_4jr0s"]
 script = ExtResource("3_l76pf")
 
-[sub_resource type="PackedScene" id="PackedScene_3uapl"]
+[sub_resource type="PackedScene" id="PackedScene_enu4q"]
 
-[sub_resource type="Resource" id="Resource_fs68q"]
+[sub_resource type="Resource" id="Resource_b60et"]
 script = ExtResource("2_yyrt0")
-player = SubResource("Resource_qu2q3")
-blueprint = ExtResource("2_nch2k")
-scene = SubResource("PackedScene_3uapl")
+player = SubResource("Resource_4jr0s")
+blueprint = ExtResource("3_dfrnc")
+scene = SubResource("PackedScene_enu4q")
 
 [node name="Card" type="Area3D"]
-script = ExtResource("1_hvgbs")
-card = SubResource("Resource_fs68q")
+script = ExtResource("1_iu1xa")
+card = SubResource("Resource_b60et")

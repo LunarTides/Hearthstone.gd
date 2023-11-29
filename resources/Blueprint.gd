@@ -10,7 +10,6 @@ class_name Blueprint
 @export var rarities: Array[Enums.RARITY]
 @export var collectible: bool
 @export var id: int
-@export var abilities: Array[Ability]
 
 @export_category("Minion")
 @export var tribes: Array[Enums.TRIBE]
