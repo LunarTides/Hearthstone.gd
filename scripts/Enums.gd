@@ -1,3 +1,5 @@
+extends Node
+
 enum TYPE {
 	NONE,
 	MINION,
