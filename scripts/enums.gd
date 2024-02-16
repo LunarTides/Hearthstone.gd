@@ -6,7 +6,8 @@ enum TYPE {
 	SPELL,
 	WEAPON,
 	HERO,
-	LOCATION
+	LOCATION,
+	HEROPOWER,
 }
 
 enum TRIBE {
@@ -22,7 +23,7 @@ enum TRIBE {
 	QUILBOAR,
 	TOTEM,
 	UNDEAD,
-	ALL
+	ALL,
 }
 
 enum SPELL_SCHOOL {
@@ -33,7 +34,7 @@ enum SPELL_SCHOOL {
 	FROST,
 	HOLY,
 	NATURE,
-	SHADOW
+	SHADOW,
 }
 
 enum CLASS {
@@ -48,7 +49,7 @@ enum CLASS {
 	WARLOCK,
 	ROGUE,
 	DEMON_HUNTER,
-	DEATH_KNIGHT
+	DEATH_KNIGHT,
 }
 
 enum RARITY {
@@ -56,7 +57,7 @@ enum RARITY {
 	COMMON,
 	RARE,
 	EPIC,
-	LEGENDARY
+	LEGENDARY,
 }
 
 enum KEYWORD {
@@ -73,6 +74,9 @@ enum KEYWORD {
 	WINDFURY,
 	OUTCAST,
 	CAST_ON_DRAW,
+	SUMMON_ON_DRAW,
+	UNBREAKABLE,
+	UNLIMITED_ATTACKS,
 	CHARGE,
 	MEGA_WINDFURY,
 	ECHO,
@@ -85,7 +89,9 @@ enum KEYWORD {
 	COLOSSAL,
 	INFUSE,
 	CLEAVE,
-	TITAN
+	TITAN,
+	FORGETFUL,
+	CANT_ATTACK,
 }
 
 enum ABILITY {
@@ -106,18 +112,19 @@ enum ABILITY {
 	PASSIVE,
 	SPELLBURST,
 	START_OF_GAME,
+	HERO_POWER,
 	USE,
 	PLACEHOLDER,
 	CONDITION,
 	REMOVE,
 #	HAND_PASSIVE # Use something like `card.location` in a passive instead.
 	TICK,
-#	TEST,
-	CREATE
+	TEST,
+#	CREATE, # Use the _ready function instead
 }
 
 enum COST_TYPE {
 	MANA,
 	ARMOR,
-	HEALTH
+	HEALTH,
 }

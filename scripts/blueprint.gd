@@ -6,7 +6,7 @@ class_name Blueprint
 @export var name: String
 @export var text: String
 @export var cost: int
-@export var type: Enums.TYPE
+@export var types: Array[Enums.TYPE]
 @export var classes: Array[Enums.CLASS]
 @export var rarities: Array[Enums.RARITY]
 @export var collectible: bool
@@ -19,14 +19,13 @@ class_name Blueprint
 @export var attack: int
 @export var health: int
 
-@export_category("Weapon")
-@export var durability: int
-
 @export_category("Spell")
 @export var spell_schools: Array[Enums.SPELL_SCHOOL]
 
 @export_category("Hero")
+@export var armor: int
 @export var heropower_id: int
 
 @export_category("Location")
+@export var durability: int
 @export var cooldown: int
