@@ -2,5 +2,9 @@
 # meta-description: Card script
 # meta-default: true
 
-func ability(name: Enums.ABILITY, plr: Player, card: Card):
-	pass
+func _ready(player: Player, card: Card) -> void:
+	card.add_ability(Enums.ABILITY.BATTLECRY, battlecry)
+
+
+func battlecry(player: Player, card: Card) -> void:
+	print_debug("Battlecry")

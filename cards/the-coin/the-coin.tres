@@ -1,9 +1,9 @@
 [gd_resource type="Resource" load_steps=2 format=3 uid="uid://ddtglwgoe0a6t"]
 
-[ext_resource type="Script" path="res://cards/the-coin/the-coin.gd" id="1_pp5w5"]
+[ext_resource type="Script" path="res://cards/the-coin/the-coin.gd" id="1_5rkkv"]
 
 [resource]
-script = ExtResource("1_pp5w5")
+script = ExtResource("1_5rkkv")
 name = "The Coin"
 text = "Gain 1 Mana Crystal this turn only."
 cost = 0

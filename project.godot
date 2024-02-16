@@ -16,4 +16,9 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-Enums="*res://scripts/Enums.gd"
+Enums="*res://scripts/enums.gd"
+
+[debug]
+
+gdscript/warnings/untyped_declaration=2
+gdscript/warnings/inferred_declaration=2

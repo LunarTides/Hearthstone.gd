@@ -1,6 +1,7 @@
 extends Resource
 class_name Blueprint
 
+
 @export_category("Common")
 @export var name: String
 @export var text: String

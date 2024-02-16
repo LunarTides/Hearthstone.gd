@@ -1,9 +1,9 @@
 [gd_scene load_steps=8 format=3 uid="uid://ccmb7s7hsvhju"]
 
-[ext_resource type="Script" path="res://scripts/Card.gd" id="1_iu1xa"]
-[ext_resource type="Script" path="res://resources/Card.gd" id="2_yyrt0"]
+[ext_resource type="Script" path="res://scenes/card.gd" id="1_iu1xa"]
+[ext_resource type="Script" path="res://scripts/card.gd" id="2_yyrt0"]
 [ext_resource type="Resource" uid="uid://ddtglwgoe0a6t" path="res://cards/the-coin/the-coin.tres" id="3_dfrnc"]
-[ext_resource type="Script" path="res://resources/Player.gd" id="3_l76pf"]
+[ext_resource type="Script" path="res://scripts/player.gd" id="3_l76pf"]
 
 [sub_resource type="Resource" id="Resource_4jr0s"]
 script = ExtResource("3_l76pf")

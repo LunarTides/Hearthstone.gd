@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="Blueprint" load_steps=2 format=3 uid="uid://6ahq1qbn8874"]
 
-[ext_resource type="Script" path="res://resources/Blueprint.gd" id="1_lpdqq"]
+[ext_resource type="Script" path="res://scripts/blueprint.gd" id="1_lpdqq"]
 
 [resource]
 script = ExtResource("1_lpdqq")

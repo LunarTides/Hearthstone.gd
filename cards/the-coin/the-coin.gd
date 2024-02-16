@@ -1,7 +1,10 @@
 extends Blueprint
 
-func ability(name: Enums.ABILITY, plr: Player, card: Card):
-	if name == Enums.ABILITY.CAST:
-		print("Cast")
-	else:
-		print(name)
+
+# Called when the card is created
+func _ready(player: Player, card: Card) -> void:
+	card.add_ability(Enums.ABILITY.CAST, cast)
+
+
+func cast(player: Player, card: Card) -> void:
+	print_debug("Cast")
