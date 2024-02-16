@@ -1,9 +1,11 @@
-[gd_scene load_steps=8 format=3 uid="uid://ccmb7s7hsvhju"]
+[gd_scene load_steps=10 format=3 uid="uid://ccmb7s7hsvhju"]
 
 [ext_resource type="Script" path="res://scenes/card.gd" id="1_iu1xa"]
+[ext_resource type="Resource" uid="uid://6ahq1qbn8874" path="res://cards/sheep/sheep.tres" id="2_w0vmy"]
 [ext_resource type="Script" path="res://scripts/card.gd" id="2_yyrt0"]
-[ext_resource type="Resource" uid="uid://ddtglwgoe0a6t" path="res://cards/the-coin/the-coin.tres" id="3_dfrnc"]
 [ext_resource type="Script" path="res://scripts/player.gd" id="3_l76pf"]
+[ext_resource type="PackedScene" uid="uid://nvbrecpc3j8n" path="res://assets/models/minion.glb" id="5_hfnpy"]
+[ext_resource type="Texture2D" uid="uid://brfqmj5tkr3o6" path="res://cards/sheep/sheep.png" id="6_55k6d"]
 
 [sub_resource type="Resource" id="Resource_4jr0s"]
 script = ExtResource("3_l76pf")
@@ -13,9 +15,53 @@ script = ExtResource("3_l76pf")
 [sub_resource type="Resource" id="Resource_b60et"]
 script = ExtResource("2_yyrt0")
 player = SubResource("Resource_4jr0s")
-blueprint = ExtResource("3_dfrnc")
+blueprint = ExtResource("2_w0vmy")
 scene = SubResource("PackedScene_enu4q")
 
-[node name="Card" type="Area3D"]
+[node name="Card" type="Area3D" node_paths=PackedStringArray("texture", "name_label", "cost_label", "text_label", "attack_label", "health_label", "tribe_label")]
 script = ExtResource("1_iu1xa")
 card = SubResource("Resource_b60et")
+texture = NodePath("Mesh/Texture")
+name_label = NodePath("Mesh/NameLabel")
+cost_label = NodePath("Mesh/CostLabel")
+text_label = NodePath("Mesh/TextLabel")
+attack_label = NodePath("Mesh/AttackLabel")
+health_label = NodePath("Mesh/HealthLabel")
+tribe_label = NodePath("Mesh/TribeLabel")
+
+[node name="Mesh" parent="." instance=ExtResource("5_hfnpy")]
+
+[node name="Texture" type="Sprite3D" parent="Mesh"]
+transform = Transform3D(1.31285, 0, 0, 0, -5.73864e-08, 1.31285, 0, -1.31285, -5.73864e-08, 0.164852, 0.000554085, -1.27345)
+texture = ExtResource("6_55k6d")
+
+[node name="NameLabel" type="Label3D" parent="Mesh"]
+transform = Transform3D(1.52175, 0, 0, 0, -6.71106e-08, 1.52175, 0, -1.53531, -6.65178e-08, 0.023496, 0.259901, -0.027993)
+text = "Brann Bronzebeard"
+width = 1000.0
+
+[node name="CostLabel" type="Label3D" parent="Mesh"]
+transform = Transform3D(4.50126, 0, 0, 0, -1.96756e-07, 4.50126, 0, -4.50126, -1.96756e-07, -1.31046, 0.474353, -2.05402)
+text = "0"
+
+[node name="TextLabel" type="Label3D" parent="Mesh"]
+transform = Transform3D(1.52175, 0, 0, 0, -6.71106e-08, 1.52175, 0, -1.53531, -6.65178e-08, -1.22732, 0.108804, 0.640704)
+text = "Battlecry: Gain +1/+1"
+font_size = 20
+horizontal_alignment = 0
+vertical_alignment = 0
+width = 1000.0
+
+[node name="AttackLabel" type="Label3D" parent="Mesh"]
+transform = Transform3D(3.61166, 0, 0, 0, -1.57871e-07, 3.61166, 0, -3.61166, -1.57871e-07, -1.26109, 0.212481, 1.80163)
+text = "0"
+
+[node name="HealthLabel" type="Label3D" parent="Mesh"]
+transform = Transform3D(3.61166, 0, 0, 0, -1.57871e-07, 3.61166, 0, -3.61166, -1.57871e-07, 1.33519, 0.212481, 1.80163)
+text = "0"
+
+[node name="TribeLabel" type="Label3D" parent="Mesh"]
+transform = Transform3D(1.52175, 0, 0, 0, -6.71106e-08, 1.52175, 0, -1.53531, -6.65178e-08, 0.0400547, 0.197763, 1.85623)
+text = "Beast"
+font_size = 30
+width = 1000.0

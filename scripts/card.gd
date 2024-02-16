@@ -11,6 +11,7 @@ class_name Card
 var name: String
 var text: String
 var cost: int
+var texture: Texture2D
 var types: Array[Enums.TYPE]
 var classes: Array[Enums.CLASS]
 var rarities: Array[Enums.RARITY]
@@ -47,7 +48,8 @@ var abilities: Dictionary
 
 
 func _ready() -> void:
-	blueprint._ready(player, self)
+	if "_ready" in blueprint:
+		blueprint._ready(player, self)
 	
 	# Assign the blueprint properties to this card
 	for prop: Dictionary in blueprint.get_property_list():
@@ -55,9 +57,14 @@ func _ready() -> void:
 			self[prop.name] = blueprint[prop.name]
 
 
-func trigger_ability(name: Enums.ABILITY) -> void:
+func trigger_ability(name: Enums.ABILITY) -> bool:
+	if not abilities.has(name):
+		return false
+	
 	for ability: Callable in abilities[name]:
 		ability.call(player, self)
+	
+	return true
 
 
 func add_ability(name: Enums.ABILITY, callback: Callable) -> void:

@@ -6,6 +6,7 @@ class_name Blueprint
 @export var name: String
 @export var text: String
 @export var cost: int
+@export var texture: Texture2D
 @export var types: Array[Enums.TYPE]
 @export var classes: Array[Enums.CLASS]
 @export var rarities: Array[Enums.RARITY]

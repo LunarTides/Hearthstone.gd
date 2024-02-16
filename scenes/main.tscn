@@ -1,0 +1,16 @@
+[gd_scene load_steps=2 format=3 uid="uid://cpla4ua3apl0p"]
+
+[ext_resource type="PackedScene" uid="uid://ccmb7s7hsvhju" path="res://scenes/card.tscn" id="1_01w4h"]
+
+[node name="Main" type="Node3D"]
+
+[node name="Card" parent="." instance=ExtResource("1_01w4h")]
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 9.514, 0)
+size = 0.833
+
+[node name="OmniLight3D" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.970188, 14.8874, 9.49997)
+omni_range = 23.152
+omni_attenuation = 0.392293

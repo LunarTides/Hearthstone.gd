@@ -1,12 +1,14 @@
-[gd_resource type="Resource" script_class="Blueprint" load_steps=2 format=3 uid="uid://6ahq1qbn8874"]
+[gd_resource type="Resource" script_class="Blueprint" load_steps=3 format=3 uid="uid://6ahq1qbn8874"]
 
 [ext_resource type="Script" path="res://scripts/blueprint.gd" id="1_lpdqq"]
+[ext_resource type="Texture2D" uid="uid://brfqmj5tkr3o6" path="res://cards/sheep/sheep.png" id="2_6qe8m"]
 
 [resource]
 script = ExtResource("1_lpdqq")
 name = "Sheep"
 text = ""
 cost = 1
+texture = ExtResource("2_6qe8m")
 types = Array[int]([1])
 classes = Array[int]([0])
 rarities = Array[int]([0])
@@ -15,7 +17,8 @@ id = 1
 tribes = Array[int]([1])
 attack = 1
 health = 1
-durability = 0
 spell_schools = Array[int]([])
+armor = 0
 heropower_id = 0
+durability = 0
 cooldown = 0
