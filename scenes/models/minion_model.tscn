@@ -1,0 +1,15 @@
+[gd_scene load_steps=4 format=3 uid="uid://sc2u2cwgauqi"]
+
+[ext_resource type="PackedScene" uid="uid://c2ribuqjv43ep" path="res://assets/models/minion/minion.glb" id="1_gvb50"]
+[ext_resource type="Script" path="res://scenes/models/minion_model.gd" id="2_8aefi"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ft0qc"]
+albedo_color = Color(1, 0.694118, 0, 1)
+
+[node name="Minion" instance=ExtResource("1_gvb50")]
+script = ExtResource("2_8aefi")
+rarity = 4
+
+[node name="Rarity" parent="." index="6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0552807, 0.290891, 0.57775)
+material_override = SubResource("StandardMaterial3D_ft0qc")

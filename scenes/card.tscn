@@ -4,7 +4,7 @@
 [ext_resource type="Resource" uid="uid://6ahq1qbn8874" path="res://cards/sheep/sheep.tres" id="2_w0vmy"]
 [ext_resource type="Script" path="res://scripts/card.gd" id="2_yyrt0"]
 [ext_resource type="Script" path="res://scripts/player.gd" id="3_l76pf"]
-[ext_resource type="PackedScene" uid="uid://nvbrecpc3j8n" path="res://assets/models/minion.glb" id="5_hfnpy"]
+[ext_resource type="PackedScene" uid="uid://sc2u2cwgauqi" path="res://scenes/models/minion_model.tscn" id="5_p2mm2"]
 [ext_resource type="Texture2D" uid="uid://brfqmj5tkr3o6" path="res://cards/sheep/sheep.png" id="6_55k6d"]
 
 [sub_resource type="Resource" id="Resource_4jr0s"]
@@ -18,9 +18,10 @@ player = SubResource("Resource_4jr0s")
 blueprint = ExtResource("2_w0vmy")
 scene = SubResource("PackedScene_enu4q")
 
-[node name="Card" type="Area3D" node_paths=PackedStringArray("texture", "name_label", "cost_label", "text_label", "attack_label", "health_label", "tribe_label")]
+[node name="Card" type="Area3D" node_paths=PackedStringArray("mesh", "texture", "name_label", "cost_label", "text_label", "attack_label", "health_label", "tribe_label")]
 script = ExtResource("1_iu1xa")
 card = SubResource("Resource_b60et")
+mesh = NodePath("Mesh")
 texture = NodePath("Mesh/Texture")
 name_label = NodePath("Mesh/NameLabel")
 cost_label = NodePath("Mesh/CostLabel")
@@ -29,7 +30,8 @@ attack_label = NodePath("Mesh/AttackLabel")
 health_label = NodePath("Mesh/HealthLabel")
 tribe_label = NodePath("Mesh/TribeLabel")
 
-[node name="Mesh" parent="." instance=ExtResource("5_hfnpy")]
+[node name="Mesh" parent="." instance=ExtResource("5_p2mm2")]
+rarity = 0
 
 [node name="Texture" type="Sprite3D" parent="Mesh"]
 transform = Transform3D(1.31285, 0, 0, 0, -5.73864e-08, 1.31285, 0, -1.31285, -5.73864e-08, 0.164852, 0.000554085, -1.27345)
@@ -53,11 +55,11 @@ vertical_alignment = 0
 width = 1000.0
 
 [node name="AttackLabel" type="Label3D" parent="Mesh"]
-transform = Transform3D(3.61166, 0, 0, 0, -1.57871e-07, 3.61166, 0, -3.61166, -1.57871e-07, -1.26109, 0.212481, 1.80163)
+transform = Transform3D(3.61166, 0, 0, 0, -1.57871e-07, 3.61166, 0, -3.61166, -1.57871e-07, -1.18758, 0.212368, 1.94032)
 text = "0"
 
 [node name="HealthLabel" type="Label3D" parent="Mesh"]
-transform = Transform3D(3.61166, 0, 0, 0, -1.57871e-07, 3.61166, 0, -3.61166, -1.57871e-07, 1.33519, 0.212481, 1.80163)
+transform = Transform3D(3.61166, 0, 0, 0, -1.57871e-07, 3.61166, 0, -3.61166, -1.57871e-07, 1.38784, 0.523843, 1.87182)
 text = "0"
 
 [node name="TribeLabel" type="Label3D" parent="Mesh"]

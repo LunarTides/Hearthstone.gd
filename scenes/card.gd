@@ -1,8 +1,15 @@
 extends Area3D
 
 
-@export var card: Card
+@export var card: Card:
+	set(new_card):
+		card = new_card
+		card._ready()
+		
+		# TODO: Remove
+		card.trigger_ability(Enums.ABILITY.CAST)
 
+@export var mesh: Node3D
 @export var texture: Sprite3D
 @export var name_label: Label3D
 @export var cost_label: Label3D
@@ -14,9 +21,15 @@ extends Area3D
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	card._ready()
-	card.trigger_ability(Enums.ABILITY.CAST)
-	
+	pass
+
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta: float) -> void:
+	_update()
+
+
+func _update() -> void:
 	texture.texture = card.texture
 	name_label.text = card.name
 	cost_label.text = str(card.cost)
@@ -26,8 +39,5 @@ func _ready() -> void:
 	
 	var tribe_keys: PackedStringArray = PackedStringArray(Enums.TRIBE.keys())
 	tribe_label.text = " / ".join(card.tribes.map(func(tribe: Enums.TRIBE) -> String: return tribe_keys[tribe].capitalize()))
-
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-	pass
+	
+	mesh.rarity = card.rarities[0]

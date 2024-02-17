@@ -128,3 +128,11 @@ enum COST_TYPE {
 	ARMOR,
 	HEALTH,
 }
+
+static var RARITY_COLOR: Dictionary = {
+	RARITY.FREE: Color.WHITE,
+	RARITY.COMMON: Color.GRAY,
+	RARITY.RARE: Color.BLUE,
+	RARITY.EPIC: Color.PURPLE,
+	RARITY.LEGENDARY: Color.GOLD,
+}

@@ -2,8 +2,15 @@ extends Resource
 class_name Card
 
 
+signal blueprint_updated(old_blueprint: Blueprint, new_blueprint: Blueprint)
+
 @export var player: Player
-@export var blueprint: Blueprint
+@export var blueprint: Blueprint:
+	set(new_blueprint):
+		blueprint_updated.emit(blueprint, new_blueprint)
+		blueprint = new_blueprint
+		update_blueprint()
+
 @export var scene: PackedScene
 
 #region Blueprint Fields
@@ -51,6 +58,10 @@ func _ready() -> void:
 	if "_ready" in blueprint:
 		blueprint._ready(player, self)
 	
+	update_blueprint()
+
+
+func update_blueprint() -> void:
 	# Assign the blueprint properties to this card
 	for prop: Dictionary in blueprint.get_property_list():
 		if prop.usage & PROPERTY_USAGE_SCRIPT_VARIABLE != 0 and prop.name in self:

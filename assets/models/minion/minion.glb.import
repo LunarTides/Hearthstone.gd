@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://nvbrecpc3j8n"
-path="res://.godot/imported/minion.glb-9976bf4b1e611fc81c22148da6190770.scn"
+uid="uid://c2ribuqjv43ep"
+path="res://.godot/imported/minion.glb-d039e63b456e9a7f82e9d9619fb53234.scn"
 
 [deps]
 
-source_file="res://assets/models/minion.glb"
-dest_files=["res://.godot/imported/minion.glb-9976bf4b1e611fc81c22148da6190770.scn"]
+source_file="res://assets/models/minion/minion.glb"
+dest_files=["res://.godot/imported/minion.glb-d039e63b456e9a7f82e9d9619fb53234.scn"]
 
 [params]
 
