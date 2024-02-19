@@ -1,7 +1,11 @@
 class_name CardNode
 extends Area3D
+## This is the physical represantation of a card.
+## @experimental
 
 
+#region Exported Variables
+## The card that the model is using.
 @export var card: Card:
 	set(new_card):
 		card = new_card
@@ -10,22 +14,45 @@ extends Area3D
 		# TODO: Remove
 		card.trigger_ability(Enums.ABILITY.CAST)
 
+
+## The mesh of the card.
 @export var mesh: Node3D
+
+## The texture / image of the card.
 @export var texture: Sprite3D
+
+## The name label of the card.
 @export var name_label: Label3D
+
+## The cost label of the card.
 @export var cost_label: Label3D
+
+## The text label of the card.
 @export var text_label: Label3D
+
+## The attack label of the card.
 @export var attack_label: Label3D
+
+## The health label of the card.
 @export var health_label: Label3D
+
+## The tribe label of the card.
 @export var tribe_label: Label3D
+#endregion
 
+#region Public Variables
+## Whether or not the player is hovering over this card.
 var is_hovering: bool = false
+#endregion
 
+#region Private Variables
 var _old_position: Vector3
 var _old_rotation: Vector3
 var _tween: Tween
+#endregion
 
 
+#region Internal Functions
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
 	_update()
@@ -49,9 +76,23 @@ func _update() -> void:
 	tribe_label.text = " / ".join(card.tribes.map(func(tribe: Enums.TRIBE) -> String: return tribe_keys[tribe].capitalize()))
 	
 	mesh.rarity = card.rarities[0]
+#endregion
 
 
+#region Public Functions
+## Change the position / rotation of the card to be correct.
 func layout() -> void:
+	if card.location == Enums.LOCATION.HAND:
+		_layout_hand()
+	elif card.location == Enums.LOCATION.BOARD:
+		_layout_board()
+	else:
+		assert(false, "Can't layout the card in this location.")
+#endregion
+
+
+#region Private Functions
+func _layout_hand() -> void:
 	# TODO: Dont hardcode this
 	var max_hand_size: int = 10
 	var player_weight: int = 1 if card.player == Game.player else -1
@@ -67,6 +108,10 @@ func layout() -> void:
 		rotation.y = deg_to_rad((Game.CARD_BOUNDS_ROTATION_Y + position.x) * -sign((card.index - half_hand_size) + player_weight))
 	
 	rotation.y += deg_to_rad(0 if card.player == Game.player else 180)
+
+
+func _layout_board() -> void:
+	assert(false, "Not implemented")
 
 
 func _on_mouse_entered() -> void:
@@ -89,3 +134,4 @@ func _on_mouse_exited() -> void:
 	rotation = _old_rotation
 	
 	is_hovering = false
+#endregion
