@@ -4,7 +4,8 @@ extends Control
 @export var join_button: Button
 @export var host_button: Button
 @export var ip_address: LineEdit
-@export var host_label: Label
+@export var info_label: Label
+@export var console_tip: Label
 
 
 func _ready() -> void:
@@ -30,20 +31,21 @@ func _on_join_button_pressed() -> void:
 		host_button.hide()
 		ip_address.hide()
 		
-		host_label.text = "Waiting for another player..."
-		host_label.show()
+		info_label.text = "Waiting for another player..."
+		info_label.show()
 
 
 func _on_host_button_pressed() -> void:
 	join_button.hide()
 	host_button.hide()
 	ip_address.hide()
+	console_tip.show()
 	
-	host_label.text = "Please wait for a client to connect..."
-	host_label.show()
+	info_label.text = "Please wait for a client to connect..."
+	info_label.show()
 	host()
 	
-	Game.game_started.connect(func() -> void: host_label.text = "A game is in progress.")
+	Game.game_started.connect(func() -> void: info_label.text = "A game is in progress.")
 
 
 func _on_ip_address_text_submitted(_new_text: String) -> void:

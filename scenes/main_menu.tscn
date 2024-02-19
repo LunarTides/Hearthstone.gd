@@ -1,8 +1,11 @@
-[gd_scene load_steps=2 format=3 uid="uid://bkgcab4wbckbx"]
+[gd_scene load_steps=3 format=3 uid="uid://bkgcab4wbckbx"]
 
 [ext_resource type="Script" path="res://scenes/main_menu.gd" id="1_47dse"]
 
-[node name="Main Menu" type="Control" node_paths=PackedStringArray("join_button", "host_button", "ip_address", "host_label")]
+[sub_resource type="LabelSettings" id="LabelSettings_s4xya"]
+font_size = 10
+
+[node name="Main Menu" type="Control" node_paths=PackedStringArray("join_button", "host_button", "ip_address", "info_label", "console_tip")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -13,7 +16,8 @@ script = ExtResource("1_47dse")
 join_button = NodePath("Panel/JoinButton")
 host_button = NodePath("Panel/HostButton")
 ip_address = NodePath("Panel/IPAddress")
-host_label = NodePath("Panel/HostLabel")
+info_label = NodePath("Panel/InfoLabel")
+console_tip = NodePath("Panel/ConsoleTip")
 
 [node name="Panel" type="Panel" parent="."]
 layout_mode = 1
@@ -71,7 +75,7 @@ expand_to_text_length = true
 virtual_keyboard_type = 3
 clear_button_enabled = true
 
-[node name="HostLabel" type="Label" parent="Panel"]
+[node name="InfoLabel" type="Label" parent="Panel"]
 visible = false
 layout_mode = 1
 anchors_preset = 8
@@ -86,6 +90,24 @@ offset_bottom = 11.5
 grow_horizontal = 2
 grow_vertical = 2
 text = "Please wait for a client to connect..."
+horizontal_alignment = 1
+
+[node name="ConsoleTip" type="Label" parent="Panel"]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -202.5
+offset_top = 39.3
+offset_right = 202.5
+offset_bottom = 62.3
+grow_horizontal = 2
+grow_vertical = 2
+text = "Tip: Launch the game with '--server' to see more info"
+label_settings = SubResource("LabelSettings_s4xya")
 horizontal_alignment = 1
 
 [connection signal="pressed" from="Panel/JoinButton" to="." method="_on_join_button_pressed"]
