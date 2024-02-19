@@ -26,13 +26,8 @@ var _old_rotation: Vector3
 var _tween: Tween
 
 
-# Called when the node enters the scene tree for the first time.
-func _ready() -> void:
-	pass
-
-
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	_update()
 
 
@@ -47,6 +42,9 @@ func _update() -> void:
 	attack_label.text = str(card.attack)
 	health_label.text = str(card.health)
 	
+	# TODO: Remove
+	text_label.text = str(card.player.id)
+	
 	var tribe_keys: PackedStringArray = PackedStringArray(Enums.TRIBE.keys())
 	tribe_label.text = " / ".join(card.tribes.map(func(tribe: Enums.TRIBE) -> String: return tribe_keys[tribe].capitalize()))
 	
@@ -56,19 +54,19 @@ func _update() -> void:
 func layout() -> void:
 	# TODO: Dont hardcode this
 	var max_hand_size: int = 10
-	var player_weight: int = 1 if card.player == Game.current_player else -1
+	var player_weight: int = 1 if card.player == Game.player else -1
 	
 	var half_hand_size: int = max_hand_size / 2
 	
-	position.x = -Game.CardBoundsX + (card.index * Game.CardDistanceX)
-	position.y = Game.CardBoundsY * abs(half_hand_size - 1 - card.index)
-	position.z = Game.CardBoundsZ * player_weight
+	position.x = -Game.CARD_BOUNDS_X + (card.index * Game.CARD_DISTANCE_X)
+	position.y = Game.CARD_BOUNDS_Y * abs(half_hand_size - 1 - card.index)
+	position.z = Game.CARD_BOUNDS_Z * player_weight
 	
 	# If index < max_hand_size / 2, -rotation
 	if card.index != half_hand_size - 1:
-		rotation.y = deg_to_rad((Game.CardBoundsRotY + position.x) * -sign((card.index - half_hand_size) + player_weight))
+		rotation.y = deg_to_rad((Game.CARD_BOUNDS_ROTATION_Y + position.x) * -sign((card.index - half_hand_size) + player_weight))
 	
-	rotation.y += deg_to_rad(0 if card.player == Game.current_player else 180)
+	rotation.y += deg_to_rad(0 if card.player == Game.player else 180)
 
 
 func _on_mouse_entered() -> void:

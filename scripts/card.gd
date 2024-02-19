@@ -69,18 +69,18 @@ func update_blueprint() -> void:
 			self[prop.name] = blueprint[prop.name]
 
 
-func trigger_ability(name: Enums.ABILITY) -> bool:
-	if not abilities.has(name):
+func trigger_ability(ability_name: Enums.ABILITY) -> bool:
+	if not abilities.has(ability_name):
 		return false
 	
-	for ability: Callable in abilities[name]:
+	for ability: Callable in abilities[ability_name]:
 		ability.call(player, self)
 	
 	return true
 
 
-func add_ability(name: Enums.ABILITY, callback: Callable) -> void:
-	if not abilities.has(name):
-		abilities[name] = []
+func add_ability(ability_name: Enums.ABILITY, callback: Callable) -> void:
+	if not abilities.has(ability_name):
+		abilities[ability_name] = []
 	
-	abilities[name].append(callback)
+	abilities[ability_name].append(callback)

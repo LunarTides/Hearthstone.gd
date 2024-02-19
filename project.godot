@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Hearthstone"
-run/main_scene="res://scenes/main.tscn"
+run/main_scene="res://scenes/main_menu.tscn"
 config/features=PackedStringArray("4.2", "Forward Plus")
 config/icon="res://icon.svg"
 
@@ -24,10 +24,3 @@ Game="*res://scripts/game.gd"
 
 gdscript/warnings/untyped_declaration=2
 gdscript/warnings/inferred_declaration=2
-
-[display]
-
-window/size/viewport_width=1920
-window/size/viewport_height=1080
-window/size/mode=3
-window/size/resizable=false

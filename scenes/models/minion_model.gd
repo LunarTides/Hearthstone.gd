@@ -14,10 +14,5 @@ func _ready() -> void:
 	_update()
 
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-	pass
-
-
 func _update() -> void:
 	$Rarity.material_override.albedo_color = Enums.RARITY_COLOR.get(rarity)

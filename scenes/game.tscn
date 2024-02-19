@@ -1,21 +1,21 @@
 [gd_scene load_steps=3 format=3 uid="uid://ly3ttyi4u1n7"]
 
-[ext_resource type="PackedScene" uid="uid://ccmb7s7hsvhju" path="res://scenes/card.tscn" id="1_01w4h"]
-[ext_resource type="Script" path="res://scenes/main.gd" id="1_lrpiv"]
+[ext_resource type="Script" path="res://scenes/game.gd" id="1_0oyma"]
+[ext_resource type="PackedScene" uid="uid://ccmb7s7hsvhju" path="res://scenes/card.tscn" id="2_w8kma"]
 
 [node name="Main" type="Node3D"]
-script = ExtResource("1_lrpiv")
+script = ExtResource("1_0oyma")
 
-[node name="Card" parent="." groups=["Cards"] instance=ExtResource("1_01w4h")]
+[node name="Card" parent="." groups=["Cards"] instance=ExtResource("2_w8kma")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 7)
 top_level = true
 visible = false
 
-[node name="Card2" parent="." groups=["Cards"] instance=ExtResource("1_01w4h")]
+[node name="Card2" parent="." groups=["Cards"] instance=ExtResource("2_w8kma")]
 transform = Transform3D(0.932324, 0, 0.361625, 0, 1, 0, -0.361625, 0, 0.932324, -1.81, -0.5, 7)
 visible = false
 
-[node name="Card3" parent="." groups=["Cards"] instance=ExtResource("1_01w4h")]
+[node name="Card3" parent="." groups=["Cards"] instance=ExtResource("2_w8kma")]
 transform = Transform3D(0.932324, 0, -0.361625, 0, 1, 0, 0.361625, 0, 0.932324, 1.81, -0.5, 7)
 top_level = true
 visible = false
