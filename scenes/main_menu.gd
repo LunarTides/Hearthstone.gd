@@ -26,13 +26,14 @@ func _on_join_button_pressed() -> void:
 	var error: Error = peer.create_client(ip_address.text, Game.PORT)
 	multiplayer.multiplayer_peer = peer
 	
-	if error == OK:
+	multiplayer.connected_to_server.connect(func() -> void:
 		join_button.hide()
 		host_button.hide()
 		ip_address.hide()
 		
 		info_label.text = "Waiting for another player..."
 		info_label.show()
+	)
 
 
 func _on_host_button_pressed() -> void:

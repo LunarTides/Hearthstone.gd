@@ -16,7 +16,7 @@ const CardScene: PackedScene = preload("res://scenes/card.tscn")
 const PORT: int = 4545
 
 ## The max amount of clients. The game only supports 2.
-const MAX_CLIENTS: int = 3
+const MAX_CLIENTS: int = 2
 
 const CARD_BOUNDS_X: float = 9.05
 const CARD_BOUNDS_Y: float = -0.5
@@ -57,7 +57,7 @@ func _ready() -> void:
 		
 		var clients: int = multiplayer.get_peers().size()
 		
-		if clients < 2:
+		if clients < MAX_CLIENTS:
 			print("Client connected, waiting for %d more..." % (MAX_PLAYERS - clients))
 			return
 		
