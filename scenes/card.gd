@@ -69,13 +69,13 @@ func _update() -> void:
 	attack_label.text = str(card.attack)
 	health_label.text = str(card.health)
 	
-	# TODO: Remove
-	text_label.text = str(card.player.id)
-	
 	var tribe_keys: PackedStringArray = PackedStringArray(Enums.TRIBE.keys())
 	tribe_label.text = " / ".join(card.tribes.map(func(tribe: Enums.TRIBE) -> String: return tribe_keys[tribe].capitalize()))
 	
 	mesh.rarity = card.rarities[0]
+	
+	# TODO: Remove
+	tribe_label.text = str(card.player.id)
 #endregion
 
 

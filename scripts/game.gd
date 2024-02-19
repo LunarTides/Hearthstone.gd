@@ -3,6 +3,12 @@ extends Node
 ## @experimental
 
 
+#region Signals
+## Emits when the game starts
+signal game_started
+#endregion
+
+
 #region Constant Variables
 const CardScene: PackedScene = preload("res://scenes/card.tscn")
 
@@ -10,13 +16,15 @@ const CardScene: PackedScene = preload("res://scenes/card.tscn")
 const PORT: int = 4545
 
 ## The max amount of clients. The game only supports 2.
-const MAX_CLIENTS: int = 2
+const MAX_CLIENTS: int = 3
 
 const CARD_BOUNDS_X: float = 9.05
 const CARD_BOUNDS_Y: float = -0.5
 const CARD_BOUNDS_Z: float = 7
 const CARD_BOUNDS_ROTATION_Y: float = 21.2
 const CARD_DISTANCE_X: float = 1.81
+
+const MAX_PLAYERS: int = 2
 #endregion
 
 
@@ -37,11 +45,23 @@ var opposing_player: Player = Player.new()
 
 #region Internal Functions
 func _ready() -> void:
+	multiplayer.server_disconnected.connect(func() -> void:
+		exit_to_main_menu()
+	)
 	multiplayer.peer_disconnected.connect(func(_id: int) -> void:
-		multiplayer.multiplayer_peer = null
-		get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
+		exit_to_main_menu()
 	)
 	multiplayer.peer_connected.connect(func(_id: int) -> void:
+		if not multiplayer.is_server():
+			return
+		
+		var clients: int = multiplayer.get_peers().size()
+		
+		if clients < 2:
+			print("Client connected, waiting for %d more..." % (MAX_PLAYERS - clients))
+			return
+		
+		print("Client connected, starting game...")
 		start_game()
 	)
 
@@ -60,12 +80,27 @@ func start_game() -> void:
 	if not multiplayer.is_server():
 		return
 	
-	var id: int = randi_range(0, 1)
+	var id: int = randi_range(0, MAX_PLAYERS - 1)
 	
-	assign_player(id)
-	assign_player.rpc(1 - id)
+	var i: int = 0
+	for peer: int in multiplayer.get_peers():
+		var player_id: int
+		
+		if i == 0:
+			player_id = id
+		else:
+			player_id = 1 - id
+		
+		assign_player.rpc_id(peer, player_id)
+		
+		print("Client %s assigned id: %s" % [peer, player_id])
+		
+		i += 1
 	
+	print("Changing to game scene...")
 	change_scene_to_file.rpc("res://scenes/game.tscn")
+	
+	game_started.emit()
 
 
 ## Places a [Card] in its player's hand at some index. You probably shouldn't touch this.
@@ -96,6 +131,11 @@ func get_card_nodes_for_player(player: Player) -> Array[CardNode]:
 	return get_tree().get_nodes_in_group("Cards").filter(func(card_node: CardNode) -> bool:
 		return card_node.card.player == player
 	)
+
+## Exits to the main menu. This disconnects from the server.
+func exit_to_main_menu() -> void:
+	multiplayer.multiplayer_peer = null
+	get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
 #endregion
 
 
@@ -111,7 +151,7 @@ func assign_player(id: int) -> void:
 
 
 ## Makes the client switch to a scene.
-@rpc("authority", "call_local", "reliable")
+@rpc("authority", "call_remote", "reliable")
 func change_scene_to_file(file: StringName) -> void:
 	get_tree().change_scene_to_file(file)
 #endregion

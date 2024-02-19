@@ -22,8 +22,3 @@ func _ready() -> void:
 		
 		var card_node: CardNode = Game.place_card_in_hand(card, i)
 		add_child(card_node)
-
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-	pass
