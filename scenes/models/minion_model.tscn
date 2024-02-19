@@ -8,7 +8,6 @@ albedo_color = Color(1, 0.694118, 0, 1)
 
 [node name="Minion" instance=ExtResource("1_gvb50")]
 script = ExtResource("2_8aefi")
-rarity = 4
 
 [node name="Rarity" parent="." index="6"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0552807, 0.290891, 0.57775)

@@ -129,6 +129,14 @@ enum COST_TYPE {
 	HEALTH,
 }
 
+enum LOCATION {
+	NONE,
+	HAND,
+	DECK,
+	BOARD,
+	GRAVEYARD,
+}
+
 static var RARITY_COLOR: Dictionary = {
 	RARITY.FREE: Color.WHITE,
 	RARITY.COMMON: Color.GRAY,

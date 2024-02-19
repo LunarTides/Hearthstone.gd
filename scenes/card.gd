@@ -1,3 +1,4 @@
+class_name CardNode
 extends Area3D
 
 
@@ -18,6 +19,12 @@ extends Area3D
 @export var health_label: Label3D
 @export var tribe_label: Label3D
 
+var is_hovering: bool = false
+
+var _old_position: Vector3
+var _old_rotation: Vector3
+var _tween: Tween
+
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -30,6 +37,9 @@ func _process(delta: float) -> void:
 
 
 func _update() -> void:
+	if not card:
+		return
+	
 	texture.texture = card.texture
 	name_label.text = card.name
 	cost_label.text = str(card.cost)
@@ -41,3 +51,43 @@ func _update() -> void:
 	tribe_label.text = " / ".join(card.tribes.map(func(tribe: Enums.TRIBE) -> String: return tribe_keys[tribe].capitalize()))
 	
 	mesh.rarity = card.rarities[0]
+
+
+func layout() -> void:
+	# TODO: Dont hardcode this
+	var max_hand_size: int = 10
+	var player_weight: int = 1 if card.player == Game.current_player else -1
+	
+	var half_hand_size: int = max_hand_size / 2
+	
+	position.x = -Game.CardBoundsX + (card.index * Game.CardDistanceX)
+	position.y = Game.CardBoundsY * abs(half_hand_size - 1 - card.index)
+	position.z = Game.CardBoundsZ * player_weight
+	
+	# If index < max_hand_size / 2, -rotation
+	if card.index != half_hand_size - 1:
+		rotation.y = deg_to_rad((Game.CardBoundsRotY + position.x) * -sign((card.index - half_hand_size) + player_weight))
+	
+	rotation.y += deg_to_rad(0 if card.player == Game.current_player else 180)
+
+
+func _on_mouse_entered() -> void:
+	is_hovering = true
+	
+	_old_rotation = rotation
+	_old_position = position
+	
+	# Animate
+	_tween = create_tween()
+	_tween.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+	_tween.parallel().tween_property(self, "position:y", position.y + 1, 0.1)
+	_tween.parallel().tween_property(self, "position:z", position.z - 2, 0.1)
+	_tween.parallel().tween_property(self, "rotation:y", 0, 0.1)
+
+
+func _on_mouse_exited() -> void:
+	_tween.kill()
+	position = _old_position
+	rotation = _old_rotation
+	
+	is_hovering = false

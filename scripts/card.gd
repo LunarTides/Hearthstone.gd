@@ -1,5 +1,5 @@
-extends Resource
 class_name Card
+extends Resource
 
 
 signal blueprint_updated(old_blueprint: Blueprint, new_blueprint: Blueprint)
@@ -10,8 +10,6 @@ signal blueprint_updated(old_blueprint: Blueprint, new_blueprint: Blueprint)
 		blueprint_updated.emit(blueprint, new_blueprint)
 		blueprint = new_blueprint
 		update_blueprint()
-
-@export var scene: PackedScene
 
 #region Blueprint Fields
 #region Common
@@ -52,6 +50,9 @@ var cooldown: int
 
 var keywords: Dictionary
 var abilities: Dictionary
+
+var index: int
+var location: Enums.LOCATION = Enums.LOCATION.NONE
 
 
 func _ready() -> void:
