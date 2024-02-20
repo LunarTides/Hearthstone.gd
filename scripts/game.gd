@@ -66,9 +66,6 @@ var is_player_1: bool:
 var is_player_2: bool:
 	get:
 		return player.id == 1
-
-## The board.
-var board: Dictionary
 #endregion
 
 
@@ -128,13 +125,6 @@ func start_game() -> void:
 		print("Client %s assigned id: %s" % [peer, player_id])
 		
 		i += 1
-	
-	# Yikes
-	assign_player(0)
-	board = {
-		player1: [],
-		player2: [],
-	}
 	
 	print("Changing to game scene...")
 	change_scene_to_file.rpc("res://scenes/game.tscn")

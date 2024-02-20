@@ -23,6 +23,7 @@ visible = false
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 9.514, 0)
+current = true
 fov = 120.0
 size = 0.833
 

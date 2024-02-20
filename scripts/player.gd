@@ -11,4 +11,13 @@ var name: String
 
 ## The player's id.
 var id: int
+
+## The player's hand.
+var hand: Array
+
+## The player's board.
+var board: Array
+
+## The player's graveyard.
+var graveyard: Array
 #endregion
