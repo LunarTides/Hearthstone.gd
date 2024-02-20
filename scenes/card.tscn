@@ -1,62 +1,63 @@
 [gd_scene load_steps=5 format=3 uid="uid://ccmb7s7hsvhju"]
 
 [ext_resource type="Script" path="res://scenes/card.gd" id="1_iu1xa"]
-[ext_resource type="PackedScene" uid="uid://sc2u2cwgauqi" path="res://scenes/models/minion_model.tscn" id="5_p2mm2"]
+[ext_resource type="PackedScene" uid="uid://g4ot01icqg10" path="res://scenes/models/minion_model.tscn" id="5_p2mm2"]
 [ext_resource type="Texture2D" uid="uid://brfqmj5tkr3o6" path="res://cards/sheep/sheep.png" id="6_55k6d"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_vsdkf"]
 size = Vector3(3, 1, 5)
 
-[node name="Card" type="Area3D" node_paths=PackedStringArray("mesh", "texture", "name_label", "cost_label", "text_label", "attack_label", "health_label", "tribe_label")]
+[node name="Card" type="Area3D" node_paths=PackedStringArray("texture", "name_label", "cost_label", "text_label", "attack_label", "health_label", "tribe_label")]
 script = ExtResource("1_iu1xa")
-mesh = NodePath("Mesh")
-texture = NodePath("Mesh/Texture")
-name_label = NodePath("Mesh/NameLabel")
-cost_label = NodePath("Mesh/CostLabel")
-text_label = NodePath("Mesh/TextLabel")
-attack_label = NodePath("Mesh/AttackLabel")
-health_label = NodePath("Mesh/HealthLabel")
-tribe_label = NodePath("Mesh/TribeLabel")
+texture = NodePath("Texture")
+name_label = NodePath("NameLabel")
+cost_label = NodePath("CostLabel")
+text_label = NodePath("TextLabel")
+attack_label = NodePath("AttackLabel")
+health_label = NodePath("HealthLabel")
+tribe_label = NodePath("TribeLabel")
 
 [node name="Mesh" parent="." instance=ExtResource("5_p2mm2")]
 
-[node name="Texture" type="Sprite3D" parent="Mesh"]
-transform = Transform3D(1.31285, 0, 0, 0, -5.73864e-08, 1.31285, 0, -1.31285, -5.73864e-08, 0.164852, 0.000554085, -1.27345)
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_vsdkf")
+
+[node name="Texture" type="Sprite3D" parent="."]
+transform = Transform3D(1.28, 0, 0, 0, -5.59506e-08, 1.28, 0, -1.28, -5.59506e-08, 0.141785, 0, -1.2414)
 texture = ExtResource("6_55k6d")
 
-[node name="NameLabel" type="Label3D" parent="Mesh"]
-transform = Transform3D(1.52175, 0, 0, 0, -6.71106e-08, 1.52175, 0, -1.53531, -6.65178e-08, 0.023496, 0.259901, -0.027993)
+[node name="NameLabel" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0.259917, -0.0302144)
 text = "PLACEHOLDER"
-width = 1000.0
+font_size = 47
 
-[node name="CostLabel" type="Label3D" parent="Mesh"]
-transform = Transform3D(4.50126, 0, 0, 0, -1.96756e-07, 4.50126, 0, -4.50126, -1.96756e-07, -1.31046, 0.474353, -2.05402)
+[node name="CostLabel" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, -1.31408, 0.215307, -2.06837)
 text = "0"
+font_size = 117
 
-[node name="TextLabel" type="Label3D" parent="Mesh"]
-transform = Transform3D(1.52175, 0, 0, 0, -6.71106e-08, 1.52175, 0, -1.53531, -6.65178e-08, -1.22732, 0.108804, 0.640704)
+[node name="TextLabel" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, -1.27893, 0.124062, 0.527602)
 text = "You're not supposed to see this."
-font_size = 20
 horizontal_alignment = 0
 vertical_alignment = 0
 width = 1000.0
 
-[node name="AttackLabel" type="Label3D" parent="Mesh"]
-transform = Transform3D(3.61166, 0, 0, 0, -1.57871e-07, 3.61166, 0, -3.61166, -1.57871e-07, -1.18758, 0.212368, 1.94032)
+[node name="AttackLabel" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, -1.21766, 0.127012, 1.96137)
 text = "0"
+font_size = 92
 
-[node name="HealthLabel" type="Label3D" parent="Mesh"]
-transform = Transform3D(3.61166, 0, 0, 0, -1.57871e-07, 3.61166, 0, -3.61166, -1.57871e-07, 1.38784, 0.523843, 1.87182)
+[node name="HealthLabel" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 1.407, 0.351036, 1.87182)
 text = "0"
+font_size = 93
 
-[node name="TribeLabel" type="Label3D" parent="Mesh"]
-transform = Transform3D(1.52175, 0, 0, 0, -6.71106e-08, 1.52175, 0, -1.53531, -6.65178e-08, 0.0400547, 0.197763, 1.85623)
+[node name="TribeLabel" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0.217, 1.87145)
 text = "Placeholder"
-font_size = 30
+font_size = 34
 width = 1000.0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-shape = SubResource("BoxShape3D_vsdkf")
 
 [connection signal="mouse_entered" from="." to="." method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="." to="." method="_on_mouse_exited"]

@@ -2,18 +2,17 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c4v853f56x0e2"
-path.s3tc="res://.godot/imported/minion_Image.png-bbbfab8b229ff8cb2d36cf5cbf68bcfd.s3tc.ctex"
+uid="uid://c8unx3rn2d4b3"
+path.s3tc="res://.godot/imported/attack.png-a51b410d0ca8411e192320067e3c7bc5.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
-generator_parameters={}
 
 [deps]
 
-source_file="res://assets/models/minion/minion_Image.png"
-dest_files=["res://.godot/imported/minion_Image.png-bbbfab8b229ff8cb2d36cf5cbf68bcfd.s3tc.ctex"]
+source_file="res://assets/models/minion/attack.png"
+dest_files=["res://.godot/imported/attack.png-a51b410d0ca8411e192320067e3c7bc5.s3tc.ctex"]
 
 [params]
 

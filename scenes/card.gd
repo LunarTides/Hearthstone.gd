@@ -14,10 +14,6 @@ extends Area3D
 		# TODO: Remove
 		card.trigger_ability(Enums.ABILITY.CAST)
 
-
-## The mesh of the card.
-@export var mesh: Node3D
-
 ## The texture / image of the card.
 @export var texture: Sprite3D
 
@@ -48,7 +44,13 @@ var is_hovering: bool = false
 #region Private Variables
 var _old_position: Vector3
 var _old_rotation: Vector3
+var _old_scale: Vector3
 var _tween: Tween
+#endregion
+
+#region Onready Variables
+## The mesh of the card.
+@onready var mesh: Node3D = $Mesh
 #endregion
 
 
@@ -119,19 +121,22 @@ func _on_mouse_entered() -> void:
 	
 	_old_rotation = rotation
 	_old_position = position
+	_old_scale = scale
 	
 	# Animate
 	_tween = create_tween()
 	_tween.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
-	_tween.parallel().tween_property(self, "position:y", position.y + 1, 0.1)
+	_tween.parallel().tween_property(self, "position:y", 1, 0.1)
 	_tween.parallel().tween_property(self, "position:z", position.z - 2, 0.1)
 	_tween.parallel().tween_property(self, "rotation:y", 0, 0.1)
+	_tween.parallel().tween_property(self, "scale", Vector3(1.5, 1.5, 1.5), 0.1)
 
 
 func _on_mouse_exited() -> void:
 	_tween.kill()
 	position = _old_position
 	rotation = _old_rotation
+	scale = _old_scale
 	
 	is_hovering = false
 #endregion

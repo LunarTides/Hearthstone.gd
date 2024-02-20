@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://bkgcab4wbckbx"]
 
-[ext_resource type="Script" path="res://scenes/main_menu.gd" id="1_47dse"]
+[ext_resource type="Script" path="res://scenes/lobby.gd" id="1_u14ym"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_s4xya"]
 font_size = 10
@@ -12,7 +12,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_47dse")
+script = ExtResource("1_u14ym")
 join_button = NodePath("Panel/JoinButton")
 host_button = NodePath("Panel/HostButton")
 ip_address = NodePath("Panel/IPAddress")

@@ -15,4 +15,5 @@ func _ready() -> void:
 
 
 func _update() -> void:
-	$Rarity.material_override.albedo_color = Enums.RARITY_COLOR.get(rarity)
+	var rarity_node: MeshInstance3D = get_node("Rarity")
+	rarity_node.mesh.surface_get_material(0).albedo_color = Enums.RARITY_COLOR.get(rarity)
