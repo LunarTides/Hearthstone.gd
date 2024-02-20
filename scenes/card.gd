@@ -4,6 +4,11 @@ extends Area3D
 ## @experimental
 
 
+#region Signals
+## Emits when the node is released from a drag.
+signal released(position: Vector3)
+#endregion
+
 #region Exported Variables
 ## The card that the model is using.
 @export var card: Card:
@@ -39,18 +44,22 @@ extends Area3D
 #region Public Variables
 ## Whether or not the player is hovering over this card.
 var is_hovering: bool = false
+
+## Whether or not the player is dragging this card.
+var is_dragging: bool = false
 #endregion
 
 #region Private Variables
-var _old_position: Vector3
-var _old_rotation: Vector3
-var _old_scale: Vector3
 var _tween: Tween
 #endregion
 
 #region Onready Variables
 ## The mesh of the card.
 @onready var mesh: Node3D = $Mesh
+
+@onready var _old_position: Vector3 = position
+@onready var _old_rotation: Vector3 = rotation
+@onready var _old_scale: Vector3 = scale
 #endregion
 
 
@@ -90,6 +99,10 @@ func layout() -> void:
 		_layout_board()
 	else:
 		assert(false, "Can't layout the card in this location.")
+	
+	_old_position = position
+	_old_rotation = rotation
+	_old_scale = scale
 #endregion
 
 
@@ -117,11 +130,10 @@ func _layout_board() -> void:
 
 
 func _on_mouse_entered() -> void:
-	is_hovering = true
+	if is_dragging:
+		return
 	
-	_old_rotation = rotation
-	_old_position = position
-	_old_scale = scale
+	is_hovering = true
 	
 	# Animate
 	_tween = create_tween()
@@ -133,10 +145,41 @@ func _on_mouse_entered() -> void:
 
 
 func _on_mouse_exited() -> void:
+	if is_dragging:
+		return
+	
 	_tween.kill()
 	position = _old_position
 	rotation = _old_rotation
 	scale = _old_scale
 	
 	is_hovering = false
+
+func _input(event: InputEvent) -> void:
+	if is_dragging:
+		# Release lmb
+		if event is InputEventMouseButton:
+			if event.is_released():
+				is_dragging = false
+				var pos: Vector3 = position
+				position = _old_position
+				released.emit(pos)
+
+func _on_input_event(_camera: Node, event: InputEvent, position: Vector3, _normal: Vector3, _shape_idx: int) -> void:
+	if not is_hovering:
+		return
+	
+	# Don't drag if this is an opposing card
+	if Game.player != card.player:
+		return
+	
+	if event is InputEventMouseButton:
+		if event.is_released():
+			# Handled by _input
+			return
+		
+		is_dragging = true
+	
+	if is_dragging:
+		global_position = Vector3(position.x, global_position.y, position.z)
 #endregion

@@ -8,6 +8,7 @@
 size = Vector3(3, 1, 5)
 
 [node name="Card" type="Area3D" node_paths=PackedStringArray("texture", "name_label", "cost_label", "text_label", "attack_label", "health_label", "tribe_label")]
+input_capture_on_drag = true
 script = ExtResource("1_iu1xa")
 texture = NodePath("Texture")
 name_label = NodePath("NameLabel")
@@ -59,5 +60,6 @@ text = "Placeholder"
 font_size = 34
 width = 1000.0
 
+[connection signal="input_event" from="." to="." method="_on_input_event"]
 [connection signal="mouse_entered" from="." to="." method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="." to="." method="_on_mouse_exited"]

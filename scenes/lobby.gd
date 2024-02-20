@@ -23,7 +23,7 @@ func host() -> void:
 
 func _on_join_button_pressed() -> void:
 	var peer: ENetMultiplayerPeer = ENetMultiplayerPeer.new()
-	var error: Error = peer.create_client(ip_address.text, Game.PORT)
+	peer.create_client(ip_address.text, Game.PORT)
 	multiplayer.multiplayer_peer = peer
 	
 	multiplayer.connected_to_server.connect(func() -> void:

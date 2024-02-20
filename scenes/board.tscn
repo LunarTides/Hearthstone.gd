@@ -1,0 +1,47 @@
+[gd_scene load_steps=7 format=3 uid="uid://c8a1adss40uh4"]
+
+[ext_resource type="Script" path="res://scenes/board.gd" id="1_fjewe"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_5s140"]
+size = Vector3(30, 30, 10)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_10mfl"]
+albedo_color = Color(0.376471, 0.376471, 0.376471, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_e8dcd"]
+material = SubResource("StandardMaterial3D_10mfl")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pta5u"]
+albedo_color = Color(0.215686, 0.215686, 0.215686, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_obhhl"]
+material = SubResource("StandardMaterial3D_pta5u")
+
+[node name="Board" type="Node3D"]
+script = ExtResource("1_fjewe")
+
+[node name="Player1" type="Area3D" parent="."]
+collision_layer = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Player1"]
+shape = SubResource("BoxShape3D_5s140")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Player1"]
+transform = Transform3D(40, 0, 0, 0, 1, 0, 0, 0, 16, 0, 0, 0)
+mesh = SubResource("BoxMesh_e8dcd")
+
+[node name="Player2" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -16)
+collision_layer = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Player2"]
+shape = SubResource("BoxShape3D_5s140")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Player2"]
+transform = Transform3D(40, 0, 0, 0, 1, 0, 0, 0, 16, 0, 0, 0)
+mesh = SubResource("BoxMesh_obhhl")
+
+[connection signal="area_entered" from="Player1" to="." method="_on_player_1_area_entered"]
+[connection signal="area_exited" from="Player1" to="." method="_on_player_1_area_exited"]
+[connection signal="area_entered" from="Player2" to="." method="_on_player_2_area_entered"]
+[connection signal="area_exited" from="Player2" to="." method="_on_player_2_area_exited"]

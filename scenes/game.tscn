@@ -1,31 +1,35 @@
-[gd_scene load_steps=3 format=3 uid="uid://ly3ttyi4u1n7"]
+[gd_scene load_steps=4 format=3 uid="uid://ly3ttyi4u1n7"]
 
 [ext_resource type="Script" path="res://scenes/game.gd" id="1_0oyma"]
 [ext_resource type="PackedScene" uid="uid://ccmb7s7hsvhju" path="res://scenes/card.tscn" id="2_w8kma"]
+[ext_resource type="PackedScene" uid="uid://c8a1adss40uh4" path="res://scenes/board.tscn" id="3_ruuks"]
 
 [node name="Main" type="Node3D"]
 script = ExtResource("1_0oyma")
 
 [node name="Card" parent="." groups=["Cards"] instance=ExtResource("2_w8kma")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 7)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 13)
 top_level = true
 visible = false
 
 [node name="Card2" parent="." groups=["Cards"] instance=ExtResource("2_w8kma")]
-transform = Transform3D(0.932324, 0, 0.361625, 0, 1, 0, -0.361625, 0, 0.932324, -1.81, -0.5, 7)
+transform = Transform3D(0.932324, 0, 0.361625, 0, 1, 0, -0.361625, 0, 0.932324, -1.81, -0.5, 13)
 visible = false
 
 [node name="Card3" parent="." groups=["Cards"] instance=ExtResource("2_w8kma")]
-transform = Transform3D(0.932324, 0, -0.361625, 0, 1, 0, 0.361625, 0, 0.932324, 1.81, -0.5, 7)
+transform = Transform3D(0.932324, 0, -0.361625, 0, 1, 0, 0.361625, 0, 0.932324, 1.81, -0.5, 13)
 top_level = true
 visible = false
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 9.514, 0)
-fov = 100.0
+fov = 120.0
 size = 0.833
 
 [node name="OmniLight3D" type="OmniLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.970188, 14.8874, 9.49997)
 omni_range = 23.152
 omni_attenuation = 0.392293
+
+[node name="Board" parent="." instance=ExtResource("3_ruuks")]
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, -1, -5, 6)

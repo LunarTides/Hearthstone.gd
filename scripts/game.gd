@@ -20,7 +20,7 @@ const MAX_CLIENTS: int = 2
 
 const CARD_BOUNDS_X: float = 9.05
 const CARD_BOUNDS_Y: float = -0.5
-const CARD_BOUNDS_Z: float = 7
+const CARD_BOUNDS_Z: float = 13
 const CARD_BOUNDS_ROTATION_Y: float = 21.2
 const CARD_DISTANCE_X: float = 1.81
 
@@ -36,10 +36,39 @@ var player: Player
 var opponent: Player
 
 ## The player whose turn it is.
-var current_player: Player = Player.new()
+var current_player: Player
 
 ## The opposing player to the player whose turn it is.
-var opposing_player: Player = Player.new()
+var opposing_player: Player
+
+## The player who starts first.
+var player1: Player:
+	get:
+		if not player:
+			return null
+		
+		return player if player.id == 0 else opponent
+
+## The player who starts with the coin.
+var player2: Player:
+	get:
+		if not player:
+			return null
+		
+		return player if player.id == 1 else opponent
+
+## If this client is [member player1].
+var is_player_1: bool:
+	get:
+		return player.id == 0
+
+## If this client is [member player2].
+var is_player_2: bool:
+	get:
+		return player.id == 1
+
+## The board.
+var board: Dictionary
 #endregion
 
 
@@ -70,6 +99,9 @@ func _unhandled_input(event: InputEvent) -> void:
 	# TODO: Make a better way to quit
 	if event.as_text() == "Escape":
 		get_tree().quit()
+	if event.as_text() == "F1":
+		layout_cards(player)
+		layout_cards(opponent)
 #endregion
 
 
@@ -96,6 +128,13 @@ func start_game() -> void:
 		print("Client %s assigned id: %s" % [peer, player_id])
 		
 		i += 1
+	
+	# Yikes
+	assign_player(0)
+	board = {
+		player1: [],
+		player2: [],
+	}
 	
 	print("Changing to game scene...")
 	change_scene_to_file.rpc("res://scenes/game.tscn")
@@ -128,9 +167,17 @@ func get_cards_for_player(player: Player) -> Array[Card]:
 
 ## Gets all card nodes for the specified player.
 func get_card_nodes_for_player(player: Player) -> Array[CardNode]:
-	return get_tree().get_nodes_in_group("Cards").filter(func(card_node: CardNode) -> bool:
+	var array: Array[CardNode] = []
+	
+	array.assign(get_tree().get_nodes_in_group("Cards").filter(func(card_node: CardNode) -> bool:
+		if not card_node.card:
+			return false
+		
 		return card_node.card.player == player
-	)
+	))
+	
+	return array
+
 
 ## Exits to the main menu. This disconnects from the server.
 func exit_to_main_menu() -> void:
