@@ -73,7 +73,7 @@ var index: int:
 			Enums.LOCATION.BOARD:
 				return player.board.find(self)
 			Enums.LOCATION.GRAVEYARD:
-				return player.board.find(self)
+				return player.graveyard.find(self)
 			_:
 				return -1
 
@@ -97,6 +97,27 @@ func update_blueprint() -> void:
 	for prop: Dictionary in blueprint.get_property_list():
 		if prop.usage & PROPERTY_USAGE_SCRIPT_VARIABLE != 0 and prop.name in self:
 			self[prop.name] = blueprint[prop.name]
+
+
+## Add the card to the correct [param index] in it's [member location].
+func add_to_location(index: int) -> void:
+	player.hand.erase(self)
+	player.deck.erase(self)
+	player.board.erase(self)
+	player.graveyard.erase(self)
+	
+	match location:
+		Enums.LOCATION.HAND:
+			player.hand.insert(index, self)
+		Enums.LOCATION.DECK:
+			player.deck.insert(index, self)
+		Enums.LOCATION.BOARD:
+			player.board.insert(index, self)
+		Enums.LOCATION.GRAVEYARD:
+			player.graveyard.insert(index, self)
+		_:
+			push_error("Invalid Location")
+			assert(false, "Invalid Location")
 
 
 ## Triggers an ability.

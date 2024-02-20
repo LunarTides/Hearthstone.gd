@@ -23,5 +23,6 @@ Game="*res://scripts/game.gd"
 [debug]
 
 gdscript/warnings/shadowed_variable=0
+gdscript/warnings/shadowed_variable_base_class=0
 gdscript/warnings/untyped_declaration=2
 gdscript/warnings/inferred_declaration=2

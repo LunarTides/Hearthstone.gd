@@ -137,6 +137,11 @@ enum LOCATION {
 	GRAVEYARD,
 }
 
+enum GAME_MULTIPLAYER_MESSAGE {
+	SUMMON,
+	ADD_TO_HAND,
+}
+
 static var RARITY_COLOR: Dictionary = {
 	RARITY.FREE: Color.WHITE,
 	RARITY.COMMON: Color.GRAY,

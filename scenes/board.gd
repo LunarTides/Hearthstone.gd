@@ -35,30 +35,21 @@ func _ready() -> void:
 
 
 #region Public Functions
-func place_card(player: Player, card_node: CardNode, pos: Vector3) -> bool:
-	var card: Card = card_node.card
-	
-	if card.location != Enums.LOCATION.HAND:
-		return false
+func place_card(player: Player, card_node: CardNode, pos: Vector3) -> void:
+	if card_node.card.location != Enums.LOCATION.HAND:
+		return
 	if player.board.size() >= Game.MAX_BOARD_SPACE:
-		return false
-
+		return
+	
 	for dict: Dictionary in card_node.released.get_connections():
 		card_node.released.disconnect(dict.callable)
-
+	
 	# TODO: Turn pos into index
 	var index: int = player.board.size()
 	
-	card.location = Enums.LOCATION.BOARD
-	
-	player.hand.erase(card)
-	player.board.insert(index, card)
-	
 	card_node.is_hovering = false
-	Game.layout_cards(player)
+	player.summon_card(card_node.card, index)
 	card_node.is_hovering = true
-	
-	return true
 #endregion
 
 
@@ -74,9 +65,9 @@ func _on_player_area_entered(player: Player, area: Area3D) -> void:
 	if player != Game.player:
 		return
 	
-	if card.location != Enums.LOCATION.HAND:
+	if card_node.card.location != Enums.LOCATION.HAND:
 		return
-
+	
 	card_node.released.connect(func(pos: Vector3) -> void: place_card(player, card_node, pos))
 	_connected.append(card_node)
 

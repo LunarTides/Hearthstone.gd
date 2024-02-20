@@ -72,7 +72,8 @@ func _process(_delta: float) -> void:
 func _update() -> void:
 	texture.texture = card.texture
 	name_label.text = card.name
-	cost_label.text = str(card.cost)
+	# TODO: Add back
+	#cost_label.text = str(card.cost)
 	text_label.text = card.text
 	attack_label.text = str(card.attack)
 	health_label.text = str(card.health)
@@ -82,8 +83,10 @@ func _update() -> void:
 	
 	mesh.rarity = card.rarities[0]
 	
-	# TODO: Remove
-	tribe_label.text = str(card.player.id)
+	# TODO: Remove.
+	# For debugging, the cost text is equal to the card's index in it's hand.
+	if card.location == Enums.LOCATION.HAND:
+		cost_label.text = str(card.index)
 #endregion
 
 
@@ -92,7 +95,10 @@ func _update() -> void:
 func layout() -> void:
 	if is_hovering:
 		return
-
+	
+	if multiplayer and multiplayer.is_server():
+		return
+	
 	position = Vector3.ONE
 	rotation = Vector3.ZERO
 	scale = Vector3.ONE
@@ -133,9 +139,9 @@ func _layout_hand() -> void:
 
 func _layout_board() -> void:
 	var player_weight: int = 1 if card.player == Game.player else -1
-
+	
 	rotation = Vector3.ZERO
-
+	
 	position.x = (card.index - 4) * 3.5 + Game.CARD_DISTANCE_X
 	position.y = 0
 	position.z = Game.board_node.player.position.z + player_weight * (
@@ -144,7 +150,7 @@ func _layout_board() -> void:
 		else -6 if card.player == Game.opponent
 		else 11
 	)
-
+	
 	if Game.is_player_1 and card.player == Game.opponent:
 		position.z += 1
 
@@ -177,6 +183,7 @@ func _on_mouse_exited() -> void:
 	
 	is_hovering = false
 
+
 func _input(event: InputEvent) -> void:
 	if is_dragging:
 		# Release lmb
@@ -186,6 +193,7 @@ func _input(event: InputEvent) -> void:
 				var pos: Vector3 = position
 				position = _old_position
 				released.emit(pos)
+
 
 func _on_input_event(_camera: Node, event: InputEvent, position: Vector3, _normal: Vector3, _shape_idx: int) -> void:
 	if not is_hovering:
