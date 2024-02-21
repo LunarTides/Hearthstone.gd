@@ -5,7 +5,7 @@
 [sub_resource type="LabelSettings" id="LabelSettings_s4xya"]
 font_size = 10
 
-[node name="Main Menu" type="Control" node_paths=PackedStringArray("join_button", "host_button", "ip_address", "info_label", "console_tip")]
+[node name="Lobby" type="Control" node_paths=PackedStringArray("join_button", "host_button", "ip_address", "info_label", "console_tip")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0

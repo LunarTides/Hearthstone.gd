@@ -18,11 +18,15 @@ const PORT: int = 4545
 ## The max amount of clients. The game only supports 2.
 const MAX_CLIENTS: int = 2
 
+# There should be a better way of doing this.
 const CARD_BOUNDS_X: float = 9.05
 const CARD_BOUNDS_Y: float = -0.5
 const CARD_BOUNDS_Z: float = 13
 const CARD_BOUNDS_ROTATION_Y: float = 21.2
 const CARD_DISTANCE_X: float = 1.81
+
+const MAX_BOARD_SPACE: int = 7
+const MAX_HAND_SIZE: int = 10
 
 const MAX_PLAYERS: int = 2
 #endregion
@@ -66,6 +70,11 @@ var is_player_1: bool:
 var is_player_2: bool:
 	get:
 		return player.id == 1
+
+## Returns the board node
+var board_node: BoardNode:
+	get:
+		return get_node("/root/Main/Board") as BoardNode
 #endregion
 
 
@@ -96,13 +105,29 @@ func _unhandled_input(event: InputEvent) -> void:
 	# TODO: Make a better way to quit
 	if event.as_text() == "Escape":
 		get_tree().quit()
+	
+	# TODO: Remove debug commands
 	if event.as_text() == "F1":
 		layout_cards(player)
+		layout_cards(opponent)
+	if event.as_text() == "F2":
+		var card_node: CardNode = get_tree().get_nodes_in_group("Cards").filter(func(card_node: CardNode) -> bool:
+			return card_node.card.location == Enums.LOCATION.HAND and card_node.card.player == opponent
+		)[0]
+
+		card_node.card.player = opponent
+		board_node.place_card(opponent, card_node, Vector3.ZERO)
 		layout_cards(opponent)
 #endregion
 
 
 #region Public Functions
+func get_player_from_id(id: int) -> Player:
+	if id == 0:
+		return player1
+	else:
+		return player2
+
 ## Starts the game. Assigns an id to each player and changes scene to the game scene.
 ## Only the host can do this.
 func start_game() -> void:
@@ -134,12 +159,15 @@ func start_game() -> void:
 
 ## Places a [Card] in its player's hand at some index. You probably shouldn't touch this.
 func place_card_in_hand(card: Card, index: int) -> CardNode:
-	card.index = index
 	card.location = Enums.LOCATION.HAND
+	
+	card.player.hand.insert(index, card)
 	
 	var card_node: CardNode = CardScene.instantiate()
 	card_node.card = card
 	card_node.layout()
+	
+	layout_cards(card.player)
 	
 	return card_node
 
@@ -159,7 +187,7 @@ func get_cards_for_player(player: Player) -> Array[Card]:
 func get_card_nodes_for_player(player: Player) -> Array[CardNode]:
 	var array: Array[CardNode] = []
 	
-	array.assign(get_tree().get_nodes_in_group("Cards").filter(func(card_node: CardNode) -> bool:
+	array.assign(get_all_card_nodes().filter(func(card_node: CardNode) -> bool:
 		if not card_node.card:
 			return false
 		
@@ -169,10 +197,17 @@ func get_card_nodes_for_player(player: Player) -> Array[CardNode]:
 	return array
 
 
+func get_all_card_nodes() -> Array[CardNode]:
+	# ???
+	var array: Array[CardNode] = []
+	array.assign(get_tree().get_nodes_in_group("Cards"))
+	return array
+
+
 ## Exits to the main menu. This disconnects from the server.
 func exit_to_main_menu() -> void:
 	multiplayer.multiplayer_peer = null
-	get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
+	get_tree().change_scene_to_file("res://scenes/lobby.tscn")
 #endregion
 
 

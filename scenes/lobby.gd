@@ -10,7 +10,7 @@ extends Control
 
 func _ready() -> void:
 	if "--server" in OS.get_cmdline_user_args() or OS.has_feature("dedicated_server") or DisplayServer.get_name() == "headless":
-		host()
+		_on_host_button_pressed()
 
 
 func host() -> void:
@@ -23,7 +23,7 @@ func host() -> void:
 
 func _on_join_button_pressed() -> void:
 	var peer: ENetMultiplayerPeer = ENetMultiplayerPeer.new()
-	peer.create_client(ip_address.text, Game.PORT)
+	peer.create_client(ip_address.text if ip_address.text else "localhost", Game.PORT)
 	multiplayer.multiplayer_peer = peer
 	
 	multiplayer.connected_to_server.connect(func() -> void:

@@ -63,7 +63,20 @@ var cooldown: int
 var keywords: Dictionary
 var abilities: Dictionary
 
-var index: int
+var index: int:
+	get:
+		match location:
+			Enums.LOCATION.HAND:
+				return player.hand.find(self)
+			Enums.LOCATION.DECK:
+				return player.deck.find(self)
+			Enums.LOCATION.BOARD:
+				return player.board.find(self)
+			Enums.LOCATION.GRAVEYARD:
+				return player.board.find(self)
+			_:
+				return -1
+
 var location: Enums.LOCATION = Enums.LOCATION.NONE
 #endregion
 

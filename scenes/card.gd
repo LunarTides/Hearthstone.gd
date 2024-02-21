@@ -70,9 +70,6 @@ func _process(_delta: float) -> void:
 
 
 func _update() -> void:
-	if not card:
-		return
-	
 	texture.texture = card.texture
 	name_label.text = card.name
 	cost_label.text = str(card.cost)
@@ -93,6 +90,13 @@ func _update() -> void:
 #region Public Functions
 ## Change the position / rotation of the card to be correct.
 func layout() -> void:
+	if is_hovering:
+		return
+
+	position = Vector3.ONE
+	rotation = Vector3.ZERO
+	scale = Vector3.ONE
+	
 	if card.location == Enums.LOCATION.HAND:
 		_layout_hand()
 	elif card.location == Enums.LOCATION.BOARD:
@@ -109,11 +113,11 @@ func layout() -> void:
 #region Private Functions
 func _layout_hand() -> void:
 	# TODO: Dont hardcode this
-	var max_hand_size: int = 10
 	var player_weight: int = 1 if card.player == Game.player else -1
 	
-	var half_hand_size: int = max_hand_size / 2
+	var half_hand_size: int = Game.MAX_HAND_SIZE / 2
 	
+	# TODO: If fewer cards, be middle (real)
 	position.x = -Game.CARD_BOUNDS_X + (card.index * Game.CARD_DISTANCE_X)
 	position.y = Game.CARD_BOUNDS_Y * abs(half_hand_size - 1 - card.index)
 	position.z = Game.CARD_BOUNDS_Z * player_weight
@@ -122,11 +126,27 @@ func _layout_hand() -> void:
 	if card.index != half_hand_size - 1:
 		rotation.y = deg_to_rad((Game.CARD_BOUNDS_ROTATION_Y + position.x) * -sign((card.index - half_hand_size) + player_weight))
 	
-	rotation.y += deg_to_rad(0 if card.player == Game.player else 180)
+	# Rotate the card 180 degrees if it isn't already
+	if card.player != Game.player and rotation.y - PI < 0:
+		rotation.y += PI
 
 
 func _layout_board() -> void:
-	assert(false, "Not implemented")
+	var player_weight: int = 1 if card.player == Game.player else -1
+
+	rotation = Vector3.ZERO
+
+	position.x = (card.index - 4) * 3.5 + Game.CARD_DISTANCE_X
+	position.y = 0
+	position.z = Game.board_node.player.position.z + player_weight * (
+		# I love hardcoded values
+		3 if Game.is_player_1
+		else -6 if card.player == Game.opponent
+		else 11
+	)
+
+	if Game.is_player_1 and card.player == Game.opponent:
+		position.z += 1
 
 
 func _on_mouse_entered() -> void:
@@ -136,12 +156,14 @@ func _on_mouse_entered() -> void:
 	is_hovering = true
 	
 	# Animate
+	var player_weight: int = 1 if card.player == Game.player else -1
+	
 	_tween = create_tween()
 	_tween.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
 	_tween.parallel().tween_property(self, "position:y", 1, 0.1)
-	_tween.parallel().tween_property(self, "position:z", position.z - 2, 0.1)
+	_tween.parallel().tween_property(self, "position:z", position.z - (4 * player_weight), 0.1)
 	_tween.parallel().tween_property(self, "rotation:y", 0, 0.1)
-	_tween.parallel().tween_property(self, "scale", Vector3(1.5, 1.5, 1.5), 0.1)
+	_tween.parallel().tween_property(self, "scale", Vector3(2, 2, 2), 0.1)
 
 
 func _on_mouse_exited() -> void:
