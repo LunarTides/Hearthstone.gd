@@ -87,6 +87,7 @@ func _update() -> void:
 	# For debugging, the cost text is equal to the card's index in it's hand.
 	if card.location == Enums.LOCATION.HAND:
 		cost_label.text = str(card.index)
+	tribe_label.text = str(card.player.id)
 #endregion
 
 

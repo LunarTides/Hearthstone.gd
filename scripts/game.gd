@@ -277,12 +277,19 @@ func msg(message: Enums.GAME_MULTIPLAYER_MESSAGE, sender_player_id: int, info: D
 	
 	# The 0th element is the sender_player, the 1th element is the other_player
 	var sorted_player_keys: Array = players.keys()
-	sorted_player_keys.sort_custom(func(a: int, b: int) -> bool:
+	sorted_player_keys.sort_custom(func(a: int, _b: int) -> bool:
 		return players[a].id == sender_player_id
 	)
 	
 	var sender_player: Player = players[sorted_player_keys[0]]
 	var other_player: Player = players[sorted_player_keys[1]]
+	
+	print("New packet from %s (Player id: %d): %s (%s)" % [
+		"Server" if sender_peer_id == 1 else str(sender_peer_id),
+		sender_player_id,
+		Enums.GAME_MULTIPLAYER_MESSAGE.keys()[message],
+		info
+	])
 	
 	# TODO: Anticheat
 	match message:
