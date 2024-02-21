@@ -8,6 +8,14 @@ extends Node3D
 		if is_inside_tree():
 			_update()
 
+@export var covered: bool:
+	set(new_covered):
+		covered = new_covered
+		for child: Node3D in get_children():
+			child.visible = not covered
+		
+		$Cover.visible = covered
+
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:

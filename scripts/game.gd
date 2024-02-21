@@ -70,7 +70,7 @@ var player2_server: Player
 
 ## The players of the game. ONLY ASSIGNED SERVER-SIDE.[br][br]
 ## Looks like this:
-## [code]{"2732163217": Player, "432769823": Player}[/code]
+## [code]{2732163217: Player, 432769823: Player}[/code]
 var players: Dictionary = {}
 
 ## If this client is [member player1].
@@ -114,14 +114,39 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if event.is_released():
+		return
+	
+	var key: String = event.as_text()
+	
 	# TODO: Make a better way to quit
-	if event.as_text() == "Escape":
+	if key == "Escape":
 		get_tree().quit()
 	
 	# TODO: Remove debug commands
-	if event.as_text() == "F1":
+	if key == "F1":
 		layout_cards(player)
 		layout_cards(opponent)
+	
+	# F2 reveals a friendly card
+	elif key == "F2":
+		var cards: Array[Card] = get_cards_for_player(player).filter(func(card: Card) -> bool: return not card.is_hidden)
+		if cards.size() <= 0:
+			return
+		
+		var card: Card = cards.pick_random()
+		
+		send_packet(Enums.PACKET_TYPE.REVEAL, player.id, {"location": card.location, "index": card.index})
+	
+	# F3 reveals an enemy card. This should trigger the anticheat and drop the packet.
+	elif key == "F3":
+		var cards: Array[Card] = get_cards_for_player(opponent).filter(func(card: Card) -> bool: return card.is_hidden)
+		if cards.size() <= 0:
+			return
+		
+		var card: Card = cards.pick_random()
+		
+		send_packet(Enums.PACKET_TYPE.REVEAL, opponent.id, {"location": card.location, "index": card.index})
 #endregion
 
 
@@ -138,6 +163,21 @@ func get_player_from_id(id: int) -> Player:
 		return player1
 	else:
 		return player2
+
+
+## Gets the [param player]'s [Card] in [param location] at [param index].
+func get_card_from_index(player: Player, location: Enums.LOCATION, index: int) -> Card:
+	match location:
+		Enums.LOCATION.HAND:
+			return player.hand[index]
+		Enums.LOCATION.DECK:
+			return player.deck[index]
+		Enums.LOCATION.BOARD:
+			return player.board[index]
+		Enums.LOCATION.GRAVEYARD:
+			return player.graveyard[index]
+		_:
+			return null
 
 
 ## Starts the game. Assigns an id to each player and changes scene to the game scene.
@@ -206,7 +246,7 @@ func layout_cards(player: Player) -> void:
 
 ## Gets all [Card]s for the specified player.
 func get_cards_for_player(player: Player) -> Array[Card]:
-	return get_card_nodes_for_player(player).map(func(card_node: CardNode) -> Card: return card_node.card)
+	return get_all_cards().filter(func(card: Card) -> bool: return card.player == player)
 
 
 ## Gets all [Card]s currently in the game scene.
@@ -266,46 +306,10 @@ func change_scene_to_file(file: StringName) -> void:
 	get_tree().change_scene_to_file(file)
 
 
-## Sends a message to the game that will be sent to all the clients.[br]
+## Sends a packet to the server that will be sent to all the clients.[br]
 ## This is used to sync every action.
-@rpc("any_peer", "call_local", "reliable")
-func msg(message: Enums.GAME_MULTIPLAYER_MESSAGE, sender_player_id: int, info: Dictionary) -> void:
-	if not multiplayer.is_server():
-		return
-	
-	var sender_peer_id: int = multiplayer.get_remote_sender_id()
-	
-	# The 0th element is the sender_player, the 1th element is the other_player
-	var sorted_player_keys: Array = players.keys()
-	sorted_player_keys.sort_custom(func(a: int, _b: int) -> bool:
-		return players[a].id == sender_player_id
-	)
-	
-	var sender_player: Player = players[sorted_player_keys[0]]
-	var other_player: Player = players[sorted_player_keys[1]]
-	
-	print("New packet from %s (Player id: %d): %s (%s)" % [
-		"Server" if sender_peer_id == 1 else str(sender_peer_id),
-		sender_player_id,
-		Enums.GAME_MULTIPLAYER_MESSAGE.keys()[message],
-		info
-	])
-	
-	# TODO: Anticheat
-	match message:
-		# Summon
-		Enums.GAME_MULTIPLAYER_MESSAGE.SUMMON:
-			var hand_index: int = info.hand_index
-			var board_index: int = info.board_index
-			
-			_accept_summon_card.rpc(sender_player.id, Enums.LOCATION.HAND, hand_index, board_index)
-		
-		# Add to hand
-		Enums.GAME_MULTIPLAYER_MESSAGE.ADD_TO_HAND:
-			var blueprint_path: NodePath = info.blueprint_path
-			var index: int = info.index
-			
-			spawn_card.rpc(blueprint_path, sender_player.id, Enums.LOCATION.HAND, index)
+func send_packet(message: Enums.PACKET_TYPE, player_id: int, info: Dictionary) -> void:
+	_send_packet.rpc_id(1, message, player_id, info)
 
 
 ## Spawns in a card. THIS HAS TO BE CALLED SERVER SIDE. USE [method msg] FOR CLIENT SIDE.
@@ -331,7 +335,7 @@ func spawn_card(blueprint_path: NodePath, player_id: int, location: Enums.LOCATI
 	Game.layout_cards(card.player)
 
 
-## Summons a card as requested by the server. THIS HAS TO BE CALLED SERVER SIDE. USE [method msg] FOR CLIENT SIDE.
+# Summons a card as requested by the server. THIS HAS TO BE CALLED SERVER SIDE. USE [method msg] FOR CLIENT SIDE.
 @rpc("authority", "call_local", "reliable")
 func _accept_summon_card(player_id: int, location: Enums.LOCATION, location_index: int, board_index: int) -> void:
 	var player: Player = Game.get_player_from_id(player_id)
@@ -347,11 +351,19 @@ func _accept_summon_card(player_id: int, location: Enums.LOCATION, location_inde
 	card.add_to_location(board_index)
 	
 	layout_cards(player)
+
+
+# Reveals a card for the player at the specified [param index] in the [param location]. THIS HAS TO BE CALLED SERVER SIDE. USE [method msg] FOR CLIENT SIDE.
+@rpc("authority", "call_local", "reliable")
+func _accept_reveal(player_id: int, location: Enums.LOCATION, index: int) -> void:
+	var player: Player = Game.get_player_from_id(player_id)
+	var card: Card = get_card_from_index(player, location, index)
+	
+	card.override_is_hidden = 0
 #endregion
 
 
 #region Private Functions
-## Places a [Card] in its player's hand at some index. You shouldn't touch this.
 func _place_card_in_hand(card: Card, index: int) -> CardNode:
 	card.location = Enums.LOCATION.HAND
 	
@@ -364,4 +376,86 @@ func _place_card_in_hand(card: Card, index: int) -> CardNode:
 	layout_cards(card.player)
 	
 	return card_node
+
+
+@rpc("any_peer", "call_local", "reliable")
+func _send_packet(message: Enums.PACKET_TYPE, player_id: int, info: Dictionary) -> void:
+	var result: Enums.PACKET_FAILURE_TYPE = __send_packet(message, player_id, info)
+	
+	if result != Enums.PACKET_FAILURE_TYPE.NONE:
+		if result == Enums.PACKET_FAILURE_TYPE.ANTICHEAT:
+			push_error("!!! ANTICHEAT FAILED IN PREVIOUS PACKET. PACKET DROPPED. !!!")
+			return
+		
+		push_warning("Packet dropped with code [%s] ^^^^" % Enums.PACKET_FAILURE_TYPE.keys()[result])
+
+
+func __send_packet(message: Enums.PACKET_TYPE, player_id: int, info: Dictionary) -> Enums.PACKET_FAILURE_TYPE:
+	if not multiplayer.is_server():
+		return Enums.PACKET_FAILURE_TYPE.IS_CLIENT
+	
+	var sender_peer_id: int = multiplayer.get_remote_sender_id()
+	var sender_player: Player = players.get(sender_peer_id)
+	
+	# The 0th element is the sender_player, the 1th element is the other_player
+	var sorted_player_keys: Array = players.keys()
+	sorted_player_keys.sort_custom(func(a: int, _b: int) -> bool:
+		return players[a].id == player_id
+	)
+	
+	var actor_player: Player = players[sorted_player_keys[0]]
+	var other_player: Player = players[sorted_player_keys[1]]
+	
+	print("[Packet]: %s (Player: %d): [%s] %s" % [
+		"Server" if sender_peer_id == 1 else str(sender_peer_id),
+		player_id,
+		Enums.PACKET_TYPE.keys()[message],
+		info
+	])
+	
+	# Anticheat
+	if not _anticheat(message, actor_player, other_player, info):
+		return Enums.PACKET_FAILURE_TYPE.ANTICHEAT
+	
+	match message:
+		# Summon
+		Enums.PACKET_TYPE.SUMMON:
+			var hand_index: int = info.hand_index
+			var board_index: int = info.board_index
+			
+			_accept_summon_card.rpc(player_id, Enums.LOCATION.HAND, hand_index, board_index)
+		
+		# Add to hand
+		Enums.PACKET_TYPE.ADD_TO_HAND:
+			var blueprint_path: NodePath = info.blueprint_path
+			var index: int = info.index
+			
+			spawn_card.rpc(blueprint_path, player_id, Enums.LOCATION.HAND, index)
+		
+		# Reveal
+		Enums.PACKET_TYPE.REVEAL:
+			var location: Enums.LOCATION = info.location
+			var index: int = info.index
+			
+			_accept_reveal.rpc(player_id, location, index)
+	
+	return Enums.PACKET_FAILURE_TYPE.NONE
+
+
+func _anticheat(message: Enums.PACKET_TYPE, actor_player: Player, other_player: Player, info: Dictionary) -> bool:
+	var sender_peer_id: int = multiplayer.get_remote_sender_id()
+	var sender_player: Player = players.get(sender_peer_id)
+	
+	# TODO: Figure out if this is a good idea
+	# Trust the server packets
+	#if sender_peer_id == 1:
+		#return true
+	
+	# TODO: More Anticheat
+	match message:
+		Enums.PACKET_TYPE.REVEAL:
+			if sender_player != actor_player:
+				return false
+	
+	return true
 #endregion

@@ -28,9 +28,9 @@ var graveyard: Array[Card]
 
 #region Public Functions
 func summon_card(card: Card, index: int) -> void:
-	Game.msg.rpc_id(1, Enums.GAME_MULTIPLAYER_MESSAGE.SUMMON, id, {"hand_index": card.index, "board_index": index})
+	Game.send_packet(Enums.PACKET_TYPE.SUMMON, id, {"hand_index": card.index, "board_index": index})
 
 
 func add_to_hand(card: Card, index: int) -> void:
-	Game.msg.rpc_id(1, Enums.GAME_MULTIPLAYER_MESSAGE.ADD_TO_HAND, id, {"blueprint_path": card.blueprint.resource_path, "index": index})
+	Game.send_packet(Enums.PACKET_TYPE.ADD_TO_HAND, id, {"blueprint_path": card.blueprint.resource_path, "index": index})
 #endregion

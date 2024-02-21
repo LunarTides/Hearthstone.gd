@@ -1,15 +1,27 @@
-[gd_scene load_steps=5 format=3 uid="uid://g4ot01icqg10"]
+[gd_scene load_steps=8 format=3 uid="uid://g4ot01icqg10"]
 
 [ext_resource type="PackedScene" uid="uid://wo8um2c2cc47" path="res://assets/models/minion/minion.blend" id="1_ybjbc"]
 [ext_resource type="Script" path="res://scenes/models/minion_model.gd" id="2_8aefi"]
 [ext_resource type="Texture2D" uid="uid://c8unx3rn2d4b3" path="res://assets/models/minion/attack.png" id="3_0rtir"]
+[ext_resource type="Texture2D" uid="uid://c85sy5ncm0tn8" path="res://assets/card_cover.png" id="4_jhqo2"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_373kx"]
 cull_mode = 2
 albedo_texture = ExtResource("3_0rtir")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_c5svb"]
+albedo_texture = ExtResource("4_jhqo2")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_vhbbj"]
+material = SubResource("StandardMaterial3D_c5svb")
+size = Vector2(3, 5)
 
 [node name="Mesh" instance=ExtResource("1_ybjbc")]
 script = ExtResource("2_8aefi")
 
 [node name="Attack" parent="." index="8"]
 surface_material_override/0 = SubResource("StandardMaterial3D_373kx")
+
+[node name="Cover" type="MeshInstance3D" parent="." index="11"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+mesh = SubResource("PlaneMesh_vhbbj")

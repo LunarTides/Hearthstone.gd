@@ -47,6 +47,21 @@ var is_hovering: bool = false
 
 ## Whether or not the player is dragging this card.
 var is_dragging: bool = false
+
+## Whether or not the card is being covered (hidden).
+var covered: bool:
+	get:
+		return mesh.covered
+	set(new_covered):
+		mesh.covered = new_covered
+		
+		texture.visible = not covered
+		name_label.visible = not covered
+		cost_label.visible = not covered
+		text_label.visible = not covered
+		attack_label.visible = not covered
+		health_label.visible = not covered
+		tribe_label.visible = not covered
 #endregion
 
 #region Private Variables
@@ -70,6 +85,18 @@ func _process(_delta: float) -> void:
 
 
 func _update() -> void:
+	# TODO: Remove.
+	# For debugging, the cost text is equal to the card's index in it's hand.
+	if card.location == Enums.LOCATION.HAND:
+		cost_label.text = str(card.index)
+	tribe_label.text = str(card.player.id)
+	
+	if card.is_hidden:
+		covered = true
+		return
+	
+	covered = false
+	
 	texture.texture = card.texture
 	name_label.text = card.name
 	# TODO: Add back
@@ -78,16 +105,11 @@ func _update() -> void:
 	attack_label.text = str(card.attack)
 	health_label.text = str(card.health)
 	
-	var tribe_keys: PackedStringArray = PackedStringArray(Enums.TRIBE.keys())
-	tribe_label.text = " / ".join(card.tribes.map(func(tribe: Enums.TRIBE) -> String: return tribe_keys[tribe].capitalize()))
+	# TODO: Add back
+	#var tribe_keys: PackedStringArray = PackedStringArray(Enums.TRIBE.keys())
+	#tribe_label.text = " / ".join(card.tribes.map(func(tribe: Enums.TRIBE) -> String: return tribe_keys[tribe].capitalize()))
 	
 	mesh.rarity = card.rarities[0]
-	
-	# TODO: Remove.
-	# For debugging, the cost text is equal to the card's index in it's hand.
-	if card.location == Enums.LOCATION.HAND:
-		cost_label.text = str(card.index)
-	tribe_label.text = str(card.player.id)
 #endregion
 
 

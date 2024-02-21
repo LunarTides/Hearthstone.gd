@@ -78,6 +78,19 @@ var index: int:
 				return -1
 
 var location: Enums.LOCATION = Enums.LOCATION.NONE
+var card_node: CardNode:
+	get:
+		return Game.get_all_card_nodes().filter(func(card_node: CardNode) -> bool: return card_node.card == self)[0]
+
+var override_is_hidden: Enums.NULLABLE_BOOL = Enums.NULLABLE_BOOL.NULL
+var is_hidden: bool:
+	get:
+		if override_is_hidden == Enums.NULLABLE_BOOL.FALSE:
+			return false
+		if override_is_hidden == Enums.NULLABLE_BOOL.TRUE:
+			return true
+		
+		return player != Game.player and (location == Enums.LOCATION.HAND or location == Enums.LOCATION.DECK)
 #endregion
 
 
