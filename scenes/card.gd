@@ -9,6 +9,13 @@ extends Area3D
 signal released(position: Vector3)
 #endregion
 
+
+#region Constant Variables
+const MinionMesh: Resource = preload("res://assets/models/minion/minion.blend")
+const SpellMesh: Resource = preload("res://assets/models/spell/spell.blend")
+#endregion
+
+
 #region Exported Variables
 ## The card that the model is using.
 @export var card: Card:
@@ -18,6 +25,9 @@ signal released(position: Vector3)
 
 ## The texture / image of the card.
 @export var texture: Sprite3D
+
+## The cover of the card.
+@export var cover: MeshInstance3D
 
 ## The name label of the card.
 @export var name_label: Label3D
@@ -36,6 +46,9 @@ signal released(position: Vector3)
 
 ## The tribe label of the card.
 @export var tribe_label: Label3D
+
+## The spell school label of the card.
+@export var spell_school_label: Label3D
 #endregion
 
 #region Public Variables
@@ -47,18 +60,23 @@ var is_dragging: bool = false
 
 ## Whether or not the card is being covered (hidden).
 var covered: bool:
-	get:
-		return mesh.covered
 	set(new_covered):
-		mesh.covered = new_covered
+		covered = new_covered
 		
+		# Only change the essentials.
+		cover.visible = covered
+		mesh.visible = not covered
 		texture.visible = not covered
 		name_label.visible = not covered
 		cost_label.visible = not covered
 		text_label.visible = not covered
-		attack_label.visible = not covered
-		health_label.visible = not covered
-		tribe_label.visible = not covered
+		
+		if covered:
+			# Hide all the non-essentials in here.
+			attack_label.hide()
+			health_label.hide()
+			tribe_label.hide()
+			spell_school_label.hide()
 #endregion
 
 #region Private Variables
@@ -76,11 +94,23 @@ var _tween: Tween
 
 
 #region Internal Functions
+func _ready() -> void:
+	mesh.queue_free()
+	
+	if card.types.has(Enums.TYPE.MINION):
+		mesh = MinionMesh.instantiate()
+	if card.types.has(Enums.TYPE.SPELL):
+		mesh = SpellMesh.instantiate()
+	
+	add_child(mesh)
+
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
 	_update()
+#endregion
 
 
+#region Private Functions
 func _update() -> void:
 	# TODO: Remove.
 	# For debugging, the cost text is equal to the card's index in it's hand.
@@ -103,10 +133,25 @@ func _update() -> void:
 	health_label.text = str(card.health)
 	
 	# TODO: Add back
+	# Tribes
 	#var tribe_keys: PackedStringArray = PackedStringArray(Enums.TRIBE.keys())
 	#tribe_label.text = " / ".join(card.tribes.map(func(tribe: Enums.TRIBE) -> String: return tribe_keys[tribe].capitalize()))
 	
-	mesh.rarity = card.rarities[0]
+	# Spell schools
+	var spell_schools: PackedStringArray = PackedStringArray(Enums.SPELL_SCHOOL.keys())
+	spell_school_label.text = " / ".join(card.spell_schools.map(func(spell_school: Enums.SPELL_SCHOOL) -> String: return spell_schools[spell_school].capitalize()))
+	
+	# Rarity Color
+	var rarity_node: MeshInstance3D = mesh.get_node("Rarity")
+	rarity_node.mesh.surface_get_material(0).albedo_color = Enums.RARITY_COLOR.get(card.rarities[0])
+	
+	# Show non-essential labels
+	if card.types.has(Enums.TYPE.MINION):
+		attack_label.show()
+		health_label.show()
+		tribe_label.show()
+	if card.types.has(Enums.TYPE.SPELL):
+		spell_school_label.show()
 #endregion
 
 
