@@ -34,8 +34,8 @@ func _ready() -> void:
 #endregion
 
 
-#region Public Functions
-func place_card(player: Player, card_node: CardNode, pos: Vector3) -> void:
+#region Private Functions
+func _place_card(player: Player, card_node: CardNode, pos: Vector3) -> void:
 	for dict: Dictionary in card_node.released.get_connections():
 		card_node.released.disconnect(dict.callable)
 	
@@ -45,10 +45,8 @@ func place_card(player: Player, card_node: CardNode, pos: Vector3) -> void:
 	card_node.is_hovering = false
 	player.summon_card(card_node.card, index)
 	card_node.is_hovering = true
-#endregion
 
 
-#region Private Functions
 func _on_player_area_entered(player: Player, area: Area3D) -> void:
 	if not area is CardNode:
 		return
@@ -63,7 +61,7 @@ func _on_player_area_entered(player: Player, area: Area3D) -> void:
 	if card_node.card.location != Enums.LOCATION.HAND:
 		return
 	
-	card_node.released.connect(func(pos: Vector3) -> void: place_card(player, card_node, pos))
+	card_node.released.connect(func(pos: Vector3) -> void: _place_card(player, card_node, pos))
 	_connected.append(card_node)
 
 

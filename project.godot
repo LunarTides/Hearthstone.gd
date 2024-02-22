@@ -10,7 +10,8 @@ config_version=5
 
 [application]
 
-config/name="Hearthstone"
+config/name="Hearthstone.gd"
+config/version="0.1.0"
 run/main_scene="res://scenes/lobby.tscn"
 config/features=PackedStringArray("4.2", "Forward Plus")
 config/icon="res://icon.svg"
@@ -23,7 +24,10 @@ Multiplayer="*res://scripts/multiplayer.gd"
 
 [debug]
 
+gdscript/warnings/unused_variable=0
+gdscript/warnings/unused_parameter=0
 gdscript/warnings/shadowed_variable=0
 gdscript/warnings/shadowed_variable_base_class=0
 gdscript/warnings/untyped_declaration=2
 gdscript/warnings/inferred_declaration=2
+gdscript/warnings/confusable_local_declaration=0

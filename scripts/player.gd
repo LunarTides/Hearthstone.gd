@@ -27,10 +27,17 @@ var graveyard: Array[Card]
 
 
 #region Public Functions
-func summon_card(card: Card, index: int) -> void:
-	Game.send_packet(Enums.PACKET_TYPE.SUMMON, id, {"hand_index": card.index, "board_index": index})
+func summon_card(card: Card, board_index: int) -> void:
+	Game.send_packet(Enums.PACKET_TYPE.SUMMON, id, {
+		"location": card.location,
+		"location_index": card.index,
+		"board_index": board_index,
+	})
 
 
 func add_to_hand(card: Card, index: int) -> void:
-	Game.send_packet(Enums.PACKET_TYPE.ADD_TO_HAND, id, {"blueprint_path": card.blueprint.resource_path, "index": index})
+	Game.send_packet(Enums.PACKET_TYPE.ADD_TO_HAND, id, {
+		"blueprint_path": card.blueprint.resource_path,
+		"index": index,
+	})
 #endregion

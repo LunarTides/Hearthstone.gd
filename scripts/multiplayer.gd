@@ -155,7 +155,7 @@ func _accept_reveal(player_id: int, location: Enums.LOCATION, index: int) -> voi
 	var player: Player = Game.get_player_from_id(player_id)
 	var card: Card = Game.get_card_from_index(player, location, index)
 	
-	card.override_is_hidden = 0
+	card.override_is_hidden = Enums.NULLABLE_BOOL.FALSE
 
 
 @rpc("any_peer", "call_local", "reliable")
@@ -210,10 +210,11 @@ func __send_packet(packet_type: Enums.PACKET_TYPE, player_id: int, info: Diction
 	match packet_type:
 		# Summon
 		Enums.PACKET_TYPE.SUMMON:
-			var hand_index: int = info.hand_index
+			var location: Enums.LOCATION = info.location
+			var location_index: int = info.location_index
 			var board_index: int = info.board_index
 			
-			_accept_summon_card.rpc(player_id, Enums.LOCATION.HAND, hand_index, board_index)
+			_accept_summon_card.rpc(player_id, location, location_index, board_index)
 		
 		# Add to hand
 		Enums.PACKET_TYPE.ADD_TO_HAND:
@@ -269,10 +270,11 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, other_play
 		
 		# Summon
 		Enums.PACKET_TYPE.SUMMON:
-			var hand_index: int = info.hand_index
+			var location: Enums.LOCATION = info.location
+			var location_index: int = info.location_index
 			var board_index: int = info.board_index
 			
-			var card: Card = Game.get_card_from_index(sender_player, Enums.LOCATION.HAND, hand_index)
+			var card: Card = Game.get_card_from_index(sender_player, location, location_index)
 			
 			# The card should exist.
 			if _anticheat_condition(not card, 1):
@@ -305,7 +307,7 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, other_play
 	return Enums.ANTICHEAT_MESSAGE.NONE
 
 
-## Returns if [param condition] is true and [param min_anticheat_level] is more or equal to [member anticheat_level].
+## Returns if [param condition] is true and [member anticheat_level] is more or equal to [param min_anticheat_level].
 func _anticheat_condition(condition: bool, min_anticheat_level: int) -> bool:
 	return condition and anticheat_level >= min_anticheat_level
 #endregion
