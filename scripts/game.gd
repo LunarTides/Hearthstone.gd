@@ -12,6 +12,7 @@ signal game_started
 #region Constant Variables
 const CardScene: PackedScene = preload("res://scenes/card.tscn")
 const Sheep: Blueprint = preload("res://cards/sheep/sheep.tres")
+const TheCoin: Blueprint = preload("res://cards/the-coin/the-coin.tres")
 
 # There should be a better way of doing this.
 const CARD_BOUNDS_X: float = 9.05
@@ -105,7 +106,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		
 		var card: Card = cards.pick_random()
 		
-		send_packet(Enums.PACKET_TYPE.REVEAL, player.id, {"location": card.location, "index": card.index})
+		send_packet(Enums.PACKET_TYPE.REVEAL, player.id, {"location": card.location, "location_index": card.index})
 	
 	# F3 reveals an enemy card. This should trigger the anticheat and drop the packet.
 	elif key == "F3":
@@ -115,7 +116,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		
 		var card: Card = cards.pick_random()
 		
-		send_packet(Enums.PACKET_TYPE.REVEAL, opponent.id, {"location": card.location, "index": card.index})
+		send_packet(Enums.PACKET_TYPE.REVEAL, opponent.id, {"location": card.location, "location_index": card.index})
 #endregion
 
 
@@ -188,7 +189,7 @@ func start_game() -> void:
 	
 	# TODO: Remove
 	# Spawn 10 cards for each player
-	var amount: int = 10
+	var amount: int = 9
 	
 	for index: int in range(amount * 2):
 		var card_player: Player = Multiplayer.players.values()[0]
@@ -202,6 +203,12 @@ func start_game() -> void:
 		card.player = card_player
 		
 		_place_card_in_hand(card, index)
+	
+	var card: Card = Card.new()
+	card.blueprint = TheCoin
+	card.player = player2_server
+	
+	_place_card_in_hand(card, 1)
 
 
 ## Lays out all the cards for the specified player. Only works client side.

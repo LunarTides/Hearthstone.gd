@@ -15,9 +15,6 @@ signal released(position: Vector3)
 	set(new_card):
 		card = new_card
 		card._ready()
-		
-		# TODO: Remove
-		card.trigger_ability(Enums.ABILITY.CAST)
 
 ## The texture / image of the card.
 @export var texture: Sprite3D

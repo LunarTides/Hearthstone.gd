@@ -42,6 +42,10 @@ func _place_card(player: Player, card_node: CardNode, pos: Vector3) -> void:
 	# TODO: Turn pos into index
 	var index: int = player.board.size()
 	
+	# TODO: Remove
+	if card_node.card.types[0] == Enums.TYPE.SPELL:
+		card_node.card.trigger_ability(Enums.ABILITY.CAST)
+	
 	card_node.is_hovering = false
 	player.summon_card(card_node.card, index)
 	card_node.is_hovering = true

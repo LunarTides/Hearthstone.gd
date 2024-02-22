@@ -7,4 +7,4 @@ func _ready(player: Player, card: Card) -> void:
 
 
 func cast(player: Player, card: Card) -> void:
-	print_debug("Cast")
+	push_warning("Test warning, please ignore.")

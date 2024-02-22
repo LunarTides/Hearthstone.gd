@@ -151,11 +151,20 @@ func _accept_summon_card(player_id: int, location: Enums.LOCATION, location_inde
 
 # Reveals a card for the player at the specified [param index] in the [param location]. THIS HAS TO BE CALLED SERVER SIDE. USE [method msg] FOR CLIENT SIDE.
 @rpc("authority", "call_local", "reliable")
-func _accept_reveal(player_id: int, location: Enums.LOCATION, index: int) -> void:
+func _accept_reveal(player_id: int, location: Enums.LOCATION, location_index: int) -> void:
 	var player: Player = Game.get_player_from_id(player_id)
-	var card: Card = Game.get_card_from_index(player, location, index)
+	var card: Card = Game.get_card_from_index(player, location, location_index)
 	
 	card.override_is_hidden = Enums.NULLABLE_BOOL.FALSE
+
+
+@rpc("authority", "call_local", "reliable")
+func _accept_trigger_ability(player_id: int, location: Enums.LOCATION, location_index: int, ability: Enums.ABILITY) -> void:
+	var player: Player = Game.get_player_from_id(player_id)
+	var card: Card = Game.get_card_from_index(player, location, location_index)
+	
+	for ability_callback: Callable in card.abilities[ability]:
+		ability_callback.call(player, card)
 
 
 @rpc("any_peer", "call_local", "reliable")
@@ -226,10 +235,19 @@ func __send_packet(packet_type: Enums.PACKET_TYPE, player_id: int, info: Diction
 		# Reveal
 		Enums.PACKET_TYPE.REVEAL:
 			var location: Enums.LOCATION = info.location
-			var index: int = info.index
+			var location_index: int = info.location_index
 			
-			_accept_reveal.rpc(player_id, location, index)
+			_accept_reveal.rpc(player_id, location, location_index)
 		
+		# Trigger ability
+		Enums.PACKET_TYPE.TRIGGER_ABILITY:
+			var location: Enums.LOCATION = info.location
+			var location_index: int = info.location_index
+			var ability: Enums.ABILITY = info.ability
+			
+			_accept_trigger_ability.rpc(player_id, location, location_index, ability)
+		
+		# Unknown
 		_:
 			var message: String = "Invalid packet '%s'." % packet_type
 			assert(false, message)
@@ -295,9 +313,25 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, other_play
 		# Reveal
 		Enums.PACKET_TYPE.REVEAL:
 			var location: Enums.LOCATION = info.location
-			var index: int = info.index
+			var index: int = info.location_index
 			
 			# The player whose card gets revealed should be the same player as the one who sent the packet
+			if _anticheat_condition(sender_player != actor_player, 2):
+				return Enums.ANTICHEAT_MESSAGE.CHEATING
+		
+		# Trigger ability
+		Enums.PACKET_TYPE.TRIGGER_ABILITY:
+			var location: Enums.LOCATION = info.location
+			var location_index: int = info.location_index
+			var ability: Enums.ABILITY = info.ability
+			
+			var card: Card = Game.get_card_from_index(actor_player, location, location_index)
+			
+			# The card should exist.
+			if _anticheat_condition(card == null, 1):
+				return Enums.ANTICHEAT_MESSAGE.INVALID
+			
+			# The player who sent the packet should own the card.
 			if _anticheat_condition(sender_player != actor_player, 2):
 				return Enums.ANTICHEAT_MESSAGE.CHEATING
 		
