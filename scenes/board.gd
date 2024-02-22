@@ -36,11 +36,6 @@ func _ready() -> void:
 
 #region Public Functions
 func place_card(player: Player, card_node: CardNode, pos: Vector3) -> void:
-	if card_node.card.location != Enums.LOCATION.HAND:
-		return
-	if player.board.size() >= Game.MAX_BOARD_SPACE:
-		return
-	
 	for dict: Dictionary in card_node.released.get_connections():
 		card_node.released.disconnect(dict.callable)
 	

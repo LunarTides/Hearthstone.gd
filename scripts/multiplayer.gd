@@ -129,10 +129,6 @@ func _send_packet(message: Enums.PACKET_TYPE, player_id: int, info: Dictionary) 
 	var result: Enums.PACKET_FAILURE_TYPE = __send_packet(message, player_id, info)
 	
 	if result != Enums.PACKET_FAILURE_TYPE.NONE:
-		if result == Enums.PACKET_FAILURE_TYPE.ANTICHEAT:
-			push_error("!!! ANTICHEAT FAILED IN PREVIOUS PACKET. PACKET DROPPED. !!!")
-			return
-		
 		push_warning("Packet dropped with code [%s] ^^^^" % Enums.PACKET_FAILURE_TYPE.keys()[result])
 
 #endregion
@@ -163,9 +159,20 @@ func __send_packet(message: Enums.PACKET_TYPE, player_id: int, info: Dictionary)
 	])
 	
 	# Anticheat
-	if not _anticheat(message, actor_player, other_player, info):
+	var anticheat_message: Enums.ANTICHEAT_MESSAGE = _anticheat(message, actor_player, other_player, info)
+	
+	if anticheat_message != Enums.ANTICHEAT_MESSAGE.NONE:
+		match anticheat_message:
+			Enums.ANTICHEAT_MESSAGE.INVALID:
+				push_error("Previous packet was invalid. This was not determined to be cheating. Packet dropped.")
+			
+			Enums.ANTICHEAT_MESSAGE.CHEATING:
+				push_error("!!! ANTICHEAT TRIGGERED IN PREVIOUS PACKET DUE TO CHEATING. PACKET DROPPED. !!!")
+			
 		return Enums.PACKET_FAILURE_TYPE.ANTICHEAT
 	
+	
+	# Actually handle the packet
 	match message:
 		# Summon
 		Enums.PACKET_TYPE.SUMMON:
@@ -191,20 +198,48 @@ func __send_packet(message: Enums.PACKET_TYPE, player_id: int, info: Dictionary)
 	return Enums.PACKET_FAILURE_TYPE.NONE
 
 
-func _anticheat(message: Enums.PACKET_TYPE, actor_player: Player, other_player: Player, info: Dictionary) -> bool:
+func _anticheat(message: Enums.PACKET_TYPE, actor_player: Player, other_player: Player, info: Dictionary) -> Enums.ANTICHEAT_MESSAGE:
 	var sender_peer_id: int = multiplayer.get_remote_sender_id()
 	var sender_player: Player = players.get(sender_peer_id)
 	
 	# TODO: Figure out if this is a good idea
 	# Trust the server packets
 	#if sender_peer_id == 1:
-		#return true
+		#return Enums.ANTICHEAT_MESSAGE.NONE
 	
 	# TODO: More Anticheat
 	match message:
-		Enums.PACKET_TYPE.REVEAL:
+		# Add to hand
+		Enums.PACKET_TYPE.ADD_TO_HAND:
+			pass
+		
+		# Summon
+		Enums.PACKET_TYPE.SUMMON:
+			# The player who summons the card should be the same player as the one who sent the packet
 			if sender_player != actor_player:
-				return false
+				return Enums.ANTICHEAT_MESSAGE.CHEATING
+			
+			var hand_index: int = info.hand_index
+			var board_index: int = info.board_index
+			
+			var card: Card = Game.get_card_from_index(sender_player, Enums.LOCATION.HAND, hand_index)
+			# Card doesn't exist
+			if not card:
+				return Enums.ANTICHEAT_MESSAGE.INVALID
+			
+			# Card not in the player's hand
+			if card.location != Enums.LOCATION.HAND:
+				return Enums.ANTICHEAT_MESSAGE.CHEATING
+			
+			# Not enough space
+			if actor_player.board.size() >= Game.MAX_BOARD_SPACE:
+				return Enums.ANTICHEAT_MESSAGE.INVALID
+		
+		# Reveal
+		Enums.PACKET_TYPE.REVEAL:
+			# The player whose card gets revealed should be the same player as the one who sent the packet
+			if sender_player != actor_player:
+				return Enums.ANTICHEAT_MESSAGE.CHEATING
 	
-	return true
+	return Enums.ANTICHEAT_MESSAGE.NONE
 #endregion
