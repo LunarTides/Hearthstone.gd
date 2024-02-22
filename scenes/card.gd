@@ -144,7 +144,7 @@ func _layout_hand() -> void:
 	# TODO: Dont hardcode this
 	var player_weight: int = 1 if card.player == Game.player else -1
 	
-	var half_hand_size: int = Game.MAX_HAND_SIZE / 2
+	var half_hand_size: int = Game.max_hand_size / 2
 	
 	# TODO: If fewer cards, be middle (real)
 	position.x = -Game.CARD_BOUNDS_X + (card.index * Game.CARD_DISTANCE_X)

@@ -14,16 +14,18 @@ func _ready() -> void:
 
 
 func host() -> void:
+	Multiplayer.load_config()
+	
 	print("Waiting for a client to connect...")
 	
 	var peer: ENetMultiplayerPeer = ENetMultiplayerPeer.new()
-	peer.create_server(Multiplayer.PORT, Multiplayer.MAX_CLIENTS)
+	peer.create_server(Multiplayer.port, Multiplayer.max_clients)
 	multiplayer.multiplayer_peer = peer
 
 
 func _on_join_button_pressed() -> void:
 	var peer: ENetMultiplayerPeer = ENetMultiplayerPeer.new()
-	peer.create_client(ip_address.text if ip_address.text else "localhost", Multiplayer.PORT)
+	peer.create_client(ip_address.text if ip_address.text else "localhost", Multiplayer.port)
 	multiplayer.multiplayer_peer = peer
 	
 	multiplayer.connected_to_server.connect(func() -> void:

@@ -19,11 +19,6 @@ const CARD_BOUNDS_Y: float = -0.5
 const CARD_BOUNDS_Z: float = 13
 const CARD_BOUNDS_ROTATION_Y: float = 21.2
 const CARD_DISTANCE_X: float = 1.81
-
-const MAX_BOARD_SPACE: int = 7
-const MAX_HAND_SIZE: int = 10
-
-const MAX_PLAYERS: int = 2
 #endregion
 
 
@@ -71,6 +66,13 @@ var is_player_1: bool:
 var is_player_2: bool:
 	get:
 		return player.id == 1
+
+# Config
+var max_board_space: int = 7
+var max_hand_size: int = 10
+
+var max_players: int = 2
+# ------
 
 ## Returns the board node
 var board_node: BoardNode:
@@ -153,7 +155,7 @@ func start_game() -> void:
 	if not multiplayer.is_server():
 		return
 	
-	var id: int = randi_range(0, MAX_PLAYERS - 1)
+	var id: int = randi_range(0, max_players - 1)
 	
 	var i: int = 0
 	for peer: int in multiplayer.get_peers():
