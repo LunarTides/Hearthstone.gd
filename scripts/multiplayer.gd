@@ -25,6 +25,8 @@ var max_clients: int = 2
 ## -1: Max anticheat.[/code]
 var anticheat_level: int = -1
 
+var anticheat_conseqence: Enums.ANTICHEAT_CONSEQUENCE = Enums.ANTICHEAT_CONSEQUENCE.DROP_PACKET
+
 ## The players of the game. ONLY ASSIGNED SERVER-SIDE.[br][br]
 ## Looks like this:
 ## [code]{2732163217: Player, 432769823: Player}[/code]
@@ -104,6 +106,7 @@ func load_config() -> void:
 	
 	port = config.get_value("Server", "port", port)
 	anticheat_level = config.get_value("Server", "anticheat_level", anticheat_level)
+	anticheat_conseqence = config.get_value("Server", "anticheat_consequence", anticheat_conseqence)
 	
 	Game.max_board_space = config.get_value("Game", "max_board_space", Game.max_board_space)
 	Game.max_hand_size = config.get_value("Game", "max_hand_size", Game.max_hand_size)
@@ -115,6 +118,7 @@ func save_config() -> void:
 	var config: ConfigFile = ConfigFile.new()
 	config.set_value("Server", "port", port)
 	config.set_value("Server", "anticheat_level", anticheat_level)
+	config.set_value("Server", "anticheat_consequence", anticheat_conseqence)
 	
 	config.set_value("Game", "max_board_space", Game.max_board_space)
 	config.set_value("Game", "max_hand_size", Game.max_hand_size)
@@ -286,7 +290,17 @@ func __send_packet(packet_type: Enums.PACKET_TYPE, player_id: int, info: Array) 
 	
 	# Anticheat
 	if not _anticheat(packet_type, actor_player, other_player, info):
-		push_error("!!! ANTICHEAT TRIGGERED IN PREVIOUS PACKET. PACKET DROPPED. !!!")
+		var consequence_text: String
+		
+		match anticheat_conseqence:
+			Enums.ANTICHEAT_CONSEQUENCE.DROP_PACKET:
+				consequence_text = "PACKET DROPPED"
+			
+			Enums.ANTICHEAT_CONSEQUENCE.KICK:
+				consequence_text = "PLAYER KICKED"
+				multiplayer.multiplayer_peer.disconnect_peer(sender_peer_id)
+		
+		push_error("!!! ANTICHEAT TRIGGERED IN PREVIOUS PACKET. %s. !!!" % consequence_text)
 		return Enums.PACKET_FAILURE_TYPE.ANTICHEAT
 	
 	

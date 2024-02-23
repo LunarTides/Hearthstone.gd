@@ -152,6 +152,12 @@ enum PACKET_FAILURE_TYPE {
 	ANTICHEAT,
 }
 
+enum ANTICHEAT_CONSEQUENCE {
+	DROP_PACKET,
+	KICK,
+	#BAN, # Banning requires getting an ip address from an rpc function, which afaik is impossible.
+}
+
 enum NULLABLE_BOOL {
 	FALSE,
 	TRUE,
