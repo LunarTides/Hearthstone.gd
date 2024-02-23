@@ -251,14 +251,25 @@ func _on_mouse_exited() -> void:
 
 
 func _input(event: InputEvent) -> void:
-	if is_dragging:
-		# Release lmb
-		if event is InputEventMouseButton:
-			if event.is_released():
-				is_dragging = false
-				var pos: Vector3 = position
-				position = _old_position
-				released.emit(pos)
+	if not is_dragging:
+		return
+	
+	# Release lmb
+	if not event is InputEventMouseButton:
+		return
+	
+	if not event.is_released():
+		return
+	
+	if not event.button_index == MOUSE_BUTTON_LEFT and not event.button_index == MOUSE_BUTTON_RIGHT:
+		return
+	
+	is_dragging = false
+	var pos: Vector3 = position
+	position = _old_position
+	
+	if event.button_index == MOUSE_BUTTON_LEFT:
+		released.emit(pos)
 
 
 func _on_input_event(_camera: Node, event: InputEvent, position: Vector3, _normal: Vector3, _shape_idx: int) -> void:
