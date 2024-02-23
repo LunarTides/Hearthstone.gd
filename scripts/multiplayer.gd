@@ -77,7 +77,8 @@ func load_config() -> void:
 		push_warning("No config found. Creating one...")
 		
 		save_config()
-		config.load(CONFIG_FILE_PATH)
+	
+	config.load(CONFIG_FILE_PATH)
 	
 	port = config.get_value("Server", "port", port)
 	anticheat_level = config.get_value("Server", "anticheat_level", anticheat_level)
@@ -115,6 +116,26 @@ func assign_player(id: int) -> void:
 @rpc("authority", "call_remote", "reliable")
 func change_scene_to_file(file: StringName) -> void:
 	get_tree().change_scene_to_file(file)
+
+
+## Sends the server config options to the client.
+@rpc("authority", "call_remote", "reliable")
+func send_config(new_port: int, new_anticheat_level: int, new_max_board_space: int, new_max_hand_size: int) -> void:
+	if multiplayer.is_server():
+		return
+	
+	port = new_port
+	anticheat_level = new_anticheat_level
+	
+	Game.max_board_space = new_max_board_space
+	Game.max_hand_size = new_max_hand_size
+	
+	print("Config loaded:\n'''\n[Server]\nport=%d\nanticheat_level=%d\n\n[Game]\nmax_board_space=%d\nmax_hand_size=%d\n'''\n" % [
+		port,
+		anticheat_level,
+		Game.max_board_space,
+		Game.max_hand_size,
+	])
 
 
 ## Spawns in a card. THIS HAS TO BE CALLED SERVER SIDE. USE [method msg] FOR CLIENT SIDE.

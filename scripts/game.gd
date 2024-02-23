@@ -182,6 +182,14 @@ func start_game() -> void:
 		
 		i += 1
 	
+	print("Sending config...")
+	Multiplayer.send_config.rpc(
+		Multiplayer.port,
+		Multiplayer.anticheat_level,
+		Game.max_board_space,
+		Game.max_hand_size,
+	)
+	
 	print("Changing to game scene...")
 	Multiplayer.change_scene_to_file.rpc("res://scenes/game.tscn")
 	
