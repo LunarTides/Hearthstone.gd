@@ -138,11 +138,7 @@ func trigger_ability(ability: Enums.ABILITY) -> bool:
 	if not abilities.has(ability):
 		return false
 	
-	Game.send_packet(Enums.PACKET_TYPE.TRIGGER_ABILITY, player.id, {
-		"location": location,
-		"location_index": index,
-		"ability": ability,
-	})
+	Game.send_packet(Enums.PACKET_TYPE.TRIGGER_ABILITY, player.id, [location, index, ability])
 	
 	return true
 

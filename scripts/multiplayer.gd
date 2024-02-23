@@ -65,7 +65,7 @@ func _ready() -> void:
 #region Public Functions
 ## Sends a packet to the server that will be sent to all the clients.[br]
 ## This is used to sync every action.
-func send_packet(message: Enums.PACKET_TYPE, player_id: int, info: Dictionary, suppress_warning: bool = false) -> void:
+func send_packet(message: Enums.PACKET_TYPE, player_id: int, info: Array, suppress_warning: bool = false) -> void:
 	if multiplayer.is_server() and not suppress_warning:
 		push_warning("A packet is being sent from the server. These packets bypass the anticheat. Be careful.")
 	
@@ -141,7 +141,7 @@ func send_config(new_port: int, new_anticheat_level: int, new_max_board_space: i
 	])
 
 
-## Spawns in a card. THIS HAS TO BE CALLED SERVER SIDE. USE [method msg] FOR CLIENT SIDE.
+## Spawns in a card. THIS HAS TO BE CALLED SERVER SIDE. USE [method send_packet] FOR CLIENT SIDE.
 @rpc("authority", "call_local", "reliable")
 func spawn_card(blueprint_path: String, player_id: int, location: Enums.LOCATION, index: int) -> void:
 	var card: Card = Card.new()
@@ -161,11 +161,11 @@ func spawn_card(blueprint_path: String, player_id: int, location: Enums.LOCATION
 	Game.layout_cards(card.player)
 
 
-# Summons a card as requested by the server. THIS HAS TO BE CALLED SERVER SIDE. USE [method msg] FOR CLIENT SIDE.
+# Summons a card as requested by the server. THIS HAS TO BE CALLED SERVER SIDE. USE [method send_packet] FOR CLIENT SIDE.
 @rpc("authority", "call_local", "reliable")
 func _accept_summon_card(player_id: int, location: Enums.LOCATION, location_index: int, board_index: int) -> void:
 	var player: Player = Game.get_player_from_id(player_id)
-	var card: Card = player.hand[location_index]
+	var card: Card = Game.get_card_from_index(player, location, location_index)
 	
 	card.location = Enums.LOCATION.BOARD
 	card.add_to_location(board_index)
@@ -173,7 +173,7 @@ func _accept_summon_card(player_id: int, location: Enums.LOCATION, location_inde
 	Game.layout_cards(player)
 
 
-# Reveals a card for the player at the specified [param index] in the [param location]. THIS HAS TO BE CALLED SERVER SIDE. USE [method msg] FOR CLIENT SIDE.
+# Reveals a card for the player at the specified [param index] in the [param location]. THIS HAS TO BE CALLED SERVER SIDE. USE [method send_packet] FOR CLIENT SIDE.
 @rpc("authority", "call_local", "reliable")
 func _accept_reveal(player_id: int, location: Enums.LOCATION, location_index: int) -> void:
 	var player: Player = Game.get_player_from_id(player_id)
@@ -192,7 +192,7 @@ func _accept_trigger_ability(player_id: int, location: Enums.LOCATION, location_
 
 
 @rpc("any_peer", "call_local", "reliable")
-func _send_packet(packet_type: Enums.PACKET_TYPE, player_id: int, info: Dictionary) -> void:
+func _send_packet(packet_type: Enums.PACKET_TYPE, player_id: int, info: Array) -> void:
 	var result: Enums.PACKET_FAILURE_TYPE = __send_packet(packet_type, player_id, info)
 	
 	if result != Enums.PACKET_FAILURE_TYPE.NONE:
@@ -202,7 +202,7 @@ func _send_packet(packet_type: Enums.PACKET_TYPE, player_id: int, info: Dictiona
 
 
 #region Private Functions
-func __send_packet(packet_type: Enums.PACKET_TYPE, player_id: int, info: Dictionary) -> Enums.PACKET_FAILURE_TYPE:
+func __send_packet(packet_type: Enums.PACKET_TYPE, player_id: int, info: Array) -> Enums.PACKET_FAILURE_TYPE:
 	if not multiplayer.is_server():
 		return Enums.PACKET_FAILURE_TYPE.IS_CLIENT
 	
@@ -243,31 +243,31 @@ func __send_packet(packet_type: Enums.PACKET_TYPE, player_id: int, info: Diction
 	match packet_type:
 		# Summon
 		Enums.PACKET_TYPE.SUMMON:
-			var location: Enums.LOCATION = info.location
-			var location_index: int = info.location_index
-			var board_index: int = info.board_index
+			var location: Enums.LOCATION = info[0]
+			var location_index: int = info[1]
+			var board_index: int = info[2]
 			
 			_accept_summon_card.rpc(player_id, location, location_index, board_index)
 		
 		# Add to hand
 		Enums.PACKET_TYPE.ADD_TO_HAND:
-			var blueprint_path: String = info.blueprint_path
-			var index: int = info.index
+			var blueprint_path: String = info[0]
+			var hand_index: int = info[1]
 			
-			spawn_card.rpc(blueprint_path, player_id, Enums.LOCATION.HAND, index)
+			spawn_card.rpc(blueprint_path, player_id, Enums.LOCATION.HAND, hand_index)
 		
 		# Reveal
 		Enums.PACKET_TYPE.REVEAL:
-			var location: Enums.LOCATION = info.location
-			var location_index: int = info.location_index
+			var location: Enums.LOCATION = info[0]
+			var location_index: int = info[1]
 			
 			_accept_reveal.rpc(player_id, location, location_index)
 		
 		# Trigger ability
 		Enums.PACKET_TYPE.TRIGGER_ABILITY:
-			var location: Enums.LOCATION = info.location
-			var location_index: int = info.location_index
-			var ability: Enums.ABILITY = info.ability
+			var location: Enums.LOCATION = info[0]
+			var location_index: int = info[1]
+			var ability: Enums.ABILITY = info[2]
 			
 			_accept_trigger_ability.rpc(player_id, location, location_index, ability)
 		
@@ -282,7 +282,7 @@ func __send_packet(packet_type: Enums.PACKET_TYPE, player_id: int, info: Diction
 	return Enums.PACKET_FAILURE_TYPE.NONE
 
 
-func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, other_player: Player, info: Dictionary) -> Enums.ANTICHEAT_MESSAGE:
+func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, other_player: Player, info: Array) -> Enums.ANTICHEAT_MESSAGE:
 	if anticheat_level < 0:
 		anticheat_level = 10000
 	elif anticheat_level == 0:
@@ -300,8 +300,8 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, other_play
 	match packet_type:
 		# Add to hand
 		Enums.PACKET_TYPE.ADD_TO_HAND:
-			var blueprint_path: String = info.blueprint_path
-			var index: int = info.index
+			var blueprint_path: String = info[0]
+			var index: int = info[1]
 			
 			# Blueprint path needs to be valid.
 			if _anticheat_condition(load(blueprint_path) == null, 1):
@@ -317,9 +317,9 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, other_play
 		
 		# Summon
 		Enums.PACKET_TYPE.SUMMON:
-			var location: Enums.LOCATION = info.location
-			var location_index: int = info.location_index
-			var board_index: int = info.board_index
+			var location: Enums.LOCATION = info[0]
+			var location_index: int = info[1]
+			var board_index: int = info[2]
 			
 			var card: Card = Game.get_card_from_index(sender_player, location, location_index)
 			
@@ -341,8 +341,8 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, other_play
 		
 		# Reveal
 		Enums.PACKET_TYPE.REVEAL:
-			var location: Enums.LOCATION = info.location
-			var index: int = info.location_index
+			var location: Enums.LOCATION = info[0]
+			var index: int = info[1]
 			
 			# The player whose card gets revealed should be the same player as the one who sent the packet
 			if _anticheat_condition(sender_player != actor_player, 2):
@@ -350,9 +350,9 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, other_play
 		
 		# Trigger ability
 		Enums.PACKET_TYPE.TRIGGER_ABILITY:
-			var location: Enums.LOCATION = info.location
-			var location_index: int = info.location_index
-			var ability: Enums.ABILITY = info.ability
+			var location: Enums.LOCATION = info[0]
+			var location_index: int = info[1]
+			var ability: Enums.ABILITY = info[2]
 			
 			var card: Card = Game.get_card_from_index(actor_player, location, location_index)
 			

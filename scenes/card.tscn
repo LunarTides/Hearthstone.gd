@@ -29,7 +29,6 @@ tribe_label = NodePath("TribeLabel")
 spell_school_label = NodePath("SpellSchoolLabel")
 
 [node name="Mesh" parent="." instance=ExtResource("5_p2mm2")]
-script = null
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("BoxShape3D_vsdkf")

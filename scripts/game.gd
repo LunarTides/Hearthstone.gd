@@ -106,7 +106,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		
 		var card: Card = cards.pick_random()
 		
-		send_packet(Enums.PACKET_TYPE.REVEAL, player.id, {"location": card.location, "location_index": card.index})
+		send_packet(Enums.PACKET_TYPE.REVEAL, player.id, [card.location, card.index])
 	
 	# F3 reveals an enemy card. This should trigger the anticheat and drop the packet.
 	elif key == "F3":
@@ -116,7 +116,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		
 		var card: Card = cards.pick_random()
 		
-		send_packet(Enums.PACKET_TYPE.REVEAL, opponent.id, {"location": card.location, "location_index": card.index})
+		send_packet(Enums.PACKET_TYPE.REVEAL, opponent.id, [card.location, card.index])
 #endregion
 
 
@@ -282,7 +282,7 @@ func exit_to_main_menu() -> void:
 
 ## Sends a packet to the server that will be sent to all the clients.[br]
 ## This is used to sync every action.
-func send_packet(message: Enums.PACKET_TYPE, player_id: int, info: Dictionary, suppress_warning: bool = false) -> void:
+func send_packet(message: Enums.PACKET_TYPE, player_id: int, info: Array, suppress_warning: bool = false) -> void:
 	Multiplayer.send_packet(message, player_id, info, suppress_warning)
 #endregion
 
