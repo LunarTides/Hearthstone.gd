@@ -31,6 +31,10 @@ var opponent: Player:
 
 
 #region Public Functions
+func play_card(card: Card, board_index: int) -> void:
+	Game.send_packet(Enums.PACKET_TYPE.PLAY, id, [card.location, card.index, board_index], true)
+
+
 func summon_card(card: Card, board_index: int) -> void:
 	if board.size() >= Game.max_board_space:
 		return

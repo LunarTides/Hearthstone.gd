@@ -112,12 +112,17 @@ func update_blueprint() -> void:
 			self[prop.name] = blueprint[prop.name]
 
 
-## Add the card to the correct [param index] in it's [member location].
-func add_to_location(index: int) -> void:
+func remove_from_location() -> void:
 	player.hand.erase(self)
 	player.deck.erase(self)
 	player.board.erase(self)
 	player.graveyard.erase(self)
+
+
+## Add the card to the correct [param index] in it's [member location].
+func add_to_location(index: int) -> void:
+	# TODO: Evaluate if this should happen here.
+	remove_from_location()
 	
 	match location:
 		Enums.LOCATION.HAND:

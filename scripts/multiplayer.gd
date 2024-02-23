@@ -196,6 +196,31 @@ func _accept_summon_packet(player_id: int, info: Array) -> void:
 	Game.layout_cards(player)
 
 
+# Summons a card as requested by the server. THIS HAS TO BE CALLED SERVER SIDE. USE [method send_packet] FOR CLIENT SIDE.
+@rpc("authority", "call_local", "reliable")
+func _accept_play_packet(player_id: int, info: Array) -> void:
+	var location: Enums.LOCATION = info[0]
+	var location_index: int = info[1]
+	var board_index: int = info[2]
+	
+	var player: Player = Game.get_player_from_id(player_id)
+	var card: Card = Game.get_card_from_index(player, location, location_index)
+	
+	if not is_server:
+		card.location = Enums.LOCATION.NONE
+		return
+	
+	if card.types.has(Enums.TYPE.MINION):
+		player.summon_card(card, board_index)
+		
+		card.trigger_ability(Enums.ABILITY.BATTLECRY)
+	
+	if card.types.has(Enums.TYPE.SPELL):
+		card.trigger_ability(Enums.ABILITY.CAST)
+		
+		card.location = Enums.LOCATION.NONE
+
+
 # Creates a card from a blueprint and adds it to the player's hand. THIS HAS TO BE CALLED SERVER SIDE. USE [method send_packet] FOR CLIENT SIDE.
 @rpc("authority", "call_local", "reliable")
 func _accept_add_to_hand_packet(player_id: int, info: Array) -> void:
@@ -350,6 +375,36 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, other_play
 			# The card should be in the player's hand.
 			if _anticheat_condition(card.location != Enums.LOCATION.HAND, 3):
 				return Enums.ANTICHEAT_MESSAGE.CHEATING
+			
+			# Check if the card is queued to be summoned.
+			if _anticheat_condition(_in_packet_history([location, location_index, board_index], 2, true), 3):
+				return Enums.ANTICHEAT_MESSAGE.CHEATING
+		
+		# Play
+		Enums.PACKET_TYPE.PLAY:
+			var location: Enums.LOCATION = info[0]
+			var location_index: int = info[1]
+			var board_index: int = info[2]
+			
+			var card: Card = Game.get_card_from_index(sender_player, location, location_index)
+			
+			# The card should exist.
+			if _anticheat_condition(not card, 1):
+				return Enums.ANTICHEAT_MESSAGE.INVALID
+			
+			# The player who summons the card should be the same player as the one who sent the packet.
+			if _anticheat_condition(sender_player != actor_player, 2):
+				return Enums.ANTICHEAT_MESSAGE.CHEATING
+			
+			# The card should be in the player's hand.
+			if _anticheat_condition(card.location != Enums.LOCATION.HAND, 3):
+				return Enums.ANTICHEAT_MESSAGE.CHEATING
+			
+			# Minion
+			if card.types.has(Enums.TYPE.MINION):
+				# The player should have enough space on their board.
+				if _anticheat_condition(actor_player.board.size() >= Game.max_board_space, 1):
+					return Enums.ANTICHEAT_MESSAGE.INVALID
 		
 		# Reveal
 		Enums.PACKET_TYPE.REVEAL:
@@ -374,6 +429,10 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, other_play
 			
 			# The player who sent the packet should own the card.
 			if _anticheat_condition(sender_player != actor_player, 2):
+				return Enums.ANTICHEAT_MESSAGE.CHEATING
+			
+			# Check if the card has already been triggered.
+			if _anticheat_condition(_in_packet_history([location, location_index, ability], 3, true), 3):
 				return Enums.ANTICHEAT_MESSAGE.CHEATING
 		
 		_:

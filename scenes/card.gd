@@ -112,6 +112,12 @@ func _process(_delta: float) -> void:
 
 #region Private Functions
 func _update() -> void:
+	if card.location == Enums.LOCATION.NONE:
+		card.remove_from_location()
+		Game.layout_cards(card.player)
+		queue_free()
+		return
+	
 	# TODO: Remove.
 	# For debugging, the cost text is equal to the card's index in it's hand.
 	if card.location == Enums.LOCATION.HAND:
@@ -168,12 +174,18 @@ func layout() -> void:
 	rotation = Vector3.ZERO
 	scale = Vector3.ONE
 	
-	if card.location == Enums.LOCATION.HAND:
-		_layout_hand()
-	elif card.location == Enums.LOCATION.BOARD:
-		_layout_board()
-	else:
-		assert(false, "Can't layout the card in this location.")
+	match card.location:
+		Enums.LOCATION.HAND:
+			_layout_hand()
+		
+		Enums.LOCATION.BOARD:
+			_layout_board()
+		
+		Enums.LOCATION.NONE:
+			pass
+		
+		_:
+			assert(false, "Can't layout the card in this location.")
 	
 	_old_position = position
 	_old_rotation = rotation
