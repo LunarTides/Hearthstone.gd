@@ -23,6 +23,10 @@ var board: Array[Card]
 
 ## The player's graveyard.
 var graveyard: Array[Card]
+
+var opponent: Player:
+	get:
+		return Game.get_player_from_id(1 - id)
 #endregion
 
 

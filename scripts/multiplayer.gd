@@ -29,6 +29,10 @@ var anticheat_level: int = -1
 ## Looks like this:
 ## [code]{2732163217: Player, 432769823: Player}[/code]
 var players: Dictionary = {}
+
+var is_server: bool:
+	get:
+		return multiplayer.is_server()
 #endregion
 
 

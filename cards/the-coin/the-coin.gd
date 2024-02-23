@@ -20,4 +20,12 @@ func _ready(player: Player, card: Card) -> void:
 
 
 func cast(player: Player, card: Card) -> void:
-	push_warning("Test warning, please ignore.")
+	# Reveal a random enemy card.
+	if Multiplayer.is_server:
+		var random_cards: Array[Card] = Game.get_cards_for_player(player.opponent).filter(func(card: Card) -> bool: return card.override_is_hidden == Enums.NULLABLE_BOOL.NULL)
+		if random_cards.size() <= 0:
+			return
+		
+		var random_card: Card = random_cards.pick_random()
+		
+		Game.send_packet(Enums.PACKET_TYPE.REVEAL, player.opponent.id, [random_card.location, random_card.index], true)
