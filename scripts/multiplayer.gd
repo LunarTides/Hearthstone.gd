@@ -30,6 +30,8 @@ var anticheat_level: int = -1
 ## [code]{2732163217: Player, 432769823: Player}[/code]
 var players: Dictionary = {}
 
+var packet_history: Array[Array] = []
+
 var is_server: bool:
 	get:
 		return multiplayer.is_server()
@@ -67,9 +69,22 @@ func _ready() -> void:
 
 
 #region Public Functions
+func get_readable_packet(sender_peer_id: int, packet_type: Enums.PACKET_TYPE, player_id: int, info: Array) -> String:
+	var packet_name: String = Enums.PACKET_TYPE.keys()[packet_type]
+	
+	return "[Packet]: %s (Player: %d): [%s] %s" % [
+		"Server" if sender_peer_id == 1 else str(sender_peer_id),
+		player_id,
+		packet_name,
+		info
+	]
+
+
 ## Sends a packet to the server that will be sent to all the clients.[br]
 ## This is used to sync every action.
 func send_packet(packet_type: Enums.PACKET_TYPE, player_id: int, info: Array, suppress_warning: bool = false) -> void:
+	print("Sending packet: " + get_readable_packet(multiplayer.get_unique_id(), packet_type, player_id, info))
+	
 	if multiplayer.is_server() and not suppress_warning:
 		push_warning("A packet is being sent from the server. These packets bypass the anticheat. Be careful.")
 	
@@ -242,13 +257,8 @@ func __send_packet(packet_type: Enums.PACKET_TYPE, player_id: int, info: Array) 
 	var actor_player: Player = players[sorted_player_keys[0]]
 	var other_player: Player = players[sorted_player_keys[1]]
 	
-	print("[Packet]: %s (Player: %d): [%s] %s" % [
-		"Server" if sender_peer_id == 1 else str(sender_peer_id),
-		player_id,
-		Enums.PACKET_TYPE.keys()[packet_type],
-		info
-	])
 	var packet_name: String = Enums.PACKET_TYPE.keys()[packet_type]
+	print(get_readable_packet(sender_peer_id, packet_type, player_id, info))
 	
 	# Anticheat
 	var anticheat_message: Enums.ANTICHEAT_MESSAGE = _anticheat(packet_type, actor_player, other_player, info)
@@ -278,6 +288,8 @@ func __send_packet(packet_type: Enums.PACKET_TYPE, player_id: int, info: Array) 
 	var method_name: String = "_accept_" + packet_name.to_lower() + "_packet"
 	assert(self[method_name], method_name + " doesn't exist.")
 	self[method_name].rpc(player_id, info)
+	
+	packet_history.append([sender_peer_id, player_id, info])
 	
 	return Enums.PACKET_FAILURE_TYPE.NONE
 
@@ -373,4 +385,13 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, other_play
 ## Returns if [param condition] is true and [member anticheat_level] is more or equal to [param min_anticheat_level].
 func _anticheat_condition(condition: bool, min_anticheat_level: int) -> bool:
 	return condition and anticheat_level >= min_anticheat_level
+
+
+func _in_packet_history(info: Array, range: int, only_use_server_packets: bool = false) -> bool:
+	for i: int in range:
+		var history: Array = packet_history[-(i + 1)]
+		if history[2] == info and (only_use_server_packets || history[1] == 1):
+			return true
+	
+	return false
 #endregion
