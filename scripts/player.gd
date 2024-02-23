@@ -46,7 +46,7 @@ func summon_card(card: Card, board_index: int) -> void:
 
 
 func add_to_hand(card: Card, hand_index: int) -> void:
-	if hand.size() >= Game.max_players:
+	if hand.size() >= Game.max_hand_size:
 		return
 	
 	Game.send_packet(Enums.PACKET_TYPE.ADD_TO_HAND, id, [card.blueprint.resource_path, hand_index], true)
