@@ -282,8 +282,8 @@ func exit_to_main_menu() -> void:
 
 ## Sends a packet to the server that will be sent to all the clients.[br]
 ## This is used to sync every action.
-func send_packet(message: Enums.PACKET_TYPE, player_id: int, info: Dictionary) -> void:
-	Multiplayer.send_packet(message, player_id, info)
+func send_packet(message: Enums.PACKET_TYPE, player_id: int, info: Dictionary, suppress_warning: bool = false) -> void:
+	Multiplayer.send_packet(message, player_id, info, suppress_warning)
 #endregion
 
 

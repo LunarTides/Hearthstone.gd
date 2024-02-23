@@ -65,7 +65,10 @@ func _ready() -> void:
 #region Public Functions
 ## Sends a packet to the server that will be sent to all the clients.[br]
 ## This is used to sync every action.
-func send_packet(message: Enums.PACKET_TYPE, player_id: int, info: Dictionary) -> void:
+func send_packet(message: Enums.PACKET_TYPE, player_id: int, info: Dictionary, suppress_warning: bool = false) -> void:
+	if multiplayer.is_server() and not suppress_warning:
+		push_warning("A packet is being sent from the server. These packets bypass the anticheat. Be careful.")
+	
 	_send_packet.rpc_id(1, message, player_id, info)
 
 
@@ -287,6 +290,11 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, other_play
 	
 	var sender_peer_id: int = multiplayer.get_remote_sender_id()
 	var sender_player: Player = players.get(sender_peer_id)
+	
+	# Packets sent from the server should bypass the anitcheat.
+	if sender_peer_id == 1:
+		return Enums.ANTICHEAT_MESSAGE.NONE
+	
 	
 	# TODO: More Anticheat
 	match packet_type:
