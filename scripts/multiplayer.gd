@@ -261,7 +261,6 @@ func _send_packet(packet_type: Enums.PACKET_TYPE, player_id: int, info: Array) -
 	
 	if result != Enums.PACKET_FAILURE_TYPE.NONE:
 		push_warning("Packet dropped with code [%s] ^^^^" % Enums.PACKET_FAILURE_TYPE.keys()[result])
-
 #endregion
 
 
@@ -286,16 +285,8 @@ func __send_packet(packet_type: Enums.PACKET_TYPE, player_id: int, info: Array) 
 	print(get_readable_packet(sender_peer_id, packet_type, player_id, info))
 	
 	# Anticheat
-	var anticheat_message: Enums.ANTICHEAT_MESSAGE = _anticheat(packet_type, actor_player, other_player, info)
-	
-	if anticheat_message != Enums.ANTICHEAT_MESSAGE.NONE:
-		match anticheat_message:
-			Enums.ANTICHEAT_MESSAGE.INVALID:
-				push_error("Previous packet was invalid. This was not determined to be cheating. Packet dropped.")
-			
-			Enums.ANTICHEAT_MESSAGE.CHEATING:
-				push_error("!!! ANTICHEAT TRIGGERED IN PREVIOUS PACKET DUE TO CHEATING. PACKET DROPPED. !!!")
-			
+	if not _anticheat(packet_type, actor_player, other_player, info):
+		push_error("!!! ANTICHEAT TRIGGERED IN PREVIOUS PACKET. PACKET DROPPED. !!!")
 		return Enums.PACKET_FAILURE_TYPE.ANTICHEAT
 	
 	
@@ -319,18 +310,18 @@ func __send_packet(packet_type: Enums.PACKET_TYPE, player_id: int, info: Array) 
 	return Enums.PACKET_FAILURE_TYPE.NONE
 
 
-func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, other_player: Player, info: Array) -> Enums.ANTICHEAT_MESSAGE:
+func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, other_player: Player, info: Array) -> bool:
 	if anticheat_level < 0:
 		anticheat_level = 10000
 	elif anticheat_level == 0:
-		return Enums.ANTICHEAT_MESSAGE.NONE
+		return true
 	
 	var sender_peer_id: int = multiplayer.get_remote_sender_id()
 	var sender_player: Player = players.get(sender_peer_id)
 	
 	# Packets sent from the server should bypass the anitcheat.
 	if sender_peer_id == 1:
-		return Enums.ANTICHEAT_MESSAGE.NONE
+		return true
 	
 	
 	# TODO: More Anticheat
@@ -341,16 +332,16 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, other_play
 			var index: int = info[1]
 			
 			# Blueprint path needs to be valid.
-			if _anticheat_condition(load(blueprint_path) == null, 1):
-				return Enums.ANTICHEAT_MESSAGE.INVALID
+			if _anticheat_check(load(blueprint_path) == null, 1):
+				return false
 			
 			# The player needs to have enough space in their hand.
-			if _anticheat_condition(actor_player.hand.size() >= Game.max_hand_size, 1):
-				return Enums.ANTICHEAT_MESSAGE.INVALID
+			if _anticheat_check(actor_player.hand.size() >= Game.max_hand_size, 1):
+				return false
 			
 			# Only the server can do this.
-			if _anticheat_condition(sender_peer_id != 1, 2):
-				return Enums.ANTICHEAT_MESSAGE.CHEATING
+			if _anticheat_check(sender_peer_id != 1, 2):
+				return false
 		
 		# Summon
 		Enums.PACKET_TYPE.SUMMON:
@@ -361,24 +352,24 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, other_play
 			var card: Card = Game.get_card_from_index(sender_player, location, location_index)
 			
 			# The card should exist.
-			if _anticheat_condition(not card, 1):
-				return Enums.ANTICHEAT_MESSAGE.INVALID
+			if _anticheat_check(not card, 1):
+				return false
 				
 			# The player should have enough space on their board.
-			if _anticheat_condition(actor_player.board.size() >= Game.max_board_space, 1):
-				return Enums.ANTICHEAT_MESSAGE.INVALID
+			if _anticheat_check(actor_player.board.size() >= Game.max_board_space, 1):
+				return false
 				
 			# The player who summons the card should be the same player as the one who sent the packet.
-			if _anticheat_condition(sender_player != actor_player, 2):
-				return Enums.ANTICHEAT_MESSAGE.CHEATING
+			if _anticheat_check(sender_player != actor_player, 2):
+				return false
 			
 			# The card should be in the player's hand.
-			if _anticheat_condition(card.location != Enums.LOCATION.HAND, 3):
-				return Enums.ANTICHEAT_MESSAGE.CHEATING
+			if _anticheat_check(card.location != Enums.LOCATION.HAND, 3):
+				return false
 			
 			# Check if the card is queued to be summoned.
-			if _anticheat_condition(_in_packet_history([location, location_index, board_index], 2, true), 3):
-				return Enums.ANTICHEAT_MESSAGE.CHEATING
+			if _anticheat_check(_in_packet_history([location, location_index, board_index], 2, true), 3):
+				return false
 		
 		# Play
 		Enums.PACKET_TYPE.PLAY:
@@ -389,22 +380,22 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, other_play
 			var card: Card = Game.get_card_from_index(sender_player, location, location_index)
 			
 			# The card should exist.
-			if _anticheat_condition(not card, 1):
-				return Enums.ANTICHEAT_MESSAGE.INVALID
+			if _anticheat_check(not card, 1):
+				return false
 			
 			# The player who summons the card should be the same player as the one who sent the packet.
-			if _anticheat_condition(sender_player != actor_player, 2):
-				return Enums.ANTICHEAT_MESSAGE.CHEATING
+			if _anticheat_check(sender_player != actor_player, 2):
+				return false
 			
 			# The card should be in the player's hand.
-			if _anticheat_condition(card.location != Enums.LOCATION.HAND, 3):
-				return Enums.ANTICHEAT_MESSAGE.CHEATING
+			if _anticheat_check(card.location != Enums.LOCATION.HAND, 3):
+				return false
 			
 			# Minion
 			if card.types.has(Enums.TYPE.MINION):
 				# The player should have enough space on their board.
-				if _anticheat_condition(actor_player.board.size() >= Game.max_board_space, 1):
-					return Enums.ANTICHEAT_MESSAGE.INVALID
+				if _anticheat_check(actor_player.board.size() >= Game.max_board_space, 1):
+					return Enums.ANTICHEAT_MESSAGE.CHEATING
 		
 		# Reveal
 		Enums.PACKET_TYPE.REVEAL:
@@ -412,8 +403,8 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, other_play
 			var index: int = info[1]
 			
 			# The player whose card gets revealed should be the same player as the one who sent the packet
-			if _anticheat_condition(sender_player != actor_player, 2):
-				return Enums.ANTICHEAT_MESSAGE.CHEATING
+			if _anticheat_check(sender_player != actor_player, 2):
+				return false
 		
 		# Trigger ability
 		Enums.PACKET_TYPE.TRIGGER_ABILITY:
@@ -424,25 +415,25 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, other_play
 			var card: Card = Game.get_card_from_index(actor_player, location, location_index)
 			
 			# The card should exist.
-			if _anticheat_condition(card == null, 1):
-				return Enums.ANTICHEAT_MESSAGE.INVALID
+			if _anticheat_check(card == null, 1):
+				return false
 			
 			# The player who sent the packet should own the card.
-			if _anticheat_condition(sender_player != actor_player, 2):
-				return Enums.ANTICHEAT_MESSAGE.CHEATING
+			if _anticheat_check(sender_player != actor_player, 2):
+				return false
 			
 			# Check if the card has already been triggered.
-			if _anticheat_condition(_in_packet_history([location, location_index, ability], 3, true), 3):
-				return Enums.ANTICHEAT_MESSAGE.CHEATING
+			if _anticheat_check(_in_packet_history([location, location_index, ability], 3, true), 3):
+				return false
 		
 		_:
 			assert(false, "No anticheat logic for '%s'" % Enums.PACKET_TYPE.keys()[packet_type])
 	
-	return Enums.ANTICHEAT_MESSAGE.NONE
+	return true
 
 
 ## Returns if [param condition] is true and [member anticheat_level] is more or equal to [param min_anticheat_level].
-func _anticheat_condition(condition: bool, min_anticheat_level: int) -> bool:
+func _anticheat_check(condition: bool, min_anticheat_level: int) -> bool:
 	return condition and anticheat_level >= min_anticheat_level
 
 

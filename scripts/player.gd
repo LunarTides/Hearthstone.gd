@@ -32,6 +32,9 @@ var opponent: Player:
 
 #region Public Functions
 func play_card(card: Card, board_index: int) -> void:
+	if card.types.has(Enums.TYPE.MINION) and board.size() >= Game.max_board_space:
+		return
+	
 	Game.send_packet(Enums.PACKET_TYPE.PLAY, id, [card.location, card.index, board_index], true)
 
 
@@ -43,5 +46,8 @@ func summon_card(card: Card, board_index: int) -> void:
 
 
 func add_to_hand(card: Card, hand_index: int) -> void:
+	if hand.size() >= Game.max_players:
+		return
+	
 	Game.send_packet(Enums.PACKET_TYPE.ADD_TO_HAND, id, [card.blueprint.resource_path, hand_index], true)
 #endregion
