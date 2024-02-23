@@ -38,6 +38,6 @@ func summon_card(card: Card, board_index: int) -> void:
 	Game.send_packet(Enums.PACKET_TYPE.SUMMON, id, [card.location, card.index, board_index], true)
 
 
-func add_to_hand(card: Card, index: int) -> void:
-	Game.send_packet(Enums.PACKET_TYPE.ADD_TO_HAND, id, [card.blueprint.resource_path, index], true)
+func add_to_hand(card: Card, hand_index: int) -> void:
+	Game.send_packet(Enums.PACKET_TYPE.ADD_TO_HAND, id, [card.blueprint.resource_path, hand_index], true)
 #endregion
