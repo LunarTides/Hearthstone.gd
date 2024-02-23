@@ -5,7 +5,7 @@
 [sub_resource type="LabelSettings" id="LabelSettings_s4xya"]
 font_size = 10
 
-[node name="Lobby" type="Control" node_paths=PackedStringArray("join_button", "host_button", "ip_address", "info_label", "console_tip")]
+[node name="Lobby" type="Control" node_paths=PackedStringArray("join_button", "host_button", "ip_address", "port", "info_label", "console_tip")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -16,6 +16,7 @@ script = ExtResource("1_u14ym")
 join_button = NodePath("Panel/JoinButton")
 host_button = NodePath("Panel/HostButton")
 ip_address = NodePath("Panel/IPAddress")
+port = NodePath("Panel/Port")
 info_label = NodePath("Panel/InfoLabel")
 console_tip = NodePath("Panel/ConsoleTip")
 
@@ -66,11 +67,24 @@ text = "Host"
 [node name="IPAddress" type="LineEdit" parent="Panel"]
 layout_mode = 0
 offset_left = 13.0
+offset_top = 54.0
+offset_right = 164.0
+offset_bottom = 89.0
+placeholder_text = "IP Address"
+max_length = 15
+expand_to_text_length = true
+virtual_keyboard_type = 3
+clear_button_enabled = true
+
+[node name="Port" type="LineEdit" parent="Panel"]
+layout_mode = 0
+offset_left = 13.0
 offset_top = 97.0
 offset_right = 164.0
 offset_bottom = 132.0
-placeholder_text = "IP Address"
-max_length = 15
+text = "4545"
+placeholder_text = "Port"
+max_length = 5
 expand_to_text_length = true
 virtual_keyboard_type = 3
 clear_button_enabled = true
@@ -113,3 +127,4 @@ horizontal_alignment = 1
 [connection signal="pressed" from="Panel/JoinButton" to="." method="_on_join_button_pressed"]
 [connection signal="pressed" from="Panel/HostButton" to="." method="_on_host_button_pressed"]
 [connection signal="text_submitted" from="Panel/IPAddress" to="." method="_on_ip_address_text_submitted"]
+[connection signal="text_submitted" from="Panel/Port" to="." method="_on_ip_address_text_submitted"]

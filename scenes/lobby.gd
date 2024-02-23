@@ -4,6 +4,7 @@ extends Control
 @export var join_button: Button
 @export var host_button: Button
 @export var ip_address: LineEdit
+@export var port: LineEdit
 @export var info_label: Label
 @export var console_tip: Label
 
@@ -25,13 +26,14 @@ func host() -> void:
 
 func _on_join_button_pressed() -> void:
 	var peer: ENetMultiplayerPeer = ENetMultiplayerPeer.new()
-	peer.create_client(ip_address.text if ip_address.text else "localhost", Multiplayer.port)
+	peer.create_client(ip_address.text if ip_address.text else "localhost", port.text.to_int() if port.text.is_valid_int() else 4545)
 	multiplayer.multiplayer_peer = peer
 	
 	multiplayer.connected_to_server.connect(func() -> void:
 		join_button.hide()
 		host_button.hide()
 		ip_address.hide()
+		port.hide()
 		
 		info_label.text = "Waiting for another player..."
 		info_label.show()
@@ -42,6 +44,7 @@ func _on_host_button_pressed() -> void:
 	join_button.hide()
 	host_button.hide()
 	ip_address.hide()
+	port.hide()
 	console_tip.show()
 	
 	info_label.text = "Please wait for a client to connect..."
