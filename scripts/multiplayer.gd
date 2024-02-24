@@ -34,6 +34,9 @@ var players: Dictionary = {}
 
 var packet_history: Array[Array] = []
 
+var peer: ENetMultiplayerPeer = ENetMultiplayerPeer.new()
+var ban_list: Array[String] = []
+
 var is_server: bool:
 	get:
 		return multiplayer.is_server()
@@ -43,19 +46,21 @@ var is_server: bool:
 #region Internal Functions
 func _ready() -> void:
 	multiplayer.server_disconnected.connect(func() -> void:
-		Game.exit_to_main_menu()
+		quit()
 	)
 	multiplayer.peer_disconnected.connect(func(_id: int) -> void:
-		if multiplayer.is_server():
-			Game.exit_to_main_menu()
-			
-			(await Game.wait_for_node("/root/Lobby")).host()
+		quit()
+	)
+	multiplayer.peer_connected.connect(func(id: int) -> void:
+		if not is_server:
 			return
 		
-		Game.exit_to_main_menu()
-	)
-	multiplayer.peer_connected.connect(func(_id: int) -> void:
-		if not multiplayer.is_server():
+		var ip_address: String = get_ip_address(id)
+		
+		if ip_address in ban_list:
+			# Kick
+			print("Banned player (%s) is trying to join. Kicking..." % ip_address)
+			kick(id, true)
 			return
 		
 		var clients: int = multiplayer.get_peers().size()
@@ -67,6 +72,11 @@ func _ready() -> void:
 		print("Client connected, starting game...")
 		Game.start_game()
 	)
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_CLOSE_REQUEST:
+		save_config()
 #endregion
 
 
@@ -87,13 +97,16 @@ func get_readable_packet(sender_peer_id: int, packet_type: Enums.PACKET_TYPE, pl
 func send_packet(packet_type: Enums.PACKET_TYPE, player_id: int, info: Array, suppress_warning: bool = false) -> void:
 	print("Sending packet: " + get_readable_packet(multiplayer.get_unique_id(), packet_type, player_id, info))
 	
-	if multiplayer.is_server() and not suppress_warning:
+	if is_server and not suppress_warning:
 		push_warning("A packet is being sent from the server. These packets bypass the anticheat. Be careful.")
 	
 	_send_packet.rpc_id(1, packet_type, player_id, info)
 
 
 func load_config() -> void:
+	if not is_server:
+		return
+	
 	print("Loading config at '%s'..." % CONFIG_FILE_PATH)
 	
 	var config: ConfigFile = ConfigFile.new()
@@ -107,6 +120,7 @@ func load_config() -> void:
 	port = config.get_value("Server", "port", port)
 	anticheat_level = config.get_value("Server", "anticheat_level", anticheat_level)
 	anticheat_conseqence = config.get_value("Server", "anticheat_consequence", anticheat_conseqence)
+	ban_list = config.get_value("Server", "ban_list", ban_list)
 	
 	Game.max_board_space = config.get_value("Game", "max_board_space", Game.max_board_space)
 	Game.max_hand_size = config.get_value("Game", "max_hand_size", Game.max_hand_size)
@@ -115,15 +129,35 @@ func load_config() -> void:
 
 
 func save_config() -> void:
+	if not is_server:
+		return
+	
 	var config: ConfigFile = ConfigFile.new()
 	config.set_value("Server", "port", port)
 	config.set_value("Server", "anticheat_level", anticheat_level)
 	config.set_value("Server", "anticheat_consequence", anticheat_conseqence)
+	config.set_value("Server", "ban_list", ban_list)
 	
 	config.set_value("Game", "max_board_space", Game.max_board_space)
 	config.set_value("Game", "max_hand_size", Game.max_hand_size)
 	
 	config.save(CONFIG_FILE_PATH)
+
+
+func get_ip_address(peer_id: int) -> String:
+	return peer.get_peer(peer_id).get_remote_address()
+
+
+func kick(peer_id: int, force: bool = false) -> void:
+	multiplayer.multiplayer_peer.disconnect_peer(peer_id, force)
+
+
+func quit() -> void:
+	save_config()
+	Game.exit_to_main_menu()
+	
+	if is_server:
+		(await Game.wait_for_node("/root/Lobby")).host()
 #endregion
 
 
@@ -146,12 +180,9 @@ func change_scene_to_file(file: StringName) -> void:
 
 ## Sends the server config options to the client.
 @rpc("authority", "call_remote", "reliable")
-func send_config(new_port: int, new_anticheat_level: int, new_max_board_space: int, new_max_hand_size: int) -> void:
-	if multiplayer.is_server():
+func send_config(new_max_board_space: int, new_max_hand_size: int) -> void:
+	if is_server:
 		return
-	
-	port = new_port
-	anticheat_level = new_anticheat_level
 	
 	Game.max_board_space = new_max_board_space
 	Game.max_hand_size = new_max_hand_size
@@ -176,7 +207,7 @@ func spawn_card(blueprint_path: String, player_id: int, location: Enums.LOCATION
 	var card_node: CardNode = CardScene.instantiate()
 	card_node.card = card
 	
-	if multiplayer.is_server():
+	if is_server:
 		add_child(card_node)
 		return
 	
@@ -270,7 +301,7 @@ func _send_packet(packet_type: Enums.PACKET_TYPE, player_id: int, info: Array) -
 
 #region Private Functions
 func __send_packet(packet_type: Enums.PACKET_TYPE, player_id: int, info: Array) -> Enums.PACKET_FAILURE_TYPE:
-	if not multiplayer.is_server():
+	if not is_server:
 		return Enums.PACKET_FAILURE_TYPE.IS_CLIENT
 	
 	var sender_peer_id: int = multiplayer.get_remote_sender_id()
@@ -298,7 +329,12 @@ func __send_packet(packet_type: Enums.PACKET_TYPE, player_id: int, info: Array) 
 			
 			Enums.ANTICHEAT_CONSEQUENCE.KICK:
 				consequence_text = "PLAYER KICKED"
-				multiplayer.multiplayer_peer.disconnect_peer(sender_peer_id)
+				kick(sender_peer_id)
+			
+			Enums.ANTICHEAT_CONSEQUENCE.BAN:
+				consequence_text = "PLAYER BANNED"
+				ban_list.append(get_ip_address(sender_peer_id))
+				kick(sender_peer_id)
 		
 		push_error("!!! ANTICHEAT TRIGGERED IN PREVIOUS PACKET. %s. !!!" % consequence_text)
 		return Enums.PACKET_FAILURE_TYPE.ANTICHEAT

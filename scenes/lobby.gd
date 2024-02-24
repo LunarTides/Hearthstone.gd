@@ -15,19 +15,28 @@ func _ready() -> void:
 
 
 func host() -> void:
+	join_button.hide()
+	host_button.hide()
+	ip_address.hide()
+	port.hide()
+	console_tip.show()
+	
+	info_label.text = "Please wait for a client to connect..."
+	info_label.show()
+	
 	Multiplayer.load_config()
 	
 	print("Waiting for a client to connect...")
 	
-	var peer: ENetMultiplayerPeer = ENetMultiplayerPeer.new()
-	peer.create_server(Multiplayer.port, Multiplayer.max_clients)
-	multiplayer.multiplayer_peer = peer
+	Multiplayer.peer.create_server(Multiplayer.port, Multiplayer.max_clients)
+	multiplayer.multiplayer_peer = Multiplayer.peer
+	
+	Game.game_started.connect(func() -> void: info_label.text = "A game is in progress.")
 
 
 func _on_join_button_pressed() -> void:
-	var peer: ENetMultiplayerPeer = ENetMultiplayerPeer.new()
-	peer.create_client(ip_address.text if ip_address.text else "localhost", port.text.to_int() if port.text.is_valid_int() else 4545)
-	multiplayer.multiplayer_peer = peer
+	Multiplayer.peer.create_client(ip_address.text if ip_address.text else "localhost", port.text.to_int() if port.text.is_valid_int() else 4545)
+	multiplayer.multiplayer_peer = Multiplayer.peer
 	
 	multiplayer.connected_to_server.connect(func() -> void:
 		join_button.hide()
@@ -41,17 +50,7 @@ func _on_join_button_pressed() -> void:
 
 
 func _on_host_button_pressed() -> void:
-	join_button.hide()
-	host_button.hide()
-	ip_address.hide()
-	port.hide()
-	console_tip.show()
-	
-	info_label.text = "Please wait for a client to connect..."
-	info_label.show()
 	host()
-	
-	Game.game_started.connect(func() -> void: info_label.text = "A game is in progress.")
 
 
 func _on_ip_address_text_submitted(_new_text: String) -> void:

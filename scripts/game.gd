@@ -184,8 +184,6 @@ func start_game() -> void:
 	
 	print("Sending config...")
 	Multiplayer.send_config.rpc(
-		Multiplayer.port,
-		Multiplayer.anticheat_level,
 		Game.max_board_space,
 		Game.max_hand_size,
 	)
