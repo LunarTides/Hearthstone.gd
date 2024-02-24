@@ -12,6 +12,8 @@ var name: String
 ## The player's id.
 var id: int
 
+var hero_class: Enums.CLASS
+
 ## The player's hand.
 var hand: Array[Card]
 
@@ -49,5 +51,21 @@ func add_to_hand(card: Card, hand_index: int) -> void:
 	if hand.size() >= Game.max_hand_size:
 		return
 	
-	Game.send_packet(Enums.PACKET_TYPE.ADD_TO_HAND, id, [card.blueprint.resource_path, hand_index], true)
+	Game.send_packet(Enums.PACKET_TYPE.CREATE_CARD, id, [
+		card.blueprint.resource_path,
+		Enums.LOCATION.HAND,
+		hand_index,
+	], true)
+
+
+func add_to_deck(card: Card, deck_index: int) -> void:
+	Game.send_packet(Enums.PACKET_TYPE.CREATE_CARD, id, [
+		card.blueprint.resource_path,
+		Enums.LOCATION.DECK,
+		deck_index,
+	], true)
+
+
+func draw_card(amount: int) -> void:
+	Game.send_packet(Enums.PACKET_TYPE.DRAW_CARDS, id, [amount], true)
 #endregion

@@ -39,6 +39,9 @@ var opposing_player: Player
 ## The player who starts first. ONLY ASSIGNED CLIENT SIDE.
 var player1: Player:
 	get:
+		if Multiplayer.is_server:
+			return _player1_server
+		
 		if not player:
 			return null
 		
@@ -47,16 +50,13 @@ var player1: Player:
 ## The player who starts with the coin. ONLY ASSIGNED CLIENT SIDE.
 var player2: Player:
 	get:
+		if Multiplayer.is_server:
+			return _player2_server
+		
 		if not player:
 			return null
 		
 		return player if player.id == 1 else opponent
-
-## The player who starts first. ONLY ASSIGNED SERVER SIDE.
-var player1_server: Player
-
-## The player who starts with the coin. ONLY ASSIGNED SERVER SIDE.
-var player2_server: Player
 
 ## If this client is [member player1].
 var is_player_1: bool:
@@ -79,6 +79,12 @@ var max_players: int = 2
 var board_node: BoardNode:
 	get:
 		return get_node("/root/Main/Board") as BoardNode
+#endregion
+
+
+#region Private Variables
+var _player1_server: Player
+var _player2_server: Player
 #endregion
 
 
@@ -125,9 +131,9 @@ func _unhandled_input(event: InputEvent) -> void:
 func get_player_from_id(id: int) -> Player:
 	if multiplayer.is_server():
 		if id == 0:
-			return player1_server
+			return _player1_server
 		else:
-			return player2_server
+			return _player2_server
 	
 	if id == 0:
 		return player1
@@ -172,9 +178,9 @@ func start_game() -> void:
 		Multiplayer.players[peer] = player
 		
 		if id == i:
-			player1_server = player
+			_player1_server = player
 		else:
-			player2_server = player
+			_player2_server = player
 		
 		Multiplayer.assign_player.rpc_id(peer, player_id)
 		
@@ -193,28 +199,13 @@ func start_game() -> void:
 	
 	game_started.emit()
 	
-	# TODO: Remove
-	# Spawn 10 cards for each player
-	var amount: int = 9
+	# Give the player the debug deck.
+	var deckcode: String = "1/30/1"
 	
-	for index: int in range(amount * 2):
-		var card_player: Player = Multiplayer.players.values()[0]
-		
-		if index >= amount:
-			index -= amount
-			card_player = Multiplayer.players.values()[1]
-		
-		var card: Card = Card.new()
-		card.blueprint = Sheep
-		card.player = card_player
-		
-		_place_card_in_hand(card, index)
+	Game.send_packet(Enums.PACKET_TYPE.START_GAME, 0, [deckcode, deckcode], true)
 	
-	var card: Card = Card.new()
-	card.blueprint = TheCoin
-	card.player = player2_server
-	
-	_place_card_in_hand(card, 1)
+	var card: Card = get_card_from_blueprint(TheCoin, player2)
+	player2.add_to_hand(card, player2.hand.size())
 
 
 ## Lays out all the cards for the specified player. Only works client side.
@@ -264,6 +255,46 @@ func get_all_card_nodes() -> Array[CardNode]:
 	return array
 
 
+func get_blueprint_from_id(id: int) -> Blueprint:
+	var files: Array[String] = get_all_files_from_path("res://cards")
+	
+	for file_path: String in files:
+		if not file_path.contains(".tres"):
+			continue
+		
+		var blueprint: Blueprint = load(file_path)
+		if blueprint.id == id:
+			return blueprint
+	
+	return null
+
+
+func get_card_from_blueprint(blueprint: Blueprint, player: Player) -> Card:
+	var card: Card = Card.new()
+	card.blueprint = blueprint
+	card.player = player
+	return card
+
+
+func get_all_files_from_path(path: String) -> Array[String]:  
+	var file_paths: Array[String] = []  
+	var dir: DirAccess = DirAccess.open(path)  
+	
+	dir.list_dir_begin()  
+	var file_name: String = dir.get_next()  
+
+	while file_name != "":  
+		var file_path: String = path + "/" + file_name  
+		if dir.current_is_dir():  
+			file_paths += get_all_files_from_path(file_path)  
+		else:  
+			file_paths.append(file_path)  
+		
+		file_name = dir.get_next()  
+	
+	return file_paths
+
+
 ## Waits for a node at the specified [param node_path] to exist before returning it.[br]
 ## Use [code]await[/code] on this.
 func wait_for_node(node_path: NodePath) -> Node:
@@ -282,20 +313,4 @@ func exit_to_main_menu() -> void:
 ## This is used to sync every action.
 func send_packet(message: Enums.PACKET_TYPE, player_id: int, info: Array, suppress_warning: bool = false) -> void:
 	Multiplayer.send_packet(message, player_id, info, suppress_warning)
-#endregion
-
-
-#region Private Functions
-func _place_card_in_hand(card: Card, index: int) -> CardNode:
-	card.location = Enums.LOCATION.HAND
-	
-	card.player.add_to_hand(card, index)
-	
-	var card_node: CardNode = CardScene.instantiate()
-	card_node.card = card
-	card_node.layout()
-	
-	layout_cards(card.player)
-	
-	return card_node
 #endregion

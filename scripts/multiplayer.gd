@@ -95,7 +95,9 @@ func get_readable_packet(sender_peer_id: int, packet_type: Enums.PACKET_TYPE, pl
 ## Sends a packet to the server that will be sent to all the clients.[br]
 ## This is used to sync every action.
 func send_packet(packet_type: Enums.PACKET_TYPE, player_id: int, info: Array, suppress_warning: bool = false) -> void:
-	print("Sending packet: " + get_readable_packet(multiplayer.get_unique_id(), packet_type, player_id, info))
+	# Only send the "Sending packet" message on non-debug builds since it spams the console with garbage.
+	if not OS.is_debug_build():
+		print("Sending packet: " + get_readable_packet(multiplayer.get_unique_id(), packet_type, player_id, info))
 	
 	if is_server and not suppress_warning:
 		push_warning("A packet is being sent from the server. These packets bypass the anticheat. Be careful.")
@@ -187,9 +189,7 @@ func send_config(new_max_board_space: int, new_max_hand_size: int) -> void:
 	Game.max_board_space = new_max_board_space
 	Game.max_hand_size = new_max_hand_size
 	
-	print("Config loaded:\n'''\n[Server]\nport=%d\nanticheat_level=%d\n\n[Game]\nmax_board_space=%d\nmax_hand_size=%d\n'''\n" % [
-		port,
-		anticheat_level,
+	print("Config loaded:\n'''\nmax_board_space=%d\nmax_hand_size=%d\n'''\n" % [
 		Game.max_board_space,
 		Game.max_hand_size,
 	])
@@ -213,6 +213,21 @@ func spawn_card(blueprint_path: String, player_id: int, location: Enums.LOCATION
 	
 	(await Game.wait_for_node("/root/Main")).add_child(card_node)
 	Game.layout_cards(card.player)
+
+
+@rpc("authority", "call_local", "reliable")
+func _accept_start_game_packet(player_id: int, info: Array) -> void:
+	var deckcodes: Array = info.slice(0, 2)
+	
+	for i: int in 2:
+		var player: Player = Game.get_player_from_id(i)
+		var deck: Dictionary = Deckcode.import(deckcodes[i], player)
+		
+		player.hero_class = deck.class
+		player.deck = deck.cards
+		
+		# Do this to not send a packet.
+		_accept_draw_cards_packet(i, [3 if player.id == 0 else 4], false)
 
 
 # Summons a card as requested by the server. THIS HAS TO BE CALLED SERVER SIDE. USE [method send_packet] FOR CLIENT SIDE.
@@ -256,13 +271,45 @@ func _accept_play_packet(player_id: int, info: Array) -> void:
 		card.location = Enums.LOCATION.NONE
 
 
-# Creates a card from a blueprint and adds it to the player's hand. THIS HAS TO BE CALLED SERVER SIDE. USE [method send_packet] FOR CLIENT SIDE.
 @rpc("authority", "call_local", "reliable")
-func _accept_add_to_hand_packet(player_id: int, info: Array) -> void:
+func _accept_create_card_packet(player_id: int, info: Array) -> void:
 	var blueprint_path: String = info[0]
-	var location_index: int = info[1]
+	var location: Enums.LOCATION = info[1]
+	var location_index: int = info[2]
 	
-	spawn_card(blueprint_path, player_id, Enums.LOCATION.HAND, location_index)
+	spawn_card(blueprint_path, player_id, location, location_index)
+
+
+@rpc("authority", "call_local", "reliable")
+func _accept_draw_cards_packet(player_id: int, info: Array, send_packet: bool = true) -> void:
+	var amount: int = info[0]
+	
+	var player: Player = Game.get_player_from_id(player_id)
+	
+	for _i: int in amount:
+		var card: Card = player.deck.pop_back()
+		
+		if player.hand.size() >= Game.max_hand_size:
+			# Burn the card.
+			return
+		
+		if send_packet:
+			player.add_to_hand(card, player.hand.size())
+		else:
+			_accept_create_card_packet(player.id, [
+				card.blueprint.resource_path,
+				Enums.LOCATION.HAND,
+				player.hand.size(),
+			])
+		
+		card.location = Enums.LOCATION.HAND
+		
+		# Create card node.
+		var card_node: CardNode = CardScene.instantiate()
+		card_node.card = card
+		card_node.layout()
+		
+		Game.layout_cards(card.player)
 
 
 # Reveals a card for the player at the specified [param index] in the [param location]. THIS HAS TO BE CALLED SERVER SIDE. USE [method send_packet] FOR CLIENT SIDE.
@@ -376,22 +423,37 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, other_play
 	
 	# TODO: More Anticheat
 	match packet_type:
-		# Add to hand
-		Enums.PACKET_TYPE.ADD_TO_HAND:
+		Enums.PACKET_TYPE.START_GAME:
+			# Only the server can do this.
+			if _anticheat_check(sender_peer_id != 1, 2):
+				return false
+		
+		# Create card
+		Enums.PACKET_TYPE.CREATE_CARD:
 			var blueprint_path: String = info[0]
-			var index: int = info[1]
+			var location: Enums.LOCATION = info[1]
+			var location_index: int = info[2]
 			
 			# Blueprint path needs to be valid.
 			if _anticheat_check(load(blueprint_path) == null, 1):
 				return false
 			
-			# The player needs to have enough space in their hand.
-			if _anticheat_check(actor_player.hand.size() >= Game.max_hand_size, 1):
-				return false
-			
 			# Only the server can do this.
 			if _anticheat_check(sender_peer_id != 1, 2):
 				return false
+			
+			if location == Enums.LOCATION.HAND:
+				# The player needs to have enough space in their hand.
+				if _anticheat_check(actor_player.hand.size() >= Game.max_hand_size, 1):
+					return false
+			elif location == Enums.LOCATION.BOARD:
+				# The player needs to have enough space on their board.
+				if _anticheat_check(actor_player.board.size() >= Game.max_board_space, 1):
+					return false
+		
+		# Draw cards
+		Enums.PACKET_TYPE.DRAW_CARDS:
+			var amount: int = info[0]
 		
 		# Summon
 		Enums.PACKET_TYPE.SUMMON:
@@ -445,7 +507,7 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, other_play
 			if card.types.has(Enums.TYPE.MINION):
 				# The player should have enough space on their board.
 				if _anticheat_check(actor_player.board.size() >= Game.max_board_space, 1):
-					return Enums.ANTICHEAT_MESSAGE.CHEATING
+					return false
 		
 		# Reveal
 		Enums.PACKET_TYPE.REVEAL:
@@ -490,7 +552,7 @@ func _anticheat_check(condition: bool, min_anticheat_level: int) -> bool:
 func _in_packet_history(info: Array, range: int, only_use_server_packets: bool = false) -> bool:
 	for i: int in range:
 		var history: Array = packet_history[-(i + 1)]
-		if history[2] == info and (only_use_server_packets || history[1] == 1):
+		if history[2] == info and (not only_use_server_packets || history[1] == 1):
 			return true
 	
 	return false

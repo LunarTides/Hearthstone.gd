@@ -35,6 +35,7 @@ func host() -> void:
 
 
 func _on_join_button_pressed() -> void:
+	# TODO: Add a deckcode input
 	Multiplayer.peer.create_client(ip_address.text if ip_address.text else "localhost", port.text.to_int() if port.text.is_valid_int() else 4545)
 	multiplayer.multiplayer_peer = Multiplayer.peer
 	
