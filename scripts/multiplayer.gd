@@ -257,7 +257,8 @@ func _accept_play_packet(player_id: int, info: Array) -> void:
 	var card: Card = Game.get_card_from_index(player, location, location_index)
 	
 	if not is_server:
-		card.location = Enums.LOCATION.NONE
+		if card.types.has(Enums.TYPE.SPELL):
+			card.location = Enums.LOCATION.NONE
 		return
 	
 	if card.types.has(Enums.TYPE.MINION):
@@ -425,7 +426,7 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, other_play
 	match packet_type:
 		Enums.PACKET_TYPE.START_GAME:
 			# Only the server can do this.
-			if _anticheat_check(sender_peer_id != 1, 2):
+			if _anticheat_check(true, 2):
 				return false
 		
 		# Create card
@@ -439,7 +440,7 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, other_play
 				return false
 			
 			# Only the server can do this.
-			if _anticheat_check(sender_peer_id != 1, 2):
+			if _anticheat_check(true, 2):
 				return false
 			
 			if location == Enums.LOCATION.HAND:
@@ -454,6 +455,10 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, other_play
 		# Draw cards
 		Enums.PACKET_TYPE.DRAW_CARDS:
 			var amount: int = info[0]
+			
+			# Only the server can do this.
+			if _anticheat_check(true, 2):
+				return false
 		
 		# Summon
 		Enums.PACKET_TYPE.SUMMON:

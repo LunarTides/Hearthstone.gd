@@ -200,7 +200,7 @@ func start_game() -> void:
 	game_started.emit()
 	
 	# Give the player the debug deck.
-	var deckcode: String = "1/30/1"
+	var deckcode: String = "1/1:30/1"
 	
 	Game.send_packet(Enums.PACKET_TYPE.START_GAME, 0, [deckcode, deckcode], true)
 	
@@ -251,7 +251,9 @@ func get_card_nodes_for_player(player: Player) -> Array[CardNode]:
 func get_all_card_nodes() -> Array[CardNode]:
 	# ???
 	var array: Array[CardNode] = []
-	array.assign(get_tree().get_nodes_in_group("Cards"))
+	array.assign(get_tree().get_nodes_in_group("Cards").filter(func(card_node: CardNode) -> bool:
+		return not card_node.is_queued_for_deletion()
+	))
 	return array
 
 
