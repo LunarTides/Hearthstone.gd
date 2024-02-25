@@ -25,10 +25,20 @@ const CARD_DISTANCE_X: float = 1.81
 
 #region Public Variables
 ## The player assigned to this client.
-var player: Player
+var player: Player:
+	get:
+		if Multiplayer.is_server:
+			return player1
+		
+		return player
 
 ## The player assigned to the opponent client.
-var opponent: Player
+var opponent: Player:
+	get:
+		if Multiplayer.is_server:
+			return player2
+		
+		return opponent
 
 ## The player whose turn it is.
 var current_player: Player
@@ -61,11 +71,17 @@ var player2: Player:
 ## If this client is [member player1].
 var is_player_1: bool:
 	get:
+		if Multiplayer.is_server:
+			return true
+		
 		return player.id == 0
 
 ## If this client is [member player2].
 var is_player_2: bool:
 	get:
+		if Multiplayer.is_server:
+			return false
+		
 		return player.id == 1
 
 # Config
@@ -206,13 +222,12 @@ func start_game() -> void:
 	
 	var card: Card = get_card_from_blueprint(TheCoin, player2)
 	player2.add_to_hand(card, player2.hand.size())
+	Game.layout_cards(player1)
+	Game.layout_cards(player2)
 
 
 ## Lays out all the cards for the specified player. Only works client side.
 func layout_cards(player: Player) -> void:
-	if multiplayer.is_server():
-		return
-	
 	for card: CardNode in get_card_nodes_for_player(player):
 		card.layout()
 
@@ -289,7 +304,9 @@ func get_all_files_from_path(path: String) -> Array[String]:
 		var file_path: String = path + "/" + file_name  
 		if dir.current_is_dir():  
 			file_paths += get_all_files_from_path(file_path)  
-		else:  
+		else:
+			if file_path.ends_with(".tres.remap"):
+				file_path = file_path.replace(".remap", "")
 			file_paths.append(file_path)  
 		
 		file_name = dir.get_next()  

@@ -175,7 +175,7 @@ func assign_player(id: int) -> void:
 
 
 ## Makes the client switch to a scene. CAN ONLY BE CALLED SERVER SIDE.
-@rpc("authority", "call_remote", "reliable")
+@rpc("authority", "call_local", "reliable")
 func change_scene_to_file(file: StringName) -> void:
 	get_tree().change_scene_to_file(file)
 

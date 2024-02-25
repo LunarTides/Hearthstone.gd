@@ -167,9 +167,6 @@ func layout() -> void:
 	if is_hovering:
 		return
 	
-	if multiplayer and multiplayer.is_server():
-		return
-	
 	position = Vector3.ONE
 	rotation = Vector3.ZERO
 	scale = Vector3.ONE
@@ -289,7 +286,7 @@ func _on_input_event(_camera: Node, event: InputEvent, position: Vector3, _norma
 		return
 	
 	# Don't drag if this is an opposing card
-	if Game.player != card.player:
+	if Game.player != card.player or Multiplayer.is_server:
 		return
 	
 	if event is InputEventMouseButton:

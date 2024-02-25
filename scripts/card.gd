@@ -85,6 +85,9 @@ var card_node: CardNode:
 var override_is_hidden: Enums.NULLABLE_BOOL = Enums.NULLABLE_BOOL.NULL
 var is_hidden: bool:
 	get:
+		if Multiplayer.is_server:
+			return false
+		
 		if override_is_hidden == Enums.NULLABLE_BOOL.FALSE:
 			return false
 		if override_is_hidden == Enums.NULLABLE_BOOL.TRUE:
