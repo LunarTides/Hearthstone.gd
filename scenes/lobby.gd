@@ -25,11 +25,22 @@ func host() -> void:
 	info_label.show()
 	
 	Multiplayer.load_config()
-	
-	print("Waiting for a client to connect...")
-	
 	Multiplayer.peer.create_server(Multiplayer.port, Multiplayer.max_clients)
 	multiplayer.multiplayer_peer = Multiplayer.peer
+	
+	# UPnP
+	if not UPnP.has_tried_upnp:
+		print("Attempting to use UPnP. Please wait...")
+		UPnP.setup(Multiplayer.port)
+		
+		UPnP.upnp_completed.connect(func(err: int) -> void:
+			if err == OK:
+				print("UPnP setup completed successfully. You do not need to port forward.")
+			else:
+				print("UPnP setup failed, you will need to port-forward port %s (TCP/UDP) manually." % Multiplayer.port)
+		)
+	
+	print("Waiting for a client to connect...")
 	
 	Game.game_started.connect(func() -> void: info_label.text = "A game is in progress.")
 

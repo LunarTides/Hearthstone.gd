@@ -96,7 +96,7 @@ func get_readable_packet(sender_peer_id: int, packet_type: Enums.PACKET_TYPE, pl
 ## This is used to sync every action.
 func send_packet(packet_type: Enums.PACKET_TYPE, player_id: int, info: Array, suppress_warning: bool = false) -> void:
 	# Only send the "Sending packet" message on non-debug builds since it spams the console with garbage.
-	if not OS.is_debug_build():
+	if not OS.is_debug_build() and not is_server:
 		print("Sending packet: " + get_readable_packet(multiplayer.get_unique_id(), packet_type, player_id, info))
 	
 	if is_server and not suppress_warning:
