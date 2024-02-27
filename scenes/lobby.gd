@@ -24,9 +24,10 @@ func host() -> void:
 	info_label.text = "Please wait for a client to connect..."
 	info_label.show()
 	
-	Multiplayer.load_config()
 	Multiplayer.peer.create_server(Multiplayer.port, Multiplayer.max_clients)
 	multiplayer.multiplayer_peer = Multiplayer.peer
+	
+	Multiplayer.load_config()
 	
 	# UPnP
 	if not UPnP.has_tried_upnp:

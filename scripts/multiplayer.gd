@@ -39,6 +39,9 @@ var ban_list: Array[String] = []
 
 var is_server: bool:
 	get:
+		if not multiplayer.multiplayer_peer:
+			return false
+		
 		return multiplayer.is_server()
 #endregion
 
@@ -155,10 +158,21 @@ func kick(peer_id: int, force: bool = false) -> void:
 
 
 func quit() -> void:
+	# CRITICAL: This function crashes clients somehow?
 	save_config()
+	
+	# Do this since after the multiplayer is closed, is_server will always return false
+	var _is_server: bool = is_server
+	
+	peer.close()
+	multiplayer.multiplayer_peer.close()
+	
+	peer = ENetMultiplayerPeer.new()
+	multiplayer.multiplayer_peer = null
+	
 	Game.exit_to_main_menu()
 	
-	if is_server:
+	if _is_server:
 		(await Game.wait_for_node("/root/Lobby")).host()
 #endregion
 
