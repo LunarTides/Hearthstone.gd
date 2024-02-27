@@ -157,6 +157,10 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, info: Arra
 		
 		# End turn
 		Enums.PACKET_TYPE.END_TURN:
+			# The player whose turn it is should be the same player as the one who sent the packet.
+			if _anticheat_check(sender_player != Game.current_player, 2):
+				return false
+			
 			# The player who ends the turn should be the same player as the one who sent the packet.
 			if _anticheat_check(sender_player != actor_player, 2):
 				return false
@@ -320,23 +324,13 @@ func _accept_play_packet(player_id: int, info: Array) -> void:
 	
 	player.mana -= card.cost
 	
-	if not is_server:
-		packet_received_after.connect(func(_sender_player_id: int, packet_type: Enums.PACKET_TYPE, _player_id: int, _info: Array) -> void:
-			if packet_type != Enums.PACKET_TYPE.TRIGGER_ABILITY:
-				return
-			
-			if card.types.has(Enums.TYPE.SPELL):
-				card.location = Enums.LOCATION.NONE
-		)
-		return
-	
 	if card.types.has(Enums.TYPE.MINION):
-		player.summon_card(card, board_index)
+		player.summon_card(card, board_index, false)
 		
-		card.trigger_ability(Enums.ABILITY.BATTLECRY)
+		card.trigger_ability(Enums.ABILITY.BATTLECRY, false)
 	
 	if card.types.has(Enums.TYPE.SPELL):
-		card.trigger_ability(Enums.ABILITY.CAST)
+		card.trigger_ability(Enums.ABILITY.CAST, false)
 		
 		card.location = Enums.LOCATION.NONE
 
@@ -377,10 +371,11 @@ func _accept_end_turn_packet(player_id: int, info: Array) -> void:
 	
 	var player: Player = Game.current_player
 	
+	# TODO: Show the player's mana
 	player.empty_mana = min(player.empty_mana + 1, player.max_mana)
 	player.mana = player.empty_mana
 	
-	_accept_draw_cards_packet(player.id, [1])
+	player.draw_cards(1, false)
 
 
 func _accept_reveal_packet(player_id: int, info: Array) -> void:

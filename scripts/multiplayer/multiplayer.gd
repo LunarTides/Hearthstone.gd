@@ -220,8 +220,7 @@ func start_game(deckcode1: String, deckcode2: String) -> void:
 		player.hero_class = deck.class
 		player.deck = deck.cards
 		
-		# Do this to not send a packet.
-		Packet._accept_draw_cards_packet(i, [3 if player.id == 0 else 4])
+		player.draw_cards(3 if player.id == 0 else 4, false)
 
 
 ## Spawns in a card. THIS HAS TO BE CALLED SERVER SIDE. USE [method send_packet] FOR CLIENT SIDE.

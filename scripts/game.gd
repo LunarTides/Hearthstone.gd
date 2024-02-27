@@ -372,6 +372,14 @@ func exit_to_main_menu() -> void:
 
 ## Sends a packet to the server that will be sent to all the clients.[br]
 ## This is used to sync every action.
-func send_packet(message: Enums.PACKET_TYPE, player_id: int, info: Array, suppress_warning: bool = false) -> void:
-	Multiplayer.send_packet(message, player_id, info, suppress_warning)
+func send_packet(packet_type: Enums.PACKET_TYPE, player_id: int, info: Array, suppress_warning: bool = false) -> void:
+	Multiplayer.send_packet(packet_type, player_id, info, suppress_warning)
+
+
+## Sends a packet if [param condition] is [code]true[/code]. If not, only apply the packet locally.
+func send_packet_if(condition: bool, packet_type: Enums.PACKET_TYPE, player_id: int, info: Array, suppress_warning: bool = false) -> void:
+	if condition:
+		send_packet(packet_type, player_id, info, suppress_warning)
+	else:
+		Packet._accept_packet(packet_type, multiplayer.get_unique_id(), player_id, info)
 #endregion

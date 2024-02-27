@@ -154,11 +154,11 @@ func add_to_location(new_location: Enums.LOCATION, index: int) -> void:
 
 
 ## Triggers an ability.
-func trigger_ability(ability: Enums.ABILITY) -> bool:
+func trigger_ability(ability: Enums.ABILITY, send_packet: bool = true) -> bool:
 	if not abilities.has(ability):
 		return false
 	
-	Game.send_packet(Enums.PACKET_TYPE.TRIGGER_ABILITY, player.id, [location, index, ability])
+	Game.send_packet_if(send_packet, Enums.PACKET_TYPE.TRIGGER_ABILITY, player.id, [location, index, ability])
 	
 	return true
 

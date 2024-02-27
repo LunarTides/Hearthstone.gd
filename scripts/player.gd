@@ -44,8 +44,8 @@ var opponent: Player:
 
 
 #region Public Functions
-## Sends a packet for the player to play a card. Returns if a packet was sent.
-func play_card(card: Card, board_index: int) -> bool:
+## Sends a packet for the player to play a card. Returns if a packet was sent / success.
+func play_card(card: Card, board_index: int, send_packet: bool = true) -> bool:
 	if card.types.has(Enums.TYPE.MINION) and board.size() >= Game.max_board_space:
 		Game.error_text = "You don't have enough space on the board."
 		return false
@@ -58,25 +58,25 @@ func play_card(card: Card, board_index: int) -> bool:
 		Game.error_text = "You don't have enough mana."
 		return false
 	
-	Game.send_packet(Enums.PACKET_TYPE.PLAY, id, [card.location, card.index, board_index], true)
+	Game.send_packet_if(send_packet, Enums.PACKET_TYPE.PLAY, id, [card.location, card.index, board_index], true)
 	return true
 
 
-## Sends a packet for the player to summon a card. Returns if a packet was sent.
-func summon_card(card: Card, board_index: int) -> bool:
+## Sends a packet for the player to summon a card. Returns if a packet was sent / success.
+func summon_card(card: Card, board_index: int, send_packet: bool = true) -> bool:
 	if board.size() >= Game.max_board_space:
 		return false
 	
-	Game.send_packet(Enums.PACKET_TYPE.SUMMON, id, [card.location, card.index, board_index], true)
+	Game.send_packet_if(send_packet, Enums.PACKET_TYPE.SUMMON, id, [card.location, card.index, board_index], true)
 	return true
 
 
-## Sends a packet to add a card to the player's hand. Returns if a packet was sent.
-func add_to_hand(card: Card, hand_index: int) -> bool:
+## Sends a packet to add a card to the player's hand. Returns if a packet was sent / success.
+func add_to_hand(card: Card, hand_index: int, send_packet: bool = true) -> bool:
 	if hand.size() >= Game.max_hand_size:
 		return false
 	
-	Game.send_packet(Enums.PACKET_TYPE.CREATE_CARD, id, [
+	Game.send_packet_if(send_packet, Enums.PACKET_TYPE.CREATE_CARD, id, [
 		card.blueprint.resource_path,
 		Enums.LOCATION.HAND,
 		hand_index,
@@ -84,9 +84,9 @@ func add_to_hand(card: Card, hand_index: int) -> bool:
 	return true
 
 
-## Sends a packet to add a card to the player's deck. Returns if a packet was sent.
-func add_to_deck(card: Card, deck_index: int) -> bool:
-	Game.send_packet(Enums.PACKET_TYPE.CREATE_CARD, id, [
+## Sends a packet to add a card to the player's deck. Returns if a packet was sent / success.
+func add_to_deck(card: Card, deck_index: int, send_packet: bool = true) -> bool:
+	Game.send_packet_if(send_packet, Enums.PACKET_TYPE.CREATE_CARD, id, [
 		card.blueprint.resource_path,
 		Enums.LOCATION.DECK,
 		deck_index,
@@ -94,8 +94,8 @@ func add_to_deck(card: Card, deck_index: int) -> bool:
 	return true
 
 
-## Sends a packet for the player to draw a card. Returns if a packet was sent.
-func draw_card(amount: int) -> bool:
-	Game.send_packet(Enums.PACKET_TYPE.DRAW_CARDS, id, [amount], true)
+## Sends a packet for the player to draw a card. Returns if a packet was sent / success.
+func draw_cards(amount: int, send_packet: bool = true) -> bool:
+	Game.send_packet_if(send_packet, Enums.PACKET_TYPE.DRAW_CARDS, id, [amount], true)
 	return true
 #endregion
