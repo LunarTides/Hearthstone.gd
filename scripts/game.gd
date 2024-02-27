@@ -43,8 +43,10 @@ var opponent: Player:
 ## The player whose turn it is.
 var current_player: Player
 
-## The opposing player to the player whose turn it is.
-var opposing_player: Player
+## The opposing player to the player whose turn it is. Don't set this.
+var opposing_player: Player:
+	get:
+		return current_player.opponent
 
 ## The player who starts first. ONLY ASSIGNED CLIENT SIDE.
 var player1: Player:
@@ -83,6 +85,12 @@ var is_player_2: bool:
 			return false
 		
 		return player.id == 1
+
+var is_players_turn: bool:
+	get:
+		return current_player == player
+
+var turn: int = 0
 
 # Config
 ## The max amount of cards that can be on a player's board. Can be override by [code]Multiplayer.load_config()[/code].
@@ -215,7 +223,7 @@ func start_game() -> void:
 	)
 	
 	print("Changing to game scene...")
-	Multiplayer.change_scene_to_file.rpc("res://scenes/game.tscn")
+	Multiplayer.change_scene_to_file.rpc("res://scenes/game/game.tscn")
 	
 	game_started.emit()
 	
@@ -228,6 +236,15 @@ func start_game() -> void:
 	player2.add_to_hand(card, player2.hand.size())
 	Game.layout_cards(player1)
 	Game.layout_cards(player2)
+
+
+## Sends a packet to end the [member current_player]'s turn. Returns if a packet was sent.
+func end_turn() -> bool:
+	if not is_players_turn:
+		return false
+	
+	send_packet(Enums.PACKET_TYPE.END_TURN, current_player.id, [], true)
+	return true
 
 
 ## Lays out all the cards for the specified player. Only works client side.

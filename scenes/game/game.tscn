@@ -1,0 +1,31 @@
+[gd_scene load_steps=4 format=3 uid="uid://ly3ttyi4u1n7"]
+
+[ext_resource type="PackedScene" uid="uid://c8a1adss40uh4" path="res://scenes/game/board.tscn" id="1_ur5pv"]
+[ext_resource type="PackedScene" uid="uid://dr1v6run3aqn0" path="res://scenes/debug.tscn" id="2_uko40"]
+[ext_resource type="PackedScene" uid="uid://bxxnfev5xa2hy" path="res://scenes/game/end_turn_button.tscn" id="3_h36g6"]
+
+[node name="Main" type="Node3D"]
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 9.514, 0)
+current = true
+fov = 120.0
+size = 0.833
+
+[node name="OmniLight3D" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.970188, 36.6899, 30.7896)
+omni_range = 4096.0
+omni_attenuation = 0.5
+
+[node name="OmniLight3D2" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.970188, 14.3081, -20.2313)
+omni_range = 29.547
+omni_attenuation = 0.183011
+
+[node name="Board" parent="." instance=ExtResource("1_ur5pv")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, -5, 5)
+
+[node name="EndTurnButton" parent="." instance=ExtResource("3_h36g6")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 33.2432, -4.49091, 0)
+
+[node name="Debug" parent="." instance=ExtResource("2_uko40")]

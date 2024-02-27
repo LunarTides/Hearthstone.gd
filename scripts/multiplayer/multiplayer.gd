@@ -207,6 +207,8 @@ func send_config(new_max_board_space: int, new_max_hand_size: int) -> void:
 ## Sends all the information needed to start the game to the clients.
 @rpc("authority", "call_local", "reliable")
 func start_game(deckcode1: String, deckcode2: String) -> void:
+	Game.current_player = Game.player1
+	
 	for i: int in 2:
 		var deckcode: String = deckcode1 if i == 0 else deckcode2
 		

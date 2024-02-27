@@ -49,6 +49,9 @@ func play_card(card: Card, board_index: int) -> bool:
 	if card.types.has(Enums.TYPE.MINION) and board.size() >= Game.max_board_space:
 		return false
 	
+	if not Game.is_players_turn:
+		return false
+	
 	if mana < card.cost:
 		return false
 	

@@ -3,6 +3,12 @@ extends Node
 ## @experimental
 
 
+#region Signals
+## Emits when a packet gets received. 
+signal packet_received(sender_peer_id: int, packet_type: Enums.PACKET_TYPE, player_id: int, info: Array)
+#endregion
+
+
 #region Public Variables
 ## Returns [code]Multiplayer.is_server[/code]
 var is_server: bool:
@@ -146,6 +152,12 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, info: Arra
 			if _anticheat_check(true, 2):
 				return false
 		
+		# End turn
+		Enums.PACKET_TYPE.END_TURN:
+			# The player who ends the turn should be the same player as the one who sent the packet.
+			if _anticheat_check(sender_player != actor_player, 2):
+				return false
+		
 		# Summon
 		Enums.PACKET_TYPE.SUMMON:
 			var location: Enums.LOCATION = info[0]
@@ -192,6 +204,10 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, info: Arra
 			
 			# The player should afford the card.
 			if _anticheat_check(actor_player.mana < card.cost, 1):
+				return false
+			
+			# It should be the player's turn.
+			if _anticheat_check(actor_player != Game.current_player, 1):
 				return false
 			
 			# The player who summons the card should be the same player as the one who sent the packet.
@@ -268,6 +284,7 @@ func _in_packet_history(info: Array, range: int, only_use_server_packets: bool =
 func _accept_packet(packet_type: Enums.PACKET_TYPE, sender_peer_id: int, player_id: int, info: Array) -> void:
 	var packet_name: String = Enums.PACKET_TYPE.keys()[packet_type]
 	
+	packet_received.emit(sender_peer_id, packet_type, player_id, info)
 	history.append([sender_peer_id, packet_type, player_id, info])
 	
 	var method_name: String = "_accept_" + packet_name.to_lower() + "_packet"
@@ -351,6 +368,12 @@ func _accept_draw_cards_packet(player_id: int, info: Array, send_packet: bool = 
 		card_node.layout()
 		
 		Game.layout_cards(card.player)
+
+
+func _accept_end_turn_packet(player_id: int, info: Array) -> void:
+	Game.turn += 1
+	
+	Game.current_player = Game.opposing_player
 
 
 func _accept_reveal_packet(player_id: int, info: Array) -> void:
