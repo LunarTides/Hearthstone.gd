@@ -73,7 +73,11 @@ var index: int:
 		return location_array.find(self)
 
 ## Where the card is. E.g. HAND, BOARD, DECK, ...
-var location: Enums.LOCATION = Enums.LOCATION.NONE
+var location: Enums.LOCATION = Enums.LOCATION.NONE:
+	set(new_location):
+		location = new_location
+		
+		Game.layout_cards(player)
 
 ## Returns the array where the card is stored according to it's [member location].
 var location_array: Array[Card]:
@@ -135,6 +139,7 @@ func update_blueprint() -> void:
 
 ## Removes the card from its [member location].
 func remove_from_location() -> void:
+	# TODO: This doesn't work?
 	location_array.erase(self)
 
 

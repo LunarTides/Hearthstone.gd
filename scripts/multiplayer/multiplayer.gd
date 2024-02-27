@@ -11,9 +11,6 @@ const CONFIG_FILE_PATH: String = "./server.conf"
 
 
 #region Public Variables
-## Packet related functions.
-var packet: Packet = Packet.new()
-
 ## The port of the multiplayer server.
 var port: int = 4545
 
@@ -94,7 +91,7 @@ func _notification(what: int) -> void:
 ## Sends a packet to the server that will be sent to all the clients.[br]
 ## This is used to sync every action.
 func send_packet(packet_type: Enums.PACKET_TYPE, player_id: int, info: Array, suppress_warning: bool = false) -> void:
-	packet.send_packet(packet_type, player_id, info, suppress_warning)
+	Packet.send_packet(packet_type, player_id, info, suppress_warning)
 
 
 ## Loads the config file specified at [constant CONFIG_FILE_PATH]. Only used by the server.
@@ -205,6 +202,22 @@ func send_config(new_max_board_space: int, new_max_hand_size: int) -> void:
 		Game.max_board_space,
 		Game.max_hand_size,
 	])
+
+
+## Sends all the information needed to start the game to the clients.
+@rpc("authority", "call_local", "reliable")
+func start_game(deckcode1: String, deckcode2: String) -> void:
+	for i: int in 2:
+		var deckcode: String = deckcode1 if i == 0 else deckcode2
+		
+		var player: Player = Game.get_player_from_id(i)
+		var deck: Dictionary = Deckcode.import(deckcode, player)
+		
+		player.hero_class = deck.class
+		player.deck = deck.cards
+		
+		# Do this to not send a packet.
+		Packet._accept_draw_cards_packet(i, [3 if player.id == 0 else 4], false)
 
 
 ## Spawns in a card. THIS HAS TO BE CALLED SERVER SIDE. USE [method send_packet] FOR CLIENT SIDE.

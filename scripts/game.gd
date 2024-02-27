@@ -222,7 +222,7 @@ func start_game() -> void:
 	# Give the player the debug deck.
 	var deckcode: String = "1/1:30/1"
 	
-	Game.send_packet(Enums.PACKET_TYPE.START_GAME, 0, [deckcode, deckcode], true)
+	Multiplayer.start_game.rpc(deckcode, deckcode)
 	
 	var card: Card = get_card_from_blueprint(TheCoin, player2)
 	player2.add_to_hand(card, player2.hand.size())

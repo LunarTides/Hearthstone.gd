@@ -1,15 +1,9 @@
-class_name Packet
-extends Object
+extends Node
 ## Packet related functions.
 ## @experimental
 
 
 #region Public Variables
-## Returns [code]Multiplayer.multiplayer[/code]
-var multiplayer: MultiplayerAPI:
-	get:
-		return Multiplayer.multiplayer
-
 ## Returns [code]Multiplayer.is_server[/code]
 var is_server: bool:
 	get:
@@ -61,23 +55,15 @@ func __send_packet(packet_type: Enums.PACKET_TYPE, player_id: int, info: Array) 
 		return Enums.PACKET_FAILURE_TYPE.IS_CLIENT
 	
 	var sender_peer_id: int = multiplayer.get_remote_sender_id()
+	
 	var sender_player: Player = Multiplayer.players.get(sender_peer_id)
-	
-	# TODO: Use Player.opponent instead of this
-	# The 0th element is the sender_player, the 1th element is the other_player
-	var sorted_player_keys: Array = Multiplayer.players.keys()
-	sorted_player_keys.sort_custom(func(a: int, _b: int) -> bool:
-		return Multiplayer.players[a].id == player_id
-	)
-	
-	var actor_player: Player = Multiplayer.players[sorted_player_keys[0]]
-	var other_player: Player = Multiplayer.players[sorted_player_keys[1]]
+	var actor_player: Player = Multiplayer.players.values().filter(func(player: Player) -> bool: return player.id == player_id)[0]
 	
 	var packet_name: String = Enums.PACKET_TYPE.keys()[packet_type]
 	print(get_readable_packet(sender_peer_id, packet_type, player_id, info))
 	
 	# Anticheat
-	if not _anticheat(packet_type, actor_player, other_player, info):
+	if not _anticheat(packet_type, actor_player, info):
 		var consequence_text: String
 		
 		match Multiplayer.anticheat_conseqence:
@@ -119,8 +105,7 @@ func __send_packet(packet_type: Enums.PACKET_TYPE, player_id: int, info: Array) 
 
 
 ## Runs the anticheat on a packet.
-# TODO: Remove other_player
-func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, other_player: Player, info: Array) -> bool:
+func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, info: Array) -> bool:
 	if Multiplayer.anticheat_level == 0:
 		return true
 	
@@ -134,11 +119,6 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, other_play
 	
 	# TODO: More Anticheat
 	match packet_type:
-		Enums.PACKET_TYPE.START_GAME:
-			# Only the server can do this.
-			if _anticheat_check(true, 2):
-				return false
-		
 		# Create card
 		Enums.PACKET_TYPE.CREATE_CARD:
 			var blueprint_path: String = info[0]
@@ -279,22 +259,6 @@ func _in_packet_history(info: Array, range: int, only_use_server_packets: bool =
 
 #region Accept Packet Functions
 # Here are the functions that gets called on the clients + server when a packet gets sent. Handled in __send_packet
-# TODO: Use the same logic as Multiplayer.send_config instead of a start_game packet.
-@rpc("authority", "call_local", "reliable")
-func _accept_start_game_packet(player_id: int, info: Array) -> void:
-	var deckcodes: Array = info.slice(0, 2)
-	
-	for i: int in 2:
-		var player: Player = Game.get_player_from_id(i)
-		var deck: Dictionary = Deckcode.import(deckcodes[i], player)
-		
-		player.hero_class = deck.class
-		player.deck = deck.cards
-		
-		# Do this to not send a packet.
-		_accept_draw_cards_packet(i, [3 if player.id == 0 else 4], false)
-
-
 @rpc("authority", "call_local", "reliable")
 func _accept_summon_packet(player_id: int, info: Array) -> void:
 	var location: Enums.LOCATION = info[0]
