@@ -147,12 +147,6 @@ func _update() -> void:
 		queue_free()
 		return
 	
-	# TODO: Remove.
-	# For debugging, the cost text is equal to the card's index in it's hand.
-	if card.location == Enums.LOCATION.HAND:
-		cost_label.text = str(card.index)
-	tribe_label.text = str(card.player.id)
-	
 	if card.is_hidden:
 		covered = true
 		return
@@ -161,16 +155,14 @@ func _update() -> void:
 	
 	texture.texture = card.texture
 	name_label.text = card.name
-	# TODO: Add back
-	#cost_label.text = str(card.cost)
+	cost_label.text = str(card.cost)
 	text_label.text = card.text
 	attack_label.text = str(card.attack)
 	health_label.text = str(card.health)
 	
-	# TODO: Add back
 	# Tribes
-	#var tribe_keys: PackedStringArray = PackedStringArray(Enums.TRIBE.keys())
-	#tribe_label.text = " / ".join(card.tribes.map(func(tribe: Enums.TRIBE) -> String: return tribe_keys[tribe].capitalize()))
+	var tribe_keys: PackedStringArray = PackedStringArray(Enums.TRIBE.keys())
+	tribe_label.text = " / ".join(card.tribes.map(func(tribe: Enums.TRIBE) -> String: return tribe_keys[tribe].capitalize()))
 	
 	# Spell schools
 	var spell_schools: PackedStringArray = PackedStringArray(Enums.SPELL_SCHOOL.keys())

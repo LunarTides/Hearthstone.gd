@@ -190,6 +190,10 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, info: Arra
 			if _anticheat_check(not card, 1):
 				return false
 			
+			# The player should afford the card.
+			if _anticheat_check(actor_player.mana < card.cost, 1):
+				return false
+			
 			# The player who summons the card should be the same player as the one who sent the packet.
 			if _anticheat_check(sender_player != actor_player, 2):
 				return false
@@ -281,7 +285,6 @@ func _accept_summon_packet(player_id: int, info: Array) -> void:
 	var card: Card = Game.get_card_from_index(player, location, location_index)
 	
 	card.add_to_location(Enums.LOCATION.BOARD, board_index)
-	
 	Game.layout_cards(player)
 
 
@@ -292,6 +295,8 @@ func _accept_play_packet(player_id: int, info: Array) -> void:
 	
 	var player: Player = Game.get_player_from_id(player_id)
 	var card: Card = Game.get_card_from_index(player, location, location_index)
+	
+	player.mana -= card.cost
 	
 	if not is_server:
 		if card.types.has(Enums.TYPE.SPELL):

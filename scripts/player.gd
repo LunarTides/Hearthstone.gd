@@ -15,6 +15,15 @@ var id: int
 ## The player's class.
 var hero_class: Enums.CLASS
 
+## How much mana the player currently has.
+var mana: int = 0
+
+## How many empty mana crystals the player has. Increases every turn until it reaches [member max_mana].
+var empty_mana: int = 0
+
+## The maximum number that [member empty_mana] can go to.
+var max_mana: int = 10
+
 ## The player's hand.
 var hand: Array[Card]
 
@@ -38,6 +47,9 @@ var opponent: Player:
 ## Sends a packet for the player to play a card. Returns if a packet was sent.
 func play_card(card: Card, board_index: int) -> bool:
 	if card.types.has(Enums.TYPE.MINION) and board.size() >= Game.max_board_space:
+		return false
+	
+	if mana < card.cost:
 		return false
 	
 	Game.send_packet(Enums.PACKET_TYPE.PLAY, id, [card.location, card.index, board_index], true)
