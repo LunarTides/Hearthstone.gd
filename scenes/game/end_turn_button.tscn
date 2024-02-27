@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://bxxnfev5xa2hy"]
 
-[ext_resource type="Script" path="res://scenes/game/end_turn_button.gd" id="1_ec4ui"]
+[ext_resource type="Script" path="res://scripts/scenes/game/end_turn_button.gd" id="1_pdxwn"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_84jdv"]
 albedo_color = Color(0.188235, 0.184314, 0, 1)
@@ -13,7 +13,7 @@ size = Vector3(5, 1, 3)
 size = Vector3(5, 1, 3)
 
 [node name="EndTurnButton" type="Area3D" node_paths=PackedStringArray("mesh")]
-script = ExtResource("1_ec4ui")
+script = ExtResource("1_pdxwn")
 mesh = NodePath("Mesh")
 
 [node name="Mesh" type="MeshInstance3D" parent="."]

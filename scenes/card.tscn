@@ -1,6 +1,6 @@
 [gd_scene load_steps=8 format=3 uid="uid://ccmb7s7hsvhju"]
 
-[ext_resource type="Script" path="res://scenes/card.gd" id="1_iu1xa"]
+[ext_resource type="Script" path="res://scripts/scenes/card.gd" id="1_unaoi"]
 [ext_resource type="Texture2D" uid="uid://c85sy5ncm0tn8" path="res://assets/card_cover.png" id="4_3o54t"]
 [ext_resource type="PackedScene" uid="uid://g4ot01icqg10" path="res://scenes/models/minion_model.tscn" id="5_p2mm2"]
 [ext_resource type="Texture2D" uid="uid://brfqmj5tkr3o6" path="res://cards/sheep/sheep.png" id="6_55k6d"]
@@ -17,7 +17,7 @@ size = Vector2(3, 5)
 
 [node name="Card" type="Area3D" node_paths=PackedStringArray("texture", "cover", "name_label", "cost_label", "text_label", "attack_label", "health_label", "tribe_label", "spell_school_label") groups=["Cards"]]
 input_capture_on_drag = true
-script = ExtResource("1_iu1xa")
+script = ExtResource("1_unaoi")
 texture = NodePath("Texture")
 cover = NodePath("Cover")
 name_label = NodePath("NameLabel")
