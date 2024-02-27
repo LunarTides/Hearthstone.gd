@@ -22,7 +22,7 @@ Enums="*res://scripts/enums.gd"
 Game="*res://scripts/game.gd"
 Multiplayer="*res://scripts/multiplayer/multiplayer.gd"
 Deckcode="*res://scripts/functions/deckcode.gd"
-UPnP="*res://scripts/upnp.gd"
+UPnP="*res://scripts/multiplayer/upnp.gd"
 Packet="*res://scripts/multiplayer/packet.gd"
 
 [debug]
