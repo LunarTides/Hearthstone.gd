@@ -47,12 +47,15 @@ var opponent: Player:
 ## Sends a packet for the player to play a card. Returns if a packet was sent.
 func play_card(card: Card, board_index: int) -> bool:
 	if card.types.has(Enums.TYPE.MINION) and board.size() >= Game.max_board_space:
+		Game.error_text = "You don't have enough space on the board."
 		return false
 	
 	if not Game.is_players_turn:
+		Game.error_text = "It is not your turn."
 		return false
 	
 	if mana < card.cost:
+		Game.error_text = "You don't have enough mana."
 		return false
 	
 	Game.send_packet(Enums.PACKET_TYPE.PLAY, id, [card.location, card.index, board_index], true)

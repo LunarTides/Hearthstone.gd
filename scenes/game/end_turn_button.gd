@@ -36,6 +36,10 @@ func _on_input_event(camera: Node, event: InputEvent, position: Vector3, normal:
 	if not event.button_index == MOUSE_BUTTON_LEFT:
 		return
 	
+	if Multiplayer.is_server and Game.is_players_turn:
+		Game.error_text = "The server is the ultimate authority. This would work without this safeguard."
+		return
+	
 	Game.end_turn()
 
 

@@ -107,6 +107,20 @@ var max_players: int = 2
 var board_node: BoardNode:
 	get:
 		return get_node("/root/Main/Board") as BoardNode
+
+## Returns an error label.
+var error_text: String:
+	set(new_error_text):
+		error_text = new_error_text
+		
+		var error_label: RichTextLabel = get_node("/root/Main/ErrorLabel") as RichTextLabel
+		error_label.modulate.a = 1
+		error_label.text = "[center][color=red]" + error_text
+		
+		await get_tree().create_timer(1.0).timeout
+		
+		var tween: Tween = get_tree().create_tween()
+		tween.tween_property(error_label, "modulate:a", 0, 1)
 #endregion
 
 
@@ -241,6 +255,7 @@ func start_game() -> void:
 ## Sends a packet to end the [member current_player]'s turn. Returns if a packet was sent.
 func end_turn() -> bool:
 	if not is_players_turn:
+		error_text = "It is not your turn."
 		return false
 	
 	send_packet(Enums.PACKET_TYPE.END_TURN, current_player.id, [], true)
