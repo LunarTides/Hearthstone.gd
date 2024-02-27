@@ -9,7 +9,7 @@ var is_server: bool:
 	get:
 		return Multiplayer.is_server
 
-## A history of packets. It looks like this: [[sender_peer_id, player_id, info]]
+## A history of packets. It looks like this: [[sender_peer_id, packet_type, player_id, info]]
 var history: Array[Array] = []
 #endregion
 
@@ -95,11 +95,7 @@ func __send_packet(packet_type: Enums.PACKET_TYPE, player_id: int, info: Array) 
 		return Enums.PACKET_FAILURE_TYPE.UNKNOWN
 	
 	# Broadcast the packet to all clients & server
-	var method_name: String = "_accept_" + packet_name.to_lower() + "_packet"
-	assert(self[method_name], method_name + " doesn't exist.")
-	self[method_name].rpc(player_id, info)
-	
-	history.append([sender_peer_id, player_id, info])
+	_accept_packet.rpc(packet_type, sender_peer_id, player_id, info)
 	
 	return Enums.PACKET_FAILURE_TYPE.NONE
 
@@ -168,6 +164,10 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, info: Arra
 				
 			# The player who summons the card should be the same player as the one who sent the packet.
 			if _anticheat_check(sender_player != actor_player, 2):
+				return false
+			
+			# Only the server can do this.
+			if _anticheat_check(true, 2):
 				return false
 			
 			# The card should be in the player's hand.
@@ -246,10 +246,12 @@ func _anticheat_check(condition: bool, min_anticheat_level: int) -> bool:
 
 ## Returns if [param info] is in the history within [param range].
 func _in_packet_history(info: Array, range: int, only_use_server_packets: bool = false) -> bool:
+	range = range if range < history.size() else history.size()
+	
 	for i: int in range:
 		var object: Array = history[-(i + 1)]
 		var peer_id: int = object[0]
-		var stored_info: Array = object[2]
+		var stored_info: Array = object[3]
 		
 		if stored_info == info and (not only_use_server_packets || peer_id == 1):
 			return true
@@ -258,8 +260,18 @@ func _in_packet_history(info: Array, range: int, only_use_server_packets: bool =
 
 
 #region Accept Packet Functions
-# Here are the functions that gets called on the clients + server when a packet gets sent. Handled in __send_packet
 @rpc("authority", "call_local", "reliable")
+func _accept_packet(packet_type: Enums.PACKET_TYPE, sender_peer_id: int, player_id: int, info: Array) -> void:
+	var packet_name: String = Enums.PACKET_TYPE.keys()[packet_type]
+	
+	history.append([sender_peer_id, packet_type, player_id, info])
+	
+	var method_name: String = "_accept_" + packet_name.to_lower() + "_packet"
+	assert(self[method_name], method_name + " doesn't exist.")
+	self[method_name].call(player_id, info)
+
+
+# Here are the functions that gets called on the clients + server when a packet gets sent. Handled in _accept_packet
 func _accept_summon_packet(player_id: int, info: Array) -> void:
 	var location: Enums.LOCATION = info[0]
 	var location_index: int = info[1]
@@ -274,7 +286,6 @@ func _accept_summon_packet(player_id: int, info: Array) -> void:
 	Game.layout_cards(player)
 
 
-@rpc("authority", "call_local", "reliable")
 func _accept_play_packet(player_id: int, info: Array) -> void:
 	var location: Enums.LOCATION = info[0]
 	var location_index: int = info[1]
@@ -299,7 +310,6 @@ func _accept_play_packet(player_id: int, info: Array) -> void:
 		card.location = Enums.LOCATION.NONE
 
 
-@rpc("authority", "call_local", "reliable")
 func _accept_create_card_packet(player_id: int, info: Array) -> void:
 	var blueprint_path: String = info[0]
 	var location: Enums.LOCATION = info[1]
@@ -308,7 +318,6 @@ func _accept_create_card_packet(player_id: int, info: Array) -> void:
 	Multiplayer.spawn_card(blueprint_path, player_id, location, location_index)
 
 
-@rpc("authority", "call_local", "reliable")
 func _accept_draw_cards_packet(player_id: int, info: Array, send_packet: bool = true) -> void:
 	var amount: int = info[0]
 	
@@ -340,7 +349,6 @@ func _accept_draw_cards_packet(player_id: int, info: Array, send_packet: bool = 
 		Game.layout_cards(card.player)
 
 
-@rpc("authority", "call_local", "reliable")
 func _accept_reveal_packet(player_id: int, info: Array) -> void:
 	var location: Enums.LOCATION = info[0]
 	var location_index: int = info[1]
@@ -351,7 +359,6 @@ func _accept_reveal_packet(player_id: int, info: Array) -> void:
 	card.override_is_hidden = Enums.NULLABLE_BOOL.FALSE
 
 
-@rpc("authority", "call_local", "reliable")
 func _accept_trigger_ability_packet(player_id: int, info: Array) -> void:
 	var location: Enums.LOCATION = info[0]
 	var location_index: int = info[1]

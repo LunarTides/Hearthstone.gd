@@ -91,6 +91,9 @@ var location_array: Array[Card]:
 				return player.board
 			Enums.LOCATION.GRAVEYARD:
 				return player.graveyard
+			Enums.LOCATION.NONE:
+				push_warning("Accessing location_array when location is NONE.")
+				return []
 			_:
 				push_error("Invalid Location")
 				assert(false, "Invalid Location")
