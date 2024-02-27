@@ -226,8 +226,7 @@ func spawn_card(blueprint_path: String, player_id: int, location: Enums.LOCATION
 	var card: Card = Card.new()
 	card.blueprint = load(blueprint_path)
 	card.player = Game.get_player_from_id(player_id)
-	card.location = location
-	card.add_to_location(index)
+	card.add_to_location(location, index)
 	
 	var card_node: CardNode = CardScene.instantiate()
 	card_node.card = card

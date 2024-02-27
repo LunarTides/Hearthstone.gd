@@ -280,8 +280,7 @@ func _accept_summon_packet(player_id: int, info: Array) -> void:
 	var player: Player = Game.get_player_from_id(player_id)
 	var card: Card = Game.get_card_from_index(player, location, location_index)
 	
-	card.location = Enums.LOCATION.BOARD
-	card.add_to_location(board_index)
+	card.add_to_location(Enums.LOCATION.BOARD, board_index)
 	
 	Game.layout_cards(player)
 

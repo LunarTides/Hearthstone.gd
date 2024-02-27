@@ -92,7 +92,6 @@ var location_array: Array[Card]:
 			Enums.LOCATION.GRAVEYARD:
 				return player.graveyard
 			Enums.LOCATION.NONE:
-				push_warning("Accessing location_array when location is NONE.")
 				return []
 			_:
 				push_error("Invalid Location")
@@ -142,15 +141,14 @@ func update_blueprint() -> void:
 
 ## Removes the card from its [member location].
 func remove_from_location() -> void:
-	# TODO: This doesn't work?
 	location_array.erase(self)
 
 
 ## Add the card to the correct [param index] in it's [member location].
-func add_to_location(index: int) -> void:
-	# TODO: Evaluate if this should happen here.
+func add_to_location(new_location: Enums.LOCATION, index: int) -> void:
 	remove_from_location()
 	
+	location = new_location
 	location_array.insert(index, self)
 
 
