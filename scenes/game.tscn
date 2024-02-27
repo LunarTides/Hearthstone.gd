@@ -1,5 +1,6 @@
-[gd_scene load_steps=2 format=3 uid="uid://ly3ttyi4u1n7"]
+[gd_scene load_steps=3 format=3 uid="uid://ly3ttyi4u1n7"]
 
+[ext_resource type="PackedScene" uid="uid://dr1v6run3aqn0" path="res://scenes/debug.tscn" id="2_haqym"]
 [ext_resource type="PackedScene" uid="uid://c8a1adss40uh4" path="res://scenes/board.tscn" id="3_ruuks"]
 
 [node name="Main" type="Node3D"]
@@ -22,3 +23,5 @@ omni_attenuation = 0.183011
 
 [node name="Board" parent="." instance=ExtResource("3_ruuks")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, -5, 5)
+
+[node name="Debug" parent="." instance=ExtResource("2_haqym")]
