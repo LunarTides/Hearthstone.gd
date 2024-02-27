@@ -208,6 +208,8 @@ func send_config(new_max_board_space: int, new_max_hand_size: int) -> void:
 @rpc("authority", "call_local", "reliable")
 func start_game(deckcode1: String, deckcode2: String) -> void:
 	Game.current_player = Game.player1
+	Game.player1.empty_mana = 1
+	Game.player1.mana = 1
 	
 	for i: int in 2:
 		var deckcode: String = deckcode1 if i == 0 else deckcode2
@@ -219,7 +221,7 @@ func start_game(deckcode1: String, deckcode2: String) -> void:
 		player.deck = deck.cards
 		
 		# Do this to not send a packet.
-		Packet._accept_draw_cards_packet(i, [3 if player.id == 0 else 4], false)
+		Packet._accept_draw_cards_packet(i, [3 if player.id == 0 else 4])
 
 
 ## Spawns in a card. THIS HAS TO BE CALLED SERVER SIDE. USE [method send_packet] FOR CLIENT SIDE.
@@ -232,10 +234,6 @@ func spawn_card(blueprint_path: String, player_id: int, location: Enums.LOCATION
 	
 	var card_node: CardNode = CardScene.instantiate()
 	card_node.card = card
-	
-	if is_server:
-		add_child(card_node)
-		return
 	
 	(await Game.wait_for_node("/root/Main")).add_child(card_node)
 	Game.layout_cards(card.player)

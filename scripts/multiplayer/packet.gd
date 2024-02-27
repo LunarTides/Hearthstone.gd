@@ -4,8 +4,11 @@ extends Node
 
 
 #region Signals
-## Emits when a packet gets received. 
-signal packet_received(sender_peer_id: int, packet_type: Enums.PACKET_TYPE, player_id: int, info: Array)
+## Emits when a packet gets received. Emits before the packet gets handled by the client who received it.
+signal packet_received_before(sender_peer_id: int, packet_type: Enums.PACKET_TYPE, player_id: int, info: Array)
+
+## Emits when a packet gets received. Emits after the packet gets handled by the client who received it.
+signal packet_received_after(sender_peer_id: int, packet_type: Enums.PACKET_TYPE, player_id: int, info: Array)
 #endregion
 
 
@@ -284,12 +287,14 @@ func _in_packet_history(info: Array, range: int, only_use_server_packets: bool =
 func _accept_packet(packet_type: Enums.PACKET_TYPE, sender_peer_id: int, player_id: int, info: Array) -> void:
 	var packet_name: String = Enums.PACKET_TYPE.keys()[packet_type]
 	
-	packet_received.emit(sender_peer_id, packet_type, player_id, info)
+	packet_received_before.emit(sender_peer_id, packet_type, player_id, info)
 	history.append([sender_peer_id, packet_type, player_id, info])
 	
 	var method_name: String = "_accept_" + packet_name.to_lower() + "_packet"
 	assert(self[method_name], method_name + " doesn't exist.")
 	self[method_name].call(player_id, info)
+	
+	packet_received_after.emit(sender_peer_id, packet_type, player_id, info)
 
 
 # Here are the functions that gets called on the clients + server when a packet gets sent. Handled in _accept_packet
@@ -316,8 +321,13 @@ func _accept_play_packet(player_id: int, info: Array) -> void:
 	player.mana -= card.cost
 	
 	if not is_server:
-		if card.types.has(Enums.TYPE.SPELL):
-			card.location = Enums.LOCATION.NONE
+		packet_received_after.connect(func(_sender_player_id: int, packet_type: Enums.PACKET_TYPE, _player_id: int, _info: Array) -> void:
+			if packet_type != Enums.PACKET_TYPE.TRIGGER_ABILITY:
+				return
+			
+			if card.types.has(Enums.TYPE.SPELL):
+				card.location = Enums.LOCATION.NONE
+		)
 		return
 	
 	if card.types.has(Enums.TYPE.MINION):
@@ -339,7 +349,7 @@ func _accept_create_card_packet(player_id: int, info: Array) -> void:
 	Multiplayer.spawn_card(blueprint_path, player_id, location, location_index)
 
 
-func _accept_draw_cards_packet(player_id: int, info: Array, send_packet: bool = true) -> void:
+func _accept_draw_cards_packet(player_id: int, info: Array) -> void:
 	var amount: int = info[0]
 	
 	var player: Player = Game.get_player_from_id(player_id)
@@ -351,29 +361,26 @@ func _accept_draw_cards_packet(player_id: int, info: Array, send_packet: bool = 
 			# Burn the card.
 			return
 		
-		if send_packet:
-			player.add_to_hand(card, player.hand.size())
-		else:
-			_accept_create_card_packet(player.id, [
-				card.blueprint.resource_path,
-				Enums.LOCATION.HAND,
-				player.hand.size(),
-			])
-		
-		card.location = Enums.LOCATION.HAND
+		card.add_to_location(Enums.LOCATION.HAND, player.hand.size())
 		
 		# Create card node.
 		var card_node: CardNode = Multiplayer.CardScene.instantiate()
 		card_node.card = card
 		card_node.layout()
 		
-		Game.layout_cards(card.player)
+		(await Game.wait_for_node("/root/Main")).add_child(card_node)
 
 
 func _accept_end_turn_packet(player_id: int, info: Array) -> void:
+	Game.current_player = Game.opposing_player
 	Game.turn += 1
 	
-	Game.current_player = Game.opposing_player
+	var player: Player = Game.current_player
+	
+	player.empty_mana = min(player.empty_mana + 1, player.max_mana)
+	player.mana = player.empty_mana
+	
+	_accept_draw_cards_packet(player.id, [1])
 
 
 func _accept_reveal_packet(player_id: int, info: Array) -> void:

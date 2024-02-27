@@ -86,10 +86,12 @@ var is_player_2: bool:
 		
 		return player.id == 1
 
+## Returns if it is currently the [member player]'s turn.
 var is_players_turn: bool:
 	get:
 		return current_player == player
 
+## The turn counter of the game.
 var turn: int = 0
 
 # Config
@@ -246,8 +248,9 @@ func start_game() -> void:
 	
 	Multiplayer.start_game.rpc(deckcode, deckcode)
 	
-	var card: Card = get_card_from_blueprint(TheCoin, player2)
-	player2.add_to_hand(card, player2.hand.size())
+	var coin: Card = get_card_from_blueprint(TheCoin, player2)
+	player2.add_to_hand(coin, player2.hand.size())
+	
 	Game.layout_cards(player1)
 	Game.layout_cards(player2)
 

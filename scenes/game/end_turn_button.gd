@@ -10,7 +10,7 @@ extends Area3D
 func _ready() -> void:
 	rotation.x = deg_to_rad(180 if Game.player == Game.player2 else 0)
 	
-	Packet.packet_received.connect(func(_sender_peer_id: int, packet_type: Enums.PACKET_TYPE, player_id: int, _info: Array) -> void:
+	Packet.packet_received_before.connect(func(_sender_peer_id: int, packet_type: Enums.PACKET_TYPE, player_id: int, _info: Array) -> void:
 		if not packet_type == Enums.PACKET_TYPE.END_TURN:
 			return
 		

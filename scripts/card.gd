@@ -75,6 +75,7 @@ var index: int:
 ## Where the card is. E.g. HAND, BOARD, DECK, ...
 var location: Enums.LOCATION = Enums.LOCATION.NONE:
 	set(new_location):
+		remove_from_location()
 		location = new_location
 		
 		Game.layout_cards(player)
