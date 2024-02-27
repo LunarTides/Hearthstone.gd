@@ -110,6 +110,35 @@ func _process(_delta: float) -> void:
 #endregion
 
 
+#region Public Functions
+## Change the position / rotation of the card to be correct.
+func layout() -> void:
+	if is_hovering:
+		return
+	
+	position = Vector3.ONE
+	rotation = Vector3.ZERO
+	scale = Vector3.ONE
+	
+	match card.location:
+		Enums.LOCATION.HAND:
+			_layout_hand()
+		
+		Enums.LOCATION.BOARD:
+			_layout_board()
+		
+		Enums.LOCATION.NONE:
+			pass
+		
+		_:
+			assert(false, "Can't layout the card in this location.")
+	
+	_old_position = position
+	_old_rotation = rotation
+	_old_scale = scale
+#endregion
+
+
 #region Private Functions
 func _update() -> void:
 	if card.location == Enums.LOCATION.NONE:
@@ -158,39 +187,8 @@ func _update() -> void:
 		tribe_label.show()
 	if card.types.has(Enums.TYPE.SPELL):
 		spell_school_label.show()
-#endregion
 
 
-#region Public Functions
-## Change the position / rotation of the card to be correct.
-func layout() -> void:
-	if is_hovering:
-		return
-	
-	position = Vector3.ONE
-	rotation = Vector3.ZERO
-	scale = Vector3.ONE
-	
-	match card.location:
-		Enums.LOCATION.HAND:
-			_layout_hand()
-		
-		Enums.LOCATION.BOARD:
-			_layout_board()
-		
-		Enums.LOCATION.NONE:
-			pass
-		
-		_:
-			assert(false, "Can't layout the card in this location.")
-	
-	_old_position = position
-	_old_rotation = rotation
-	_old_scale = scale
-#endregion
-
-
-#region Private Functions
 func _layout_hand() -> void:
 	# TODO: Dont hardcode this
 	var player_weight: int = 1 if card.player == Game.player else -1
