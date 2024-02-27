@@ -23,6 +23,15 @@ func _exit_tree() -> void:
 #endregion
 
 
+#region Public Functions
+## Tries to setup UPnP on [member thread]. Emits [member upnp_completed] on completion.
+func setup(server_port: int) -> void:
+	thread = Thread.new()
+	thread.start(_upnp_setup.bind(server_port))
+	has_tried_upnp = true
+#endregion
+
+
 #region Private Functions
 func _upnp_setup(server_port: int) -> void:
 	# UPNP queries take some time.
@@ -40,13 +49,4 @@ func _upnp_setup(server_port: int) -> void:
 		emit_signal.call_deferred("upnp_completed", OK)
 	else:
 		emit_signal.call_deferred("upnp_completed", ERR_CANT_RESOLVE)
-#endregion
-
-
-#region Public Functions
-## Tries to setup UPnP on [member thread]. Emits [member upnp_completed] on completion.
-func setup(server_port: int) -> void:
-	thread = Thread.new()
-	thread.start(_upnp_setup.bind(server_port))
-	has_tried_upnp = true
 #endregion

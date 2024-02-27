@@ -1,5 +1,7 @@
 extends Node
 
+
+## Loads and decodes the specified [param deckcode]. Returns [code]{"class": Enums.CLASS, "cards": Array[Card]}[/code]
 func import(deckcode: String, player: Player) -> Dictionary:
 	# Reference:
 	# 1/1:30/1 - 30 Sheeps, Mage

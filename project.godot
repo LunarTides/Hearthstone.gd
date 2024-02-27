@@ -20,7 +20,7 @@ config/icon="res://icon.svg"
 
 Enums="*res://scripts/enums.gd"
 Game="*res://scripts/game.gd"
-Multiplayer="*res://scripts/multiplayer.gd"
+Multiplayer="*res://scripts/multiplayer/multiplayer.gd"
 Deckcode="*res://scripts/functions/deckcode.gd"
 UPnP="*res://scripts/upnp.gd"
 

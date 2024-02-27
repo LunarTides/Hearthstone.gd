@@ -155,8 +155,11 @@ enum PACKET_FAILURE_TYPE {
 }
 
 enum ANTICHEAT_CONSEQUENCE {
+	## Drops the cheated packet.
 	DROP_PACKET,
+	## Drops the cheated packet and kicks the player.
 	KICK,
+	## Drops the cheated packet and bans the player.
 	BAN,
 }
 

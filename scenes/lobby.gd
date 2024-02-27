@@ -1,19 +1,25 @@
 extends Control
 
 
+#region Exported Variables
 @export var join_button: Button
 @export var host_button: Button
 @export var ip_address: LineEdit
 @export var port: LineEdit
 @export var info_label: Label
 @export var console_tip: Label
+#endregion
 
 
+#region Internal Functions
 func _ready() -> void:
 	if "--server" in OS.get_cmdline_user_args() or OS.has_feature("dedicated_server") or DisplayServer.get_name() == "headless":
 		_on_host_button_pressed()
+#endregion
 
 
+#region Public Functions
+## Makes the game start hosting a server.
 func host() -> void:
 	join_button.hide()
 	host_button.hide()
@@ -44,8 +50,10 @@ func host() -> void:
 	print("Waiting for a client to connect...")
 	
 	Game.game_started.connect(func() -> void: info_label.text = "A game is in progress.")
+#endregion
 
 
+#region Private Functions
 func _on_join_button_pressed() -> void:
 	# TODO: Add a deckcode input
 	Multiplayer.peer.create_client(ip_address.text if ip_address.text else "localhost", port.text.to_int() if port.text.is_valid_int() else 4545)
@@ -68,3 +76,4 @@ func _on_host_button_pressed() -> void:
 
 func _on_ip_address_text_submitted(_new_text: String) -> void:
 	_on_join_button_pressed()
+#endregion

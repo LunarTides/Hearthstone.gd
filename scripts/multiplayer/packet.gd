@@ -1,0 +1,402 @@
+class_name Packet
+extends Object
+## Packet related functions.
+## @experimental
+
+
+#region Public Variables
+## Returns [code]Multiplayer.multiplayer[/code]
+var multiplayer: MultiplayerAPI:
+	get:
+		return Multiplayer.multiplayer
+
+## Returns [code]Multiplayer.is_server[/code]
+var is_server: bool:
+	get:
+		return Multiplayer.is_server
+
+## A history of packets. It looks like this: [[sender_peer_id, player_id, info]]
+var history: Array[Array] = []
+#endregion
+
+
+#region Public Functions
+## Returns a packet in a readable format. E.g. [Packet]: Server (Player: 1): [PLAY] [1, 0, 1]
+func get_readable_packet(sender_peer_id: int, packet_type: Enums.PACKET_TYPE, player_id: int, info: Array) -> String:
+	var packet_name: String = Enums.PACKET_TYPE.keys()[packet_type]
+	
+	return "[Packet]: %s (Player: %d): [%s] %s" % [
+		"Server" if sender_peer_id == 1 else str(sender_peer_id),
+		player_id,
+		packet_name,
+		info
+	]
+
+
+## Sends a packet to the server that will be sent to all the clients.[br]
+## This is used to sync every action.
+func send_packet(packet_type: Enums.PACKET_TYPE, player_id: int, info: Array, suppress_warning: bool = false) -> void:
+	# Only send the "Sending packet" message on non-debug builds since it spams the console with garbage.
+	if not OS.is_debug_build() and not is_server:
+		print("Sending packet: " + get_readable_packet(multiplayer.get_unique_id(), packet_type, player_id, info))
+	
+	if is_server and not suppress_warning:
+		push_warning("A packet is being sent from the server. These packets bypass the anticheat. Be careful.")
+	
+	_send_packet.rpc_id(1, packet_type, player_id, info)
+#endregion
+
+
+#region Private Functions
+@rpc("any_peer", "call_local", "reliable")
+func _send_packet(packet_type: Enums.PACKET_TYPE, player_id: int, info: Array) -> void:
+	var result: Enums.PACKET_FAILURE_TYPE = __send_packet(packet_type, player_id, info)
+	
+	if result != Enums.PACKET_FAILURE_TYPE.NONE:
+		push_warning("Packet dropped with code [%s] ^^^^" % Enums.PACKET_FAILURE_TYPE.keys()[result])
+
+
+func __send_packet(packet_type: Enums.PACKET_TYPE, player_id: int, info: Array) -> Enums.PACKET_FAILURE_TYPE:
+	if not is_server:
+		return Enums.PACKET_FAILURE_TYPE.IS_CLIENT
+	
+	var sender_peer_id: int = multiplayer.get_remote_sender_id()
+	var sender_player: Player = Multiplayer.players.get(sender_peer_id)
+	
+	# TODO: Use Player.opponent instead of this
+	# The 0th element is the sender_player, the 1th element is the other_player
+	var sorted_player_keys: Array = Multiplayer.players.keys()
+	sorted_player_keys.sort_custom(func(a: int, _b: int) -> bool:
+		return Multiplayer.players[a].id == player_id
+	)
+	
+	var actor_player: Player = Multiplayer.players[sorted_player_keys[0]]
+	var other_player: Player = Multiplayer.players[sorted_player_keys[1]]
+	
+	var packet_name: String = Enums.PACKET_TYPE.keys()[packet_type]
+	print(get_readable_packet(sender_peer_id, packet_type, player_id, info))
+	
+	# Anticheat
+	if not _anticheat(packet_type, actor_player, other_player, info):
+		var consequence_text: String
+		
+		match Multiplayer.anticheat_conseqence:
+			Enums.ANTICHEAT_CONSEQUENCE.DROP_PACKET:
+				consequence_text = "PACKET DROPPED"
+			
+			Enums.ANTICHEAT_CONSEQUENCE.KICK:
+				consequence_text = "PLAYER KICKED"
+				Multiplayer.kick(sender_peer_id)
+			
+			Enums.ANTICHEAT_CONSEQUENCE.BAN:
+				consequence_text = "PLAYER BANNED"
+				var ip_address: String = Multiplayer.get_ip_address(sender_peer_id)
+				Multiplayer.ban_list.append(ip_address)
+				Multiplayer.kick(sender_peer_id)
+		
+		push_error("!!! ANTICHEAT TRIGGERED IN PREVIOUS PACKET. %s. !!!" % consequence_text)
+		return Enums.PACKET_FAILURE_TYPE.ANTICHEAT
+	
+	
+	# Actually handle the packet
+	
+	# Invalid packet type
+	if not Enums.PACKET_TYPE.values().has(packet_type):
+		var message: String = "Invalid packet '%s'." % packet_type
+		assert(false, message)
+		
+		push_error(message + " The client who sent this packet might be modded. If you think this is a bug, open an issue here: https://github.com/LunarTides/Hearthstone.gd")
+		return Enums.PACKET_FAILURE_TYPE.UNKNOWN
+	
+	# Broadcast the packet to all clients & server
+	var method_name: String = "_accept_" + packet_name.to_lower() + "_packet"
+	assert(self[method_name], method_name + " doesn't exist.")
+	self[method_name].rpc(player_id, info)
+	
+	history.append([sender_peer_id, player_id, info])
+	
+	return Enums.PACKET_FAILURE_TYPE.NONE
+
+
+## Runs the anticheat on a packet.
+# TODO: Remove other_player
+func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, other_player: Player, info: Array) -> bool:
+	if Multiplayer.anticheat_level == 0:
+		return true
+	
+	var sender_peer_id: int = multiplayer.get_remote_sender_id()
+	var sender_player: Player = Multiplayer.players.get(sender_peer_id)
+	
+	# Packets sent from the server should bypass the anitcheat.
+	if sender_peer_id == 1:
+		return true
+	
+	
+	# TODO: More Anticheat
+	match packet_type:
+		Enums.PACKET_TYPE.START_GAME:
+			# Only the server can do this.
+			if _anticheat_check(true, 2):
+				return false
+		
+		# Create card
+		Enums.PACKET_TYPE.CREATE_CARD:
+			var blueprint_path: String = info[0]
+			var location: Enums.LOCATION = info[1]
+			var location_index: int = info[2]
+			
+			# Blueprint path needs to be valid.
+			if _anticheat_check(load(blueprint_path) == null, 1):
+				return false
+			
+			# Only the server can do this.
+			if _anticheat_check(true, 2):
+				return false
+			
+			if location == Enums.LOCATION.HAND:
+				# The player needs to have enough space in their hand.
+				if _anticheat_check(actor_player.hand.size() >= Game.max_hand_size, 1):
+					return false
+			elif location == Enums.LOCATION.BOARD:
+				# The player needs to have enough space on their board.
+				if _anticheat_check(actor_player.board.size() >= Game.max_board_space, 1):
+					return false
+		
+		# Draw cards
+		Enums.PACKET_TYPE.DRAW_CARDS:
+			var amount: int = info[0]
+			
+			# Only the server can do this.
+			if _anticheat_check(true, 2):
+				return false
+		
+		# Summon
+		Enums.PACKET_TYPE.SUMMON:
+			var location: Enums.LOCATION = info[0]
+			var location_index: int = info[1]
+			var board_index: int = info[2]
+			
+			var card: Card = Game.get_card_from_index(sender_player, location, location_index)
+			
+			# The card should exist.
+			if _anticheat_check(not card, 1):
+				return false
+				
+			# The player should have enough space on their board.
+			if _anticheat_check(actor_player.board.size() >= Game.max_board_space, 1):
+				return false
+				
+			# The player who summons the card should be the same player as the one who sent the packet.
+			if _anticheat_check(sender_player != actor_player, 2):
+				return false
+			
+			# The card should be in the player's hand.
+			if _anticheat_check(card.location != Enums.LOCATION.HAND, 3):
+				return false
+			
+			# Check if the card is queued to be summoned.
+			if _anticheat_check(_in_packet_history([location, location_index, board_index], 2, true), 3):
+				return false
+		
+		# Play
+		Enums.PACKET_TYPE.PLAY:
+			var location: Enums.LOCATION = info[0]
+			var location_index: int = info[1]
+			var board_index: int = info[2]
+			
+			var card: Card = Game.get_card_from_index(sender_player, location, location_index)
+			
+			# The card should exist.
+			if _anticheat_check(not card, 1):
+				return false
+			
+			# The player who summons the card should be the same player as the one who sent the packet.
+			if _anticheat_check(sender_player != actor_player, 2):
+				return false
+			
+			# The card should be in the player's hand.
+			if _anticheat_check(card.location != Enums.LOCATION.HAND, 3):
+				return false
+			
+			# Minion
+			if card.types.has(Enums.TYPE.MINION):
+				# The player should have enough space on their board.
+				if _anticheat_check(actor_player.board.size() >= Game.max_board_space, 1):
+					return false
+		
+		# Reveal
+		Enums.PACKET_TYPE.REVEAL:
+			var location: Enums.LOCATION = info[0]
+			var index: int = info[1]
+			
+			# The player whose card gets revealed should be the same player as the one who sent the packet
+			if _anticheat_check(sender_player != actor_player, 2):
+				return false
+		
+		# Trigger ability
+		Enums.PACKET_TYPE.TRIGGER_ABILITY:
+			var location: Enums.LOCATION = info[0]
+			var location_index: int = info[1]
+			var ability: Enums.ABILITY = info[2]
+			
+			var card: Card = Game.get_card_from_index(actor_player, location, location_index)
+			
+			# The card should exist.
+			if _anticheat_check(card == null, 1):
+				return false
+			
+			# The player who sent the packet should own the card.
+			if _anticheat_check(sender_player != actor_player, 2):
+				return false
+			
+			# Check if the card has already been triggered.
+			if _anticheat_check(_in_packet_history([location, location_index, ability], 3, true), 3):
+				return false
+		
+		_:
+			assert(false, "No anticheat logic for '%s'" % Enums.PACKET_TYPE.keys()[packet_type])
+	
+	return true
+
+
+## Returns if [param condition] is true and [member anticheat_level] is more or equal to [param min_anticheat_level].
+func _anticheat_check(condition: bool, min_anticheat_level: int) -> bool:
+	return condition and (Multiplayer.anticheat_level >= min_anticheat_level or Multiplayer.anticheat_level < 0)
+
+
+## Returns if [param info] is in the history within [param range].
+func _in_packet_history(info: Array, range: int, only_use_server_packets: bool = false) -> bool:
+	for i: int in range:
+		var object: Array = history[-(i + 1)]
+		var peer_id: int = object[0]
+		var stored_info: Array = object[2]
+		
+		if stored_info == info and (not only_use_server_packets || peer_id == 1):
+			return true
+	
+	return false
+
+
+#region Accept Packet Functions
+# Here are the functions that gets called on the clients + server when a packet gets sent. Handled in __send_packet
+# TODO: Use the same logic as Multiplayer.send_config instead of a start_game packet.
+@rpc("authority", "call_local", "reliable")
+func _accept_start_game_packet(player_id: int, info: Array) -> void:
+	var deckcodes: Array = info.slice(0, 2)
+	
+	for i: int in 2:
+		var player: Player = Game.get_player_from_id(i)
+		var deck: Dictionary = Deckcode.import(deckcodes[i], player)
+		
+		player.hero_class = deck.class
+		player.deck = deck.cards
+		
+		# Do this to not send a packet.
+		_accept_draw_cards_packet(i, [3 if player.id == 0 else 4], false)
+
+
+@rpc("authority", "call_local", "reliable")
+func _accept_summon_packet(player_id: int, info: Array) -> void:
+	var location: Enums.LOCATION = info[0]
+	var location_index: int = info[1]
+	var board_index: int = info[2]
+	
+	var player: Player = Game.get_player_from_id(player_id)
+	var card: Card = Game.get_card_from_index(player, location, location_index)
+	
+	card.location = Enums.LOCATION.BOARD
+	card.add_to_location(board_index)
+	
+	Game.layout_cards(player)
+
+
+@rpc("authority", "call_local", "reliable")
+func _accept_play_packet(player_id: int, info: Array) -> void:
+	var location: Enums.LOCATION = info[0]
+	var location_index: int = info[1]
+	var board_index: int = info[2]
+	
+	var player: Player = Game.get_player_from_id(player_id)
+	var card: Card = Game.get_card_from_index(player, location, location_index)
+	
+	if not is_server:
+		if card.types.has(Enums.TYPE.SPELL):
+			card.location = Enums.LOCATION.NONE
+		return
+	
+	if card.types.has(Enums.TYPE.MINION):
+		player.summon_card(card, board_index)
+		
+		card.trigger_ability(Enums.ABILITY.BATTLECRY)
+	
+	if card.types.has(Enums.TYPE.SPELL):
+		card.trigger_ability(Enums.ABILITY.CAST)
+		
+		card.location = Enums.LOCATION.NONE
+
+
+@rpc("authority", "call_local", "reliable")
+func _accept_create_card_packet(player_id: int, info: Array) -> void:
+	var blueprint_path: String = info[0]
+	var location: Enums.LOCATION = info[1]
+	var location_index: int = info[2]
+	
+	Multiplayer.spawn_card(blueprint_path, player_id, location, location_index)
+
+
+@rpc("authority", "call_local", "reliable")
+func _accept_draw_cards_packet(player_id: int, info: Array, send_packet: bool = true) -> void:
+	var amount: int = info[0]
+	
+	var player: Player = Game.get_player_from_id(player_id)
+	
+	for _i: int in amount:
+		var card: Card = player.deck.pop_back()
+		
+		if player.hand.size() >= Game.max_hand_size:
+			# Burn the card.
+			return
+		
+		if send_packet:
+			player.add_to_hand(card, player.hand.size())
+		else:
+			_accept_create_card_packet(player.id, [
+				card.blueprint.resource_path,
+				Enums.LOCATION.HAND,
+				player.hand.size(),
+			])
+		
+		card.location = Enums.LOCATION.HAND
+		
+		# Create card node.
+		var card_node: CardNode = Multiplayer.CardScene.instantiate()
+		card_node.card = card
+		card_node.layout()
+		
+		Game.layout_cards(card.player)
+
+
+@rpc("authority", "call_local", "reliable")
+func _accept_reveal_packet(player_id: int, info: Array) -> void:
+	var location: Enums.LOCATION = info[0]
+	var location_index: int = info[1]
+	
+	var player: Player = Game.get_player_from_id(player_id)
+	var card: Card = Game.get_card_from_index(player, location, location_index)
+	
+	card.override_is_hidden = Enums.NULLABLE_BOOL.FALSE
+
+
+@rpc("authority", "call_local", "reliable")
+func _accept_trigger_ability_packet(player_id: int, info: Array) -> void:
+	var location: Enums.LOCATION = info[0]
+	var location_index: int = info[1]
+	var ability: Enums.ABILITY = info[2]
+	
+	var player: Player = Game.get_player_from_id(player_id)
+	var card: Card = Game.get_card_from_index(player, location, location_index)
+	
+	for ability_callback: Callable in card.abilities[ability]:
+		ability_callback.call(player, card)
+#endregion
+#endregion

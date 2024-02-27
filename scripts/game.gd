@@ -85,9 +85,13 @@ var is_player_2: bool:
 		return player.id == 1
 
 # Config
+## The max amount of cards that can be on a player's board. Can be override by [code]Multiplayer.load_config()[/code].
 var max_board_space: int = 7
+
+## The max amount of cards that can be in a player's hand. Can be override by [code]Multiplayer.load_config()[/code].
 var max_hand_size: int = 10
 
+## The max amount of players that can be in a game at once. Any value other than 2 is not supported and will break.
 var max_players: int = 2
 # ------
 
@@ -272,6 +276,7 @@ func get_all_card_nodes() -> Array[CardNode]:
 	return array
 
 
+## Creates a [Blueprint] from the specified [param id]. Returns [code]null[/code] if no such blueprint exists.
 func get_blueprint_from_id(id: int) -> Blueprint:
 	var files: Array[String] = get_all_files_from_path("res://cards")
 	
@@ -286,6 +291,7 @@ func get_blueprint_from_id(id: int) -> Blueprint:
 	return null
 
 
+## Creates a card with the specified [param blueprint] with the specified [param player] as its owner.
 func get_card_from_blueprint(blueprint: Blueprint, player: Player) -> Card:
 	var card: Card = Card.new()
 	card.blueprint = blueprint
@@ -293,6 +299,7 @@ func get_card_from_blueprint(blueprint: Blueprint, player: Player) -> Card:
 	return card
 
 
+## Returns all filenames from the specified [param path].
 func get_all_files_from_path(path: String) -> Array[String]:  
 	var file_paths: Array[String] = []  
 	var dir: DirAccess = DirAccess.open(path)  
@@ -323,7 +330,7 @@ func wait_for_node(node_path: NodePath) -> Node:
 	return get_node(node_path)
 
 
-## Exits to the main menu. This disconnects from the server.
+## Exits to the main menu. You might want to use [code]Multiplayer.quit[/code] instead.
 func exit_to_main_menu() -> void:
 	get_tree().change_scene_to_file("res://scenes/lobby.tscn")
 
