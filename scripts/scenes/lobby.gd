@@ -6,8 +6,8 @@ extends Control
 @export var host_button: Button
 @export var ip_address: LineEdit
 @export var port: LineEdit
+@export var deckcode: LineEdit
 @export var info_label: Label
-@export var console_tip: Label
 #endregion
 
 
@@ -28,7 +28,7 @@ func host() -> void:
 	host_button.hide()
 	ip_address.hide()
 	port.hide()
-	console_tip.show()
+	deckcode.hide()
 	
 	info_label.text = "Please wait for a client to connect..."
 	info_label.show()
@@ -58,19 +58,24 @@ func host() -> void:
 
 #region Private Functions
 func _on_join_button_pressed() -> void:
-	# TODO: Add a deckcode input
-	Multiplayer.peer.create_client(ip_address.text if ip_address.text else "localhost", port.text.to_int() if port.text.is_valid_int() else 4545)
-	multiplayer.multiplayer_peer = Multiplayer.peer
+	if not Deckcode.validate(deckcode.text):
+		Game.error_text = "Invalid deckcode."
+		push_warning("Invalid deckcode.")
+		return
+	
 	Multiplayer.join(
 		ip_address.text,
 		port.text.to_int() if port.text.is_valid_int() else 4545,
 	)
+	
+	Multiplayer._deckcode = deckcode.text
 	
 	multiplayer.connected_to_server.connect(func() -> void:
 		join_button.hide()
 		host_button.hide()
 		ip_address.hide()
 		port.hide()
+		deckcode.hide()
 		
 		info_label.text = "Waiting for another player..."
 		info_label.show()

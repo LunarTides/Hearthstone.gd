@@ -65,7 +65,7 @@ func __send_packet(packet_type: Enums.PACKET_TYPE, player_id: int, info: Array) 
 	
 	var sender_peer_id: int = multiplayer.get_remote_sender_id()
 	
-	var sender_player: Player = Multiplayer.players.get(sender_peer_id)
+	var sender_player: Player = Multiplayer.get_player_from_peer_id(sender_peer_id)
 	var actor_player: Player = Multiplayer.players.values().filter(func(player: Player) -> bool: return player.id == player_id)[0]
 	
 	var packet_name: String = Enums.PACKET_TYPE.keys()[packet_type]
@@ -115,7 +115,7 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, info: Arra
 		return true
 	
 	var sender_peer_id: int = multiplayer.get_remote_sender_id()
-	var sender_player: Player = Multiplayer.players.get(sender_peer_id)
+	var sender_player: Player = Multiplayer.get_player_from_peer_id(sender_peer_id)
 	
 	# Packets sent from the server should bypass the anitcheat.
 	if sender_peer_id == 1:

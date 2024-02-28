@@ -1,8 +1,9 @@
 extends Node
 
 
+#region Public Functions
 ## Loads and decodes the specified [param deckcode]. Returns [code]{"class": Enums.CLASS, "cards": Array[Card]}[/code]
-func import(deckcode: String, player: Player) -> Dictionary:
+func import(deckcode: String, player: Player, validate: bool = true) -> Dictionary:
 	# Reference:
 	# 1/1:30/1 - 30 Sheeps, Mage
 	# 1/1:20,2:5,3/1,2,3,4,5,6,7,8,9,a,b,c,d,e,f,10,11,12,13,14,15,16,17,18 - 1 copy of 20 cards, 2 copies of 5, Mage
@@ -49,4 +50,27 @@ func import(deckcode: String, player: Player) -> Dictionary:
 		for _i: int in copies:
 			cards.append(Game.get_card_from_blueprint(Game.get_blueprint_from_id(id), player))
 	
+	if validate and not _validate_deck(deckcode, hero_class, cards):
+		return {}
+	
 	return {"class": hero_class, "cards": cards}
+
+
+## Returns [code]true[/code] if [param deckcode] is a valid deckcode.
+func validate(deckcode: String) -> bool:
+	return import(deckcode, Game.player1).has("cards")
+#endregion
+
+
+#region Private Functions
+func _validate_deck(deckcode: String, hero_class: Enums.CLASS, cards: Array[Card]) -> bool:
+	if deckcode == "1/1:30/1":
+		# TODO: Uncomment
+		#return OS.is_debug_build()
+		return true
+	
+	if cards.any(func(card: Card) -> bool: return not card.collectible):
+		return false
+	
+	return true
+#endregion

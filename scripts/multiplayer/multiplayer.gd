@@ -49,6 +49,11 @@ var is_server: bool:
 #endregion
 
 
+#region Private Variables
+var _deckcode: String
+#endregion
+
+
 #region Internal Functions
 func _ready() -> void:
 	multiplayer.server_disconnected.connect(func() -> void:
@@ -143,6 +148,11 @@ func get_ip_address(peer_id: int) -> String:
 	return peer.get_peer(peer_id).get_remote_address()
 
 
+## Returns the [Player] from the [param peer_id].
+func get_player_from_peer_id(peer_id: int) -> Player:
+	return players.get(peer_id)
+
+
 ## Kicks the player with the specified [param peer_id]. If [param force] is [code]true[/code] the [signal MultiplayerPeer.peer_disconnected] signal will not be emitted.
 func kick(peer_id: int, force: bool = false) -> void:
 	multiplayer.multiplayer_peer.disconnect_peer(peer_id, force)
@@ -220,18 +230,45 @@ func send_config(new_max_board_space: int, new_max_hand_size: int) -> void:
 	])
 
 
+## Request a deckcode from the client. It will respond by rpc'ing [method send_deckcode].
+@rpc("authority", "call_remote", "reliable")
+func request_deckcode() -> void:
+	send_deckcode.rpc(_deckcode)
+
+
+## Send the client's deckcode to the server.
+@rpc("any_peer", "call_local", "reliable")
+func send_deckcode(deckcode: String) -> void:
+	var sender_peer_id: int = multiplayer.get_remote_sender_id()
+	var player: Player = get_player_from_peer_id(sender_peer_id)
+	
+	player.deckcode = deckcode if deckcode else "1/1:30/1"
+	
+	if is_server and not Deckcode.validate(player.deckcode):
+		# Invalid deckcode. This is unsalvageable.
+		quit()
+
+
 ## Sends all the information needed to start the game to the clients.
 @rpc("authority", "call_local", "reliable")
-func start_game(deckcode1: String, deckcode2: String) -> void:
+func start_game() -> void:
 	Game.current_player = Game.player1
 	Game.player1.empty_mana = 1
 	Game.player1.mana = 1
 	
+	# A bit of a hack but its fine...
+	while not multiplayer.multiplayer_peer or not Game.player1.deckcode or not Game.player2.deckcode:
+		await get_tree().create_timer(0.1).timeout
+	
+	if not multiplayer.multiplayer_peer:
+		quit()
+		return
+	
 	for i: int in 2:
-		var deckcode: String = deckcode1 if i == 0 else deckcode2
+		var deckcode: String = Game.player1.deckcode if i == 0 else Game.player2.deckcode
 		
 		var player: Player = Game.get_player_from_id(i)
-		var deck: Dictionary = Deckcode.import(deckcode, player)
+		var deck: Dictionary = Deckcode.import(deckcode, player, is_server)
 		
 		player.hero_class = deck.class
 		player.deck = deck.cards

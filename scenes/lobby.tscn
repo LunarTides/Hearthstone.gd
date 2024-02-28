@@ -1,12 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://bkgcab4wbckbx"]
+[gd_scene load_steps=3 format=3 uid="uid://bkgcab4wbckbx"]
 
 [ext_resource type="Script" path="res://scripts/scenes/lobby.gd" id="1_u14ym"]
 [ext_resource type="PackedScene" uid="uid://dr1v6run3aqn0" path="res://scenes/debug.tscn" id="2_o23aw"]
 
-[sub_resource type="LabelSettings" id="LabelSettings_s4xya"]
-font_size = 10
-
-[node name="Lobby" type="Control" node_paths=PackedStringArray("join_button", "host_button", "ip_address", "port", "info_label", "console_tip")]
+[node name="Lobby" type="Control" node_paths=PackedStringArray("join_button", "host_button", "ip_address", "port", "deckcode", "info_label")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -18,8 +15,8 @@ join_button = NodePath("Panel/JoinButton")
 host_button = NodePath("Panel/HostButton")
 ip_address = NodePath("Panel/IPAddress")
 port = NodePath("Panel/Port")
+deckcode = NodePath("Panel/Deckcode")
 info_label = NodePath("Panel/InfoLabel")
-console_tip = NodePath("Panel/ConsoleTip")
 
 [node name="Panel" type="Panel" parent="."]
 layout_mode = 1
@@ -42,10 +39,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -179.0
-offset_top = -25.0
-offset_right = -91.0
-offset_bottom = 30.0
+offset_left = -178.0
+offset_top = 105.0
+offset_right = -90.0
+offset_bottom = 160.0
 grow_horizontal = 2
 grow_vertical = 2
 text = "Join"
@@ -57,10 +54,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = 73.0
-offset_top = -25.0
-offset_right = 161.0
-offset_bottom = 30.0
+offset_left = 90.0
+offset_top = 105.0
+offset_right = 178.0
+offset_bottom = 160.0
 grow_horizontal = 2
 grow_vertical = 2
 text = "Host"
@@ -90,6 +87,18 @@ expand_to_text_length = true
 virtual_keyboard_type = 3
 clear_button_enabled = true
 
+[node name="Deckcode" type="LineEdit" parent="Panel"]
+layout_mode = 0
+offset_left = 13.0
+offset_top = 140.0
+offset_right = 164.0
+offset_bottom = 175.0
+text = "1/1:30/1"
+placeholder_text = "Deckcode"
+expand_to_text_length = true
+virtual_keyboard_type = 3
+clear_button_enabled = true
+
 [node name="InfoLabel" type="Label" parent="Panel"]
 visible = false
 layout_mode = 1
@@ -107,28 +116,12 @@ grow_vertical = 2
 text = "Please wait for a client to connect..."
 horizontal_alignment = 1
 
-[node name="ConsoleTip" type="Label" parent="Panel"]
-visible = false
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -202.5
-offset_top = 39.3
-offset_right = 202.5
-offset_bottom = 62.3
-grow_horizontal = 2
-grow_vertical = 2
-text = "Tip: Launch the game with '--server' to see more info"
-label_settings = SubResource("LabelSettings_s4xya")
-horizontal_alignment = 1
-
 [node name="Debug" parent="." instance=ExtResource("2_o23aw")]
+visible = false
 layout_mode = 1
 
 [connection signal="pressed" from="Panel/JoinButton" to="." method="_on_join_button_pressed"]
 [connection signal="pressed" from="Panel/HostButton" to="." method="_on_host_button_pressed"]
 [connection signal="text_submitted" from="Panel/IPAddress" to="." method="_on_ip_address_text_submitted"]
 [connection signal="text_submitted" from="Panel/Port" to="." method="_on_ip_address_text_submitted"]
+[connection signal="text_submitted" from="Panel/Deckcode" to="." method="_on_ip_address_text_submitted"]

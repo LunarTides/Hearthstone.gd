@@ -252,12 +252,15 @@ func start_game() -> void:
 	print("Changing to game scene...")
 	Multiplayer.change_scene_to_file.rpc("res://scenes/game/game.tscn")
 	
+	current_player = player1
+	player1.empty_mana = 1
+	player1.mana = 1
+	
+	Multiplayer.request_deckcode.rpc()
+	
 	game_started.emit()
 	
-	# Give the player the debug deck.
-	var deckcode: String = "1/1:30/1"
-	
-	Multiplayer.start_game.rpc(deckcode, deckcode)
+	Multiplayer.start_game.rpc()
 	
 	var coin: Card = get_card_from_blueprint(TheCoin, player2)
 	player2.add_to_hand(coin, player2.hand.size())

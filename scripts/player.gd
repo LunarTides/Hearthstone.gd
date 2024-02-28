@@ -40,6 +40,9 @@ var graveyard: Array[Card]
 var opponent: Player:
 	get:
 		return Game.get_player_from_id(1 - id)
+
+## The player's deckcode.
+var deckcode: String
 #endregion
 
 
