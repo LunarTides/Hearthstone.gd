@@ -13,14 +13,17 @@ extends Control
 
 #region Internal Functions
 func _ready() -> void:
-	if "--server" in OS.get_cmdline_user_args() or OS.has_feature("dedicated_server") or DisplayServer.get_name() == "headless":
-		_on_host_button_pressed()
+	if OS.get_cmdline_args().has("--server") or OS.has_feature("dedicated_server") or DisplayServer.get_name() == "headless":
+		host()
 #endregion
 
 
 #region Public Functions
 ## Makes the game start hosting a server.
 func host() -> void:
+	# Will not really work with a dedicated server but there it nothing i can do.
+	OS.set_restart_on_exit(true, ["--server"])
+	
 	join_button.hide()
 	host_button.hide()
 	ip_address.hide()
@@ -58,6 +61,10 @@ func _on_join_button_pressed() -> void:
 	# TODO: Add a deckcode input
 	Multiplayer.peer.create_client(ip_address.text if ip_address.text else "localhost", port.text.to_int() if port.text.is_valid_int() else 4545)
 	multiplayer.multiplayer_peer = Multiplayer.peer
+	Multiplayer.join(
+		ip_address.text,
+		port.text.to_int() if port.text.is_valid_int() else 4545,
+	)
 	
 	multiplayer.connected_to_server.connect(func() -> void:
 		join_button.hide()

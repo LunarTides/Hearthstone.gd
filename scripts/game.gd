@@ -115,7 +115,7 @@ var error_text: String:
 	set(new_error_text):
 		error_text = new_error_text
 		
-		var error_label: RichTextLabel = get_node("/root/Main/ErrorLabel") as RichTextLabel
+		var error_label: RichTextLabel = get_node("/root/ErrorLabel") as RichTextLabel
 		error_label.modulate.a = 1
 		error_label.text = "[center][color=red]" + error_text
 		
@@ -133,7 +133,30 @@ var _player2_server: Player
 
 
 #region Internal Functions
-func _unhandled_input(event: InputEvent) -> void:
+func _ready() -> void:
+	# Add error label
+	var error_label: RichTextLabel = RichTextLabel.new()
+	error_label.bbcode_enabled = true
+	error_label.fit_content = true
+	error_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	error_label.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	error_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	error_label.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	error_label.grow_vertical = Control.GROW_DIRECTION_BOTH
+	
+	error_label.anchors_preset = 14
+	error_label.anchor_top = 0.5
+	error_label.anchor_right = 1.0
+	error_label.anchor_bottom = 0.5
+	
+	error_label.offset_top = -11.5
+	error_label.offset_bottom = 11.5
+	
+	error_label.name = "ErrorLabel"
+	get_node("/root").add_child.call_deferred(error_label, true)
+
+
+func _input(event: InputEvent) -> void:
 	if event.is_released():
 		return
 	
@@ -141,25 +164,13 @@ func _unhandled_input(event: InputEvent) -> void:
 	
 	# TODO: Make a better way to quit
 	if key == "Escape":
-		get_tree().quit()
+		OS.set_restart_on_exit(false)
+		Multiplayer.quit()
 	
 	# TODO: Remove debug commands
-	if key == "F1":
+	if key == "F2":
 		layout_cards(player)
 		layout_cards(opponent)
-	
-	# F2 reveals a friendly card
-	elif key == "F2":
-		var cards: Array[Card] = get_cards_for_player(player).filter(func(card: Card) -> bool: return not card.is_hidden)
-		if cards.size() <= 0:
-			return
-		
-		var card: Card = cards.pick_random()
-		
-		send_packet(Enums.PACKET_TYPE.REVEAL, player.id, [card.location, card.index])
-	
-	# F3 reveals an enemy card. This should trigger the anticheat and drop the packet.
-	elif key == "F3":
 		var cards: Array[Card] = get_cards_for_player(opponent).filter(func(card: Card) -> bool: return card.is_hidden)
 		if cards.size() <= 0:
 			return

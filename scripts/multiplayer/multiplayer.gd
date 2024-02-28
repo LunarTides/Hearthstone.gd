@@ -28,7 +28,7 @@ var anticheat_level: int = -1
 ## The action that should bw taken if the anticheat gets triggered.
 var anticheat_conseqence: Enums.ANTICHEAT_CONSEQUENCE = Enums.ANTICHEAT_CONSEQUENCE.DROP_PACKET
 
-## The players of the game. ONLY ASSIGNED SERVER-SIDE.[br][br]
+## The players of the game.[br][br]
 ## Looks like this:
 ## [code]{2732163217: Player, 432769823: Player}[/code]
 var players: Dictionary = {}
@@ -83,7 +83,8 @@ func _ready() -> void:
 func _notification(what: int) -> void:
 	# Save on quit.
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
-		save_config()
+		OS.set_restart_on_exit(false)
+		quit()
 #endregion
 
 
@@ -147,6 +148,12 @@ func kick(peer_id: int, force: bool = false) -> void:
 	multiplayer.multiplayer_peer.disconnect_peer(peer_id, force)
 
 
+## Joins a server at the specified [param ip_address] and [param port].
+func join(ip_address: String, port: int) -> void:
+	peer.create_client(ip_address if ip_address else "localhost", port)
+	multiplayer.multiplayer_peer = Multiplayer.peer
+
+
 ## Quits to main menu. Use this instead of [code]Game.exit_to_main_menu[/code].
 func quit() -> void:
 	# CRITICAL: This function crashes clients somehow?
@@ -161,10 +168,10 @@ func quit() -> void:
 	peer = ENetMultiplayerPeer.new()
 	multiplayer.multiplayer_peer = null
 	
-	Game.exit_to_main_menu()
-	
 	if _is_server:
-		(await Game.wait_for_node("/root/Lobby")).host()
+		get_tree().quit()
+	else:
+		Game.exit_to_main_menu()
 #endregion
 
 
@@ -181,6 +188,15 @@ func assign_player(id: int) -> void:
 	
 	Game.opponent = Player.new()
 	Game.opponent.id = 1 - id
+	
+	Multiplayer.players[multiplayer.get_unique_id()] = Game.player
+	
+	for peer: int in multiplayer.get_peers():
+		if peer == 1:
+			continue
+		
+		Multiplayer.players[peer] = Game.opponent
+		break
 
 
 ## Makes the client switch to a scene. CAN ONLY BE RPC CALLED SERVER SIDE.
