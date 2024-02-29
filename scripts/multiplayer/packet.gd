@@ -132,7 +132,7 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, info: Arra
 		# Create card
 		Enums.PACKET_TYPE.CREATE_CARD:
 			# The info needs to be correct.
-			if not _anticheat_info_check(info, 3, PackedInt32Array([TYPE_STRING, TYPE_INT, TYPE_INT])):
+			if not _anticheat_info_check(info, PackedInt32Array([TYPE_STRING, TYPE_INT, TYPE_INT])):
 				feedback.call("Invalid CREATE_CARD info.")
 				return false
 			
@@ -164,7 +164,7 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, info: Arra
 		# Draw cards
 		Enums.PACKET_TYPE.DRAW_CARDS:
 			# The info needs to be correct.
-			if not _anticheat_info_check(info, 1, PackedInt32Array([TYPE_INT])):
+			if not _anticheat_info_check(info, PackedInt32Array([TYPE_INT])):
 				feedback.call("Invalid DRAW_CARDS info.")
 				return false
 			
@@ -178,7 +178,7 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, info: Arra
 		# End turn
 		Enums.PACKET_TYPE.END_TURN:
 			# The info needs to be correct.
-			if not _anticheat_info_check(info, 0, PackedInt32Array([])):
+			if not _anticheat_info_check(info, PackedInt32Array([])):
 				feedback.call("Invalid END_TURN info.")
 				return false
 			
@@ -195,7 +195,7 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, info: Arra
 		# Summon
 		Enums.PACKET_TYPE.SUMMON:
 			# The info needs to be correct.
-			if not _anticheat_info_check(info, 3, PackedInt32Array([TYPE_INT, TYPE_INT, TYPE_INT])):
+			if not _anticheat_info_check(info, PackedInt32Array([TYPE_INT, TYPE_INT, TYPE_INT])):
 				feedback.call("Invalid SUMMON info.")
 				return false
 			
@@ -242,7 +242,7 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, info: Arra
 		# Play
 		Enums.PACKET_TYPE.PLAY:
 			# The info needs to be correct.
-			if not _anticheat_info_check(info, 3, PackedInt32Array([TYPE_INT, TYPE_INT, TYPE_INT])):
+			if not _anticheat_info_check(info, PackedInt32Array([TYPE_INT, TYPE_INT, TYPE_INT])):
 				feedback.call("Invalid PLAY info.")
 				return false
 			
@@ -291,7 +291,7 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, info: Arra
 		# Reveal
 		Enums.PACKET_TYPE.REVEAL:
 			# The info needs to be correct.
-			if not _anticheat_info_check(info, 2, PackedInt32Array([TYPE_INT, TYPE_INT])):
+			if not _anticheat_info_check(info, PackedInt32Array([TYPE_INT, TYPE_INT])):
 				feedback.call("Invalid REVEAL info.")
 				return false
 			
@@ -306,7 +306,7 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, info: Arra
 		# Trigger ability
 		Enums.PACKET_TYPE.TRIGGER_ABILITY:
 			# The info needs to be correct.
-			if not _anticheat_info_check(info, 3, PackedInt32Array([TYPE_INT, TYPE_INT, TYPE_INT])):
+			if not _anticheat_info_check(info, PackedInt32Array([TYPE_INT, TYPE_INT, TYPE_INT])):
 				feedback.call("Invalid TRIGGER_ABILITY info.")
 				return false
 			
@@ -342,7 +342,7 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, info: Arra
 			
 			# Check if the card has already been triggered.
 			if _anticheat_check(_in_packet_history([location, location_index, ability], 3, true), 3):
-				feedback.call("That card does not have sufficent reason to for it's ability to be triggered.")
+				feedback.call("That card does not have sufficent reason to for its ability to be triggered.")
 				return false
 		
 		_:
@@ -356,9 +356,9 @@ func _anticheat_check(condition: bool, min_anticheat_level: int) -> bool:
 	return condition and (Multiplayer.anticheat_level >= min_anticheat_level or Multiplayer.anticheat_level < 0)
 
 
-## Returns if [param info]'s size is [param size] and the elements in [param info] matches the [param types].
-func _anticheat_info_check(info: Array, size: int, types: PackedInt32Array) -> bool:
-	if info.size() != size:
+## Returns if [param info]'s size is equal to [param types]'s size and the elements in [param info] matches the types in [param types].
+func _anticheat_info_check(info: Array, types: PackedInt32Array) -> bool:
+	if info.size() != types.size():
 		return false
 	
 	var i: int = 0
