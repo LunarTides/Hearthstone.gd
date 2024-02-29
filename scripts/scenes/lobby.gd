@@ -68,17 +68,22 @@ func _on_join_button_pressed() -> void:
 		port.text.to_int() if port.text.is_valid_int() else 4545,
 	)
 	
-	Multiplayer._deckcode = deckcode.text
-	
 	multiplayer.connected_to_server.connect(func() -> void:
-		join_button.hide()
-		host_button.hide()
-		ip_address.hide()
-		port.hide()
-		deckcode.hide()
+		Multiplayer.send_deckcode.rpc_id(1, deckcode.text)
 		
-		info_label.text = "Waiting for another player..."
-		info_label.show()
+		Multiplayer.server_responded.connect(func(success: bool) -> void:
+			if not success:
+				return
+			
+			join_button.hide()
+			host_button.hide()
+			ip_address.hide()
+			port.hide()
+			deckcode.hide()
+			
+			info_label.text = "Waiting for another player..."
+			info_label.show()
+		)
 	)
 
 

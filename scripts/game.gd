@@ -230,6 +230,7 @@ func start_game() -> void:
 			player_id = 1 - id
 		
 		player.id = player_id
+		player.peer_id = peer
 		Multiplayer.players[peer] = player
 		
 		if id == i:
@@ -256,11 +257,10 @@ func start_game() -> void:
 	player1.empty_mana = 1
 	player1.mana = 1
 	
-	Multiplayer.request_deckcode.rpc()
-	
 	game_started.emit()
 	
-	Multiplayer.start_game.rpc()
+	var deckcodes: Dictionary = Multiplayer._deckcodes
+	Multiplayer.start_game.rpc(deckcodes[player1.peer_id], deckcodes[player2.peer_id])
 	
 	var coin: Card = get_card_from_blueprint(TheCoin, player2)
 	player2.add_to_hand(coin, player2.hand.size())

@@ -2,6 +2,11 @@ extends Node
 ## Singleton for multiplayer stuff.
 ## @experimental
 
+#region Signals
+## Emits when the server responds to a client's packet. Only responds to [method send_deckcode] for now.
+signal server_responded(success: bool)
+#endregion
+
 
 #region Constant Variables
 const CardScene: PackedScene = preload("res://scenes/card.tscn")
@@ -50,7 +55,8 @@ var is_server: bool:
 
 
 #region Private Variables
-var _deckcode: String
+# Only assigned server-side.
+var _deckcodes: Dictionary
 #endregion
 
 
@@ -79,6 +85,10 @@ func _ready() -> void:
 		if clients < max_clients:
 			print("Client connected, waiting for %d more..." % (Game.max_players - clients))
 			return
+		
+		# Wait until the player sends their deckcode.
+		while _deckcodes.size() < clients:
+			await get_tree().create_timer(0.1).timeout
 		
 		print("Client connected, starting game...")
 		Game.start_game()
@@ -199,13 +209,16 @@ func assign_player(id: int) -> void:
 	Game.opponent = Player.new()
 	Game.opponent.id = 1 - id
 	
-	Multiplayer.players[multiplayer.get_unique_id()] = Game.player
+	var client_peer_id: int = multiplayer.get_unique_id()
+	Multiplayer.players[client_peer_id] = Game.player
+	Game.get_player_from_id(id).peer_id = client_peer_id
 	
 	for peer: int in multiplayer.get_peers():
 		if peer == 1:
 			continue
 		
 		Multiplayer.players[peer] = Game.opponent
+		Game.get_player_from_id(1 - id).peer_id = peer
 		break
 
 
@@ -230,24 +243,30 @@ func send_config(new_max_board_space: int, new_max_hand_size: int) -> void:
 	])
 
 
-## Request a deckcode from the client. It will respond by rpc'ing [method send_deckcode].
-@rpc("authority", "call_remote", "reliable")
-func request_deckcode() -> void:
-	send_deckcode.rpc(_deckcode)
-
-
 ## Send the client's deckcode to the server.
-@rpc("any_peer", "call_local", "reliable")
+@rpc("any_peer", "call_remote", "reliable")
 func send_deckcode(deckcode: String) -> void:
 	var sender_peer_id: int = multiplayer.get_remote_sender_id()
-	var player: Player = get_player_from_peer_id(sender_peer_id)
+	deckcode = deckcode if deckcode else "1/1:30/1"
 	
-	player.deckcode = deckcode if deckcode else "1/1:30/1"
+	if not Deckcode.validate(deckcode):
+		server_response.rpc_id(sender_peer_id, false, "Invalid deckcode")
+		kick(sender_peer_id, true)
+		return
 	
-	if is_server and not Deckcode.validate(player.deckcode):
-		# Invalid deckcode. This is unsalvageable.
-		feedback.rpc("ERROR - A client sent an invalid deckcode, restarting...")
-		quit()
+	_deckcodes[sender_peer_id] = deckcode
+	server_response.rpc_id(sender_peer_id, true)
+
+
+## Sends a response from the server to the client.[br]
+## [br]
+## If [param text] is set, it will call [method feedback] on the client with that text too.
+@rpc("authority", "call_remote", "reliable")
+func server_response(success: bool, text: String = "") -> void:
+	if text:
+		feedback(text)
+	
+	server_responded.emit(success)
 
 
 ## Sends feedback to the client using [member Game.error_text].
@@ -261,19 +280,13 @@ func feedback(text: String) -> void:
 
 ## Sends all the information needed to start the game to the clients.
 @rpc("authority", "call_local", "reliable")
-func start_game() -> void:
+func start_game(deckcode1: String, deckcode2: String) -> void:
 	Game.current_player = Game.player1
 	Game.player1.empty_mana = 1
 	Game.player1.mana = 1
 	
-	# A bit of a hack but its fine...
-	while not multiplayer.multiplayer_peer or not Game.player1.deckcode or not Game.player2.deckcode:
-		await get_tree().create_timer(0.1).timeout
-	
-	if not multiplayer.multiplayer_peer:
-		Game.error_text = "Multiplayer disconnected for unknown reason."
-		quit()
-		return
+	Game.player1.deckcode = deckcode1
+	Game.player2.deckcode = deckcode2
 	
 	for i: int in 2:
 		var deckcode: String = Game.player1.deckcode if i == 0 else Game.player2.deckcode

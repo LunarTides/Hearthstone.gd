@@ -43,6 +43,9 @@ var opponent: Player:
 
 ## The player's deckcode.
 var deckcode: String
+
+## The player's peer id.
+var peer_id: int
 #endregion
 
 
