@@ -1,7 +1,106 @@
-[gd_scene load_steps=3 format=3 uid="uid://bkgcab4wbckbx"]
+[gd_scene load_steps=15 format=3 uid="uid://bkgcab4wbckbx"]
 
 [ext_resource type="Script" path="res://scripts/scenes/lobby.gd" id="1_u14ym"]
 [ext_resource type="PackedScene" uid="uid://dr1v6run3aqn0" path="res://scenes/debug.tscn" id="2_o23aw"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bt1qw"]
+bg_color = Color(0.262745, 0.164706, 0, 1)
+corner_radius_top_left = 60
+corner_radius_top_right = 60
+corner_radius_bottom_right = 60
+corner_radius_bottom_left = 60
+shadow_size = 270
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_goeq1"]
+bg_color = Color(0, 0.509804, 0.701961, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8qtr6"]
+bg_color = Color(0, 0.713726, 0.976471, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_aa1jc"]
+bg_color = Color(0, 0.317647, 0.447059, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_x62w4"]
+bg_color = Color(0, 0.509804, 0.701961, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v6lv5"]
+bg_color = Color(0, 0.546086, 0.482081, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wx4wt"]
+bg_color = Color(0, 0.756863, 0.67451, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_g21qg"]
+bg_color = Color(0, 0.34902, 0.305882, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vhpof"]
+bg_color = Color(0, 0.545098, 0.482353, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1rojc"]
+bg_color = Color(0.117647, 0.101961, 0.0627451, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+corner_radius_top_left = 60
+corner_radius_top_right = 60
+corner_radius_bottom_right = 60
+corner_radius_bottom_left = 60
+expand_margin_left = 10.0
+expand_margin_right = 10.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fjp6v"]
+bg_color = Color(0.117647, 0.101961, 0.0627451, 1)
+corner_radius_top_left = 60
+corner_radius_top_right = 60
+corner_radius_bottom_right = 60
+corner_radius_bottom_left = 60
+expand_margin_left = 10.0
+expand_margin_right = 10.0
+
+[sub_resource type="Theme" id="Theme_l2osu"]
+LineEdit/styles/focus = SubResource("StyleBoxFlat_1rojc")
+LineEdit/styles/normal = SubResource("StyleBoxFlat_fjp6v")
 
 [node name="Lobby" type="Control" node_paths=PackedStringArray("join_button", "host_button", "ip_address", "port", "deckcode", "info_label")]
 layout_mode = 3
@@ -25,12 +124,13 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -234.0
-offset_top = -182.0
-offset_right = 232.0
-offset_bottom = 174.0
+offset_left = -233.0
+offset_top = -178.0
+offset_right = 233.0
+offset_bottom = 178.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_bt1qw")
 
 [node name="JoinButton" type="Button" parent="Panel"]
 layout_mode = 1
@@ -39,12 +139,17 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -178.0
-offset_top = 105.0
-offset_right = -90.0
-offset_bottom = 160.0
+offset_left = -175.0
+offset_top = 72.0
+offset_right = -87.0
+offset_bottom = 127.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_font_sizes/font_size = 26
+theme_override_styles/normal = SubResource("StyleBoxFlat_goeq1")
+theme_override_styles/hover = SubResource("StyleBoxFlat_8qtr6")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_aa1jc")
+theme_override_styles/focus = SubResource("StyleBoxFlat_x62w4")
 text = "Join"
 
 [node name="HostButton" type="Button" parent="Panel"]
@@ -54,20 +159,26 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = 90.0
-offset_top = 105.0
-offset_right = 178.0
-offset_bottom = 160.0
+offset_left = 93.0
+offset_top = 72.0
+offset_right = 181.0
+offset_bottom = 127.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_font_sizes/font_size = 26
+theme_override_styles/normal = SubResource("StyleBoxFlat_v6lv5")
+theme_override_styles/hover = SubResource("StyleBoxFlat_wx4wt")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_g21qg")
+theme_override_styles/focus = SubResource("StyleBoxFlat_vhpof")
 text = "Host"
 
 [node name="IPAddress" type="LineEdit" parent="Panel"]
 layout_mode = 0
-offset_left = 13.0
-offset_top = 54.0
-offset_right = 164.0
-offset_bottom = 89.0
+offset_left = 146.0
+offset_top = 101.0
+offset_right = 297.0
+offset_bottom = 136.0
+theme = SubResource("Theme_l2osu")
 placeholder_text = "IP Address"
 max_length = 45
 expand_to_text_length = true
@@ -76,10 +187,11 @@ clear_button_enabled = true
 
 [node name="Port" type="LineEdit" parent="Panel"]
 layout_mode = 0
-offset_left = 13.0
-offset_top = 97.0
-offset_right = 164.0
-offset_bottom = 132.0
+offset_left = 146.0
+offset_top = 144.0
+offset_right = 297.0
+offset_bottom = 179.0
+theme = SubResource("Theme_l2osu")
 text = "4545"
 placeholder_text = "Port"
 max_length = 5
@@ -89,10 +201,11 @@ clear_button_enabled = true
 
 [node name="Deckcode" type="LineEdit" parent="Panel"]
 layout_mode = 0
-offset_left = 13.0
-offset_top = 140.0
-offset_right = 164.0
-offset_bottom = 175.0
+offset_left = 146.0
+offset_top = 187.0
+offset_right = 297.0
+offset_bottom = 222.0
+theme = SubResource("Theme_l2osu")
 text = "1/1:30/1"
 placeholder_text = "Deckcode"
 expand_to_text_length = true
@@ -113,11 +226,13 @@ offset_right = 130.0
 offset_bottom = 11.5
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_font_sizes/font_size = 26
 text = "Please wait for a client to connect..."
 horizontal_alignment = 1
 
 [node name="Debug" parent="." instance=ExtResource("2_o23aw")]
 layout_mode = 1
+metadata/_edit_lock_ = true
 
 [connection signal="pressed" from="Panel/JoinButton" to="." method="_on_join_button_pressed"]
 [connection signal="pressed" from="Panel/HostButton" to="." method="_on_host_button_pressed"]

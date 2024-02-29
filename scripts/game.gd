@@ -114,14 +114,14 @@ var max_players: int = 2
 ## Returns the board node
 var board_node: BoardNode:
 	get:
-		return get_node("/root/Main/Board") as BoardNode
+		return get_tree().root.get_node("Main/Board") as BoardNode
 
 ## Returns an error label.
 var error_text: String:
 	set(new_error_text):
 		error_text = new_error_text
 		
-		var error_label: RichTextLabel = get_node("/root/ErrorLabel") as RichTextLabel
+		var error_label: RichTextLabel = get_tree().root.get_node("ErrorLabel") as RichTextLabel
 		error_label.modulate.a = 1
 		error_label.text = "[center][color=red]" + error_text
 		
@@ -159,7 +159,7 @@ func _ready() -> void:
 	error_label.offset_bottom = 11.5
 	
 	error_label.name = "ErrorLabel"
-	get_node("/root").add_child.call_deferred(error_label, true)
+	get_tree().root.add_child.call_deferred(error_label, true)
 
 
 func _input(event: InputEvent) -> void:

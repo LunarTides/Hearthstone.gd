@@ -1,6 +1,8 @@
 extends Node
+## @experimental
 
 
+#region Public Functions
 ## Runs the anticheat on a packet.
 func run(packet_type: Enums.PACKET_TYPE, sender_peer_id: int, actor_player: Player, info: Array) -> bool:
 	if Multiplayer.anticheat_level == 0:
@@ -19,8 +21,11 @@ func run(packet_type: Enums.PACKET_TYPE, sender_peer_id: int, actor_player: Play
 	
 	assert(method, "No anticheat logic for '%s'" % Enums.PACKET_TYPE.keys()[packet_type])
 	return method.call(sender_peer_id, sender_player, actor_player, info)
+#endregion
 
 
+#region Private Functions
+#region Helper Functions
 ## Returns if [param condition] is true and [member anticheat_level] is more or equal to [param min_level].
 func _check(condition: bool, min_level: int) -> bool:
 	return condition and Multiplayer.anticheat_level >= min_level
@@ -73,8 +78,10 @@ func _in_packet_history(info: Array, range: int, only_use_server_packets: bool =
 # Send feedback to the client. Optimized for the anticheat.
 func _feedback(text: String, sender_peer_id: int) -> void:
 	Multiplayer.feedback.rpc_id(sender_peer_id, "Anticheat Failed - %s" % text)
+#endregion
 
 
+#region Packet Specific Anticheat
 # Create Card
 func _run_create_card_packet(sender_peer_id: int, sender_player: Player, actor_player: Player, info: Array) -> bool:
 	# The info needs to be correct.
@@ -311,3 +318,5 @@ func _run_trigger_ability_packet(sender_peer_id: int, sender_player: Player, act
 		return false
 	
 	return true
+#endregion
+#endregion
