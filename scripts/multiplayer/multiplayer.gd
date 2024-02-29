@@ -28,7 +28,12 @@ var max_clients: int = 2
 ## 2: Basic cheat detection.
 ## 3-inf: More-and-more aggressive anticheat.
 ## -1: Max anticheat.[/code]
-var anticheat_level: int = -1
+var anticheat_level: int = -1:
+	get:
+		if anticheat_level < 0:
+			return 10000
+		
+		return anticheat_level
 
 ## The action that should bw taken if the anticheat gets triggered.
 var anticheat_conseqence: Enums.ANTICHEAT_CONSEQUENCE = Enums.ANTICHEAT_CONSEQUENCE.DROP_PACKET

@@ -171,13 +171,6 @@ func _input(event: InputEvent) -> void:
 	if key == "F2":
 		layout_cards(player)
 		layout_cards(opponent)
-		var cards: Array[Card] = get_cards_for_player(opponent).filter(func(card: Card) -> bool: return card.is_hidden)
-		if cards.size() <= 0:
-			return
-		
-		var card: Card = cards.pick_random()
-		
-		send_packet(Enums.PACKET_TYPE.REVEAL, opponent.id, [card.location, card.index])
 #endregion
 
 

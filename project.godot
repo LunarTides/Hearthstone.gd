@@ -24,6 +24,7 @@ Multiplayer="*res://scripts/multiplayer/multiplayer.gd"
 Deckcode="*res://scripts/functions/deckcode.gd"
 UPnP="*res://scripts/multiplayer/upnp.gd"
 Packet="*res://scripts/multiplayer/packet.gd"
+Anticheat="*res://scripts/multiplayer/anticheat.gd"
 
 [debug]
 
