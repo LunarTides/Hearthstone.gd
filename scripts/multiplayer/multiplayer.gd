@@ -246,7 +246,14 @@ func send_deckcode(deckcode: String) -> void:
 	
 	if is_server and not Deckcode.validate(player.deckcode):
 		# Invalid deckcode. This is unsalvageable.
+		feedback.rpc("ERROR - A client sent an invalid deckcode, restarting...")
 		quit()
+
+
+## Sends feedback to the client using [member Game.error_text].
+@rpc("authority", "call_local", "reliable")
+func feedback(text: String) -> void:
+	Game.error_text = "[Server]: %s" % text
 
 
 ## Sends all the information needed to start the game to the clients.
@@ -261,6 +268,7 @@ func start_game() -> void:
 		await get_tree().create_timer(0.1).timeout
 	
 	if not multiplayer.multiplayer_peer:
+		Game.error_text = "Multiplayer disconnected for unknown reason."
 		quit()
 		return
 	

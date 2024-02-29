@@ -98,6 +98,7 @@ func __send_packet(packet_type: Enums.PACKET_TYPE, player_id: int, info: Array) 
 	# Invalid packet type
 	if not Enums.PACKET_TYPE.values().has(packet_type):
 		var message: String = "Invalid packet '%s'." % packet_type
+		Multiplayer.feedback.rpc_id(sender_peer_id, message)
 		assert(false, message)
 		
 		push_error(message + " The client who sent this packet might be modded. If you think this is a bug, open an issue here: https://github.com/LunarTides/Hearthstone.gd")
@@ -122,6 +123,10 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, info: Arra
 		return true
 	
 	
+	var feedback: Callable = func(text: String) -> void:
+		Multiplayer.feedback.rpc_id(sender_peer_id, "Anticheat Failed - %s" % text)
+	
+	
 	# TODO: More Anticheat
 	match packet_type:
 		# Create card
@@ -132,19 +137,23 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, info: Arra
 			
 			# Blueprint path needs to be valid.
 			if _anticheat_check(load(blueprint_path) == null, 1):
+				feedback.call("Invalid blueprint path.")
 				return false
 			
 			# Only the server can do this.
 			if _anticheat_check(true, 2):
+				feedback.call("Only the server can do this.")
 				return false
 			
 			if location == Enums.LOCATION.HAND:
 				# The player needs to have enough space in their hand.
 				if _anticheat_check(actor_player.hand.size() >= Game.max_hand_size, 1):
+					feedback.call("You do not have enough space in your hand.")
 					return false
 			elif location == Enums.LOCATION.BOARD:
 				# The player needs to have enough space on their board.
 				if _anticheat_check(actor_player.board.size() >= Game.max_board_space, 1):
+					feedback.call("You do not have enough space on your board.")
 					return false
 		
 		# Draw cards
@@ -153,16 +162,19 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, info: Arra
 			
 			# Only the server can do this.
 			if _anticheat_check(true, 2):
+				feedback.call("Only the server can do this.")
 				return false
 		
 		# End turn
 		Enums.PACKET_TYPE.END_TURN:
 			# The player whose turn it is should be the same player as the one who sent the packet.
 			if _anticheat_check(sender_player != Game.current_player, 2):
+				feedback.call("It is not your turn.")
 				return false
 			
 			# The player who ends the turn should be the same player as the one who sent the packet.
 			if _anticheat_check(sender_player != actor_player, 2):
+				feedback.call("You are not authorized to end your opponent's turn.")
 				return false
 		
 		# Summon
@@ -175,26 +187,36 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, info: Arra
 			
 			# The card should exist.
 			if _anticheat_check(not card, 1):
+				feedback.call("The specified card does not exist in Player %d's %s at %d." % [
+					sender_player.id + 1,
+					Enums.LOCATION.keys()[location],
+					location_index,
+				])
 				return false
 				
 			# The player should have enough space on their board.
 			if _anticheat_check(actor_player.board.size() >= Game.max_board_space, 1):
+				feedback.call("You do not have enough space on your board.")
 				return false
 				
 			# The player who summons the card should be the same player as the one who sent the packet.
 			if _anticheat_check(sender_player != actor_player, 2):
+				feedback.call("You are not authorized to summon a card on behalf of your opponent.")
 				return false
 			
 			# Only the server can do this.
 			if _anticheat_check(true, 2):
+				feedback.call("Only the server can do this.")
 				return false
 			
 			# The card should be in the player's hand.
 			if _anticheat_check(card.location != Enums.LOCATION.HAND, 3):
+				feedback.call("That card is not in your hand.")
 				return false
 			
 			# Check if the card is queued to be summoned.
 			if _anticheat_check(_in_packet_history([location, location_index, board_index], 2, true), 3):
+				feedback.call("That card does not have sufficent reason to be summoned.")
 				return false
 		
 		# Play
@@ -207,28 +229,38 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, info: Arra
 			
 			# The card should exist.
 			if _anticheat_check(not card, 1):
+				feedback.call("The specified card does not exist in Player %d's %s at %d." % [
+					sender_player.id + 1,
+					Enums.LOCATION.keys()[location],
+					location_index,
+				])
 				return false
 			
 			# The player should afford the card.
 			if _anticheat_check(actor_player.mana < card.cost, 1):
+				feedback.call("You can not afford this card.")
 				return false
 			
 			# It should be the player's turn.
 			if _anticheat_check(actor_player != Game.current_player, 1):
+				feedback.call("It is not your turn.")
 				return false
 			
-			# The player who summons the card should be the same player as the one who sent the packet.
+			# The player who play the card should be the same player as the one who sent the packet.
 			if _anticheat_check(sender_player != actor_player, 2):
+				feedback.call("You are not authorized to play a card on behalf of your opponent.")
 				return false
 			
 			# The card should be in the player's hand.
 			if _anticheat_check(card.location != Enums.LOCATION.HAND, 3):
+				feedback.call("That card is not in your card.")
 				return false
 			
 			# Minion
 			if card.types.has(Enums.TYPE.MINION):
 				# The player should have enough space on their board.
 				if _anticheat_check(actor_player.board.size() >= Game.max_board_space, 1):
+					feedback.call("You do not have enough space on the board.")
 					return false
 		
 		# Reveal
@@ -238,6 +270,7 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, info: Arra
 			
 			# The player whose card gets revealed should be the same player as the one who sent the packet
 			if _anticheat_check(sender_player != actor_player, 2):
+				feedback.call("You are not authorized to reveal a card on behalf of your opponent.")
 				return false
 		
 		# Trigger ability
@@ -250,14 +283,21 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, info: Arra
 			
 			# The card should exist.
 			if _anticheat_check(card == null, 1):
+				feedback.call("The specified card does not exist in Player %d's %s at %d." % [
+					sender_player.id + 1,
+					Enums.LOCATION.keys()[location],
+					location_index,
+				])
 				return false
 			
 			# The player who sent the packet should own the card.
 			if _anticheat_check(sender_player != actor_player, 2):
+				feedback.call("You are not authorized to trigger a card's ability on behalf of your opponent.")
 				return false
 			
 			# Check if the card has already been triggered.
 			if _anticheat_check(_in_packet_history([location, location_index, ability], 3, true), 3):
+				feedback.call("That card does not have sufficent reason to for it's ability to be triggered.")
 				return false
 		
 		_:
