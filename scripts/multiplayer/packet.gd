@@ -325,6 +325,16 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, info: Arra
 				])
 				return false
 			
+			# The ability should exist.
+			if _anticheat_check(!Enums.ABILITY.values().has(ability), 1):
+				feedback.call("The specified ability (%s) does not exist." % ability)
+				return false
+			
+			# The ability should exist on that card.
+			if _anticheat_check(!card.abilities.has(ability), 1):
+				feedback.call("The specified card does not have that ability (%s)." % Enums.ABILITY.keys()[ability])
+				return false
+			
 			# The player who sent the packet should own the card.
 			if _anticheat_check(sender_player != actor_player, 2):
 				feedback.call("You are not authorized to trigger a card's ability on behalf of your opponent.")
@@ -357,7 +367,10 @@ func _anticheat_info_check(info: Array, size: int, types: PackedInt32Array) -> b
 		
 		if actual_type != expected_type:
 			# Allow this.
-			if actual_type == TYPE_INT and expected_type == TYPE_FLOAT:
+			if (
+				actual_type == TYPE_INT and expected_type == TYPE_FLOAT or
+				actual_type == TYPE_FLOAT and expected_type == TYPE_INT
+			):
 				i += 1
 				continue
 			

@@ -251,9 +251,12 @@ func send_deckcode(deckcode: String) -> void:
 
 
 ## Sends feedback to the client using [member Game.error_text].
-@rpc("authority", "call_local", "reliable")
+@rpc("authority", "call_remote", "reliable")
 func feedback(text: String) -> void:
-	Game.error_text = "[Server]: %s" % text
+	text = "[Server]: %s" % text
+	
+	print(text)
+	Game.error_text = text
 
 
 ## Sends all the information needed to start the game to the clients.
