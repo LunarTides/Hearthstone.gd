@@ -12,7 +12,7 @@ signal game_started
 #region Constant Variables
 const CardScene: PackedScene = preload("res://scenes/card.tscn")
 const Sheep: Blueprint = preload("res://cards/sheep/sheep.tres")
-const TheCoin: Blueprint = preload("res://cards/the-coin/the-coin.tres")
+const TheCoin: Blueprint = preload("res://cards/the_coin/the_coin.tres")
 
 # There should be a better way of doing this.
 const CARD_BOUNDS_X: float = 9.05

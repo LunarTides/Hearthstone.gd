@@ -303,6 +303,8 @@ func _accept_packet(packet_type: Enums.PACKET_TYPE, sender_peer_id: int, player_
 
 # Here are the functions that gets called on the clients + server when a packet gets sent. Handled in _accept_packet
 func _accept_summon_packet(player_id: int, info: Array) -> void:
+	# TODO: Determine if cards should be found like this.
+	#		This is problematic if a card is in the NONE location.
 	var location: Enums.LOCATION = info[0]
 	var location_index: int = info[1]
 	var board_index: int = info[2]

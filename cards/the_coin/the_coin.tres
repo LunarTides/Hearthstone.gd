@@ -1,7 +1,7 @@
 [gd_resource type="Resource" load_steps=3 format=3 uid="uid://ddtglwgoe0a6t"]
 
-[ext_resource type="Script" path="res://cards/the-coin/the-coin.gd" id="1_5rkkv"]
-[ext_resource type="Texture2D" uid="uid://cj3i2247n3cjl" path="res://cards/the-coin/the-coin.png" id="2_lugst"]
+[ext_resource type="Script" path="res://cards/the_coin/the_coin.gd" id="1_5rkkv"]
+[ext_resource type="Texture2D" uid="uid://cj3i2247n3cjl" path="res://cards/the_coin/the_coin.png" id="2_lugst"]
 
 [resource]
 script = ExtResource("1_5rkkv")
