@@ -70,7 +70,11 @@ func _process(delta: float) -> void:
 func _on_send_packet_button_pressed() -> void:
 	var packet_type: Enums.PACKET_TYPE = Enums.PACKET_TYPE.values()[send_packet_type.selected]
 	var player_id: int = send_packet_player.value
-	var info: Array = JSON.parse_string(send_packet_info.text)
+	
+	var info: Variant = JSON.parse_string(send_packet_info.text)
+	if typeof(info) != TYPE_ARRAY:
+		Game.error_text = "The info needs to be a valid JSON Array."
+		return
 	
 	Game.send_packet(packet_type, player_id, info, true)
 

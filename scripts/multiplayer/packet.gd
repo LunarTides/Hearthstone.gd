@@ -131,6 +131,11 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, info: Arra
 	match packet_type:
 		# Create card
 		Enums.PACKET_TYPE.CREATE_CARD:
+			# The info needs to be correct.
+			if not _anticheat_info_check(info, 3, PackedInt32Array([TYPE_STRING, TYPE_INT, TYPE_INT])):
+				feedback.call("Invalid CREATE_CARD info.")
+				return false
+			
 			var blueprint_path: String = info[0]
 			var location: Enums.LOCATION = info[1]
 			var location_index: int = info[2]
@@ -158,6 +163,11 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, info: Arra
 		
 		# Draw cards
 		Enums.PACKET_TYPE.DRAW_CARDS:
+			# The info needs to be correct.
+			if not _anticheat_info_check(info, 1, PackedInt32Array([TYPE_INT])):
+				feedback.call("Invalid DRAW_CARDS info.")
+				return false
+			
 			var amount: int = info[0]
 			
 			# Only the server can do this.
@@ -167,6 +177,11 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, info: Arra
 		
 		# End turn
 		Enums.PACKET_TYPE.END_TURN:
+			# The info needs to be correct.
+			if not _anticheat_info_check(info, 0, PackedInt32Array([])):
+				feedback.call("Invalid END_TURN info.")
+				return false
+			
 			# The player whose turn it is should be the same player as the one who sent the packet.
 			if _anticheat_check(sender_player != Game.current_player, 2):
 				feedback.call("It is not your turn.")
@@ -179,6 +194,11 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, info: Arra
 		
 		# Summon
 		Enums.PACKET_TYPE.SUMMON:
+			# The info needs to be correct.
+			if not _anticheat_info_check(info, 3, PackedInt32Array([TYPE_INT, TYPE_INT, TYPE_INT])):
+				feedback.call("Invalid SUMMON info.")
+				return false
+			
 			var location: Enums.LOCATION = info[0]
 			var location_index: int = info[1]
 			var board_index: int = info[2]
@@ -221,6 +241,11 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, info: Arra
 		
 		# Play
 		Enums.PACKET_TYPE.PLAY:
+			# The info needs to be correct.
+			if not _anticheat_info_check(info, 3, PackedInt32Array([TYPE_INT, TYPE_INT, TYPE_INT])):
+				feedback.call("Invalid PLAY info.")
+				return false
+			
 			var location: Enums.LOCATION = info[0]
 			var location_index: int = info[1]
 			var board_index: int = info[2]
@@ -265,6 +290,11 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, info: Arra
 		
 		# Reveal
 		Enums.PACKET_TYPE.REVEAL:
+			# The info needs to be correct.
+			if not _anticheat_info_check(info, 2, PackedInt32Array([TYPE_INT, TYPE_INT])):
+				feedback.call("Invalid REVEAL info.")
+				return false
+			
 			var location: Enums.LOCATION = info[0]
 			var index: int = info[1]
 			
@@ -275,6 +305,11 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, info: Arra
 		
 		# Trigger ability
 		Enums.PACKET_TYPE.TRIGGER_ABILITY:
+			# The info needs to be correct.
+			if not _anticheat_info_check(info, 3, PackedInt32Array([TYPE_INT, TYPE_INT, TYPE_INT])):
+				feedback.call("Invalid TRIGGER_ABILITY info.")
+				return false
+			
 			var location: Enums.LOCATION = info[0]
 			var location_index: int = info[1]
 			var ability: Enums.ABILITY = info[2]
@@ -309,6 +344,33 @@ func _anticheat(packet_type: Enums.PACKET_TYPE, actor_player: Player, info: Arra
 ## Returns if [param condition] is true and [member anticheat_level] is more or equal to [param min_anticheat_level].
 func _anticheat_check(condition: bool, min_anticheat_level: int) -> bool:
 	return condition and (Multiplayer.anticheat_level >= min_anticheat_level or Multiplayer.anticheat_level < 0)
+
+
+## Returns if [param info]'s size is [param size] and the elements in [param info] matches the [param types].
+func _anticheat_info_check(info: Array, size: int, types: PackedInt32Array) -> bool:
+	if info.size() != size:
+		return false
+	
+	var i: int = 0
+	for expected_type: int in types:
+		var actual_type: int = typeof(info[i])
+		
+		if actual_type != expected_type:
+			# Allow this.
+			if actual_type == TYPE_INT and expected_type == TYPE_FLOAT:
+				i += 1
+				continue
+			
+			push_warning("info[%d] is of type %s, was expecting %s." % [
+				i,
+				type_string(actual_type),
+				type_string(expected_type),
+			])
+			return false
+		
+		i += 1
+	
+	return true
 
 
 ## Returns if [param info] is in the history within [param range].
