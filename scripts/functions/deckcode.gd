@@ -69,7 +69,16 @@ func _validate_deck(deckcode: String, hero_class: Enums.CLASS, cards: Array[Card
 		#return OS.is_debug_build()
 		return true
 	
+	# There should be no uncollectible cards.
 	if cards.any(func(card: Card) -> bool: return not card.collectible):
+		return false
+	
+	# The size of the deck shouldn't be more than the max_deck_size or less than min_deck_size.
+	if cards.size() > Game.max_deck_size or cards.size() < Game.min_deck_size:
+		return false
+	
+	# The hero class should exist.
+	if not Enums.CLASS.values().has(hero_class):
 		return false
 	
 	return true

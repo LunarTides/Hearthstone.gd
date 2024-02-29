@@ -101,6 +101,12 @@ var max_board_space: int = 7
 ## The max amount of cards that can be in a player's hand. Can be override by [code]Multiplayer.load_config()[/code].
 var max_hand_size: int = 10
 
+## The max amount of cards that can be in a player's deck. Can be override by [code]Multiplayer.load_config()[/code].
+var max_deck_size: int = 30
+
+## The min amount of cards that can be in a player's deck. Can be override by [code]Multiplayer.load_config()[/code].
+var min_deck_size: int = 30
+
 ## The max amount of players that can be in a game at once. Any value other than 2 is not supported and will break.
 var max_players: int = 2
 # ------
@@ -239,8 +245,10 @@ func start_game() -> void:
 	
 	print("Sending config...")
 	Multiplayer.send_config.rpc(
-		Game.max_board_space,
-		Game.max_hand_size,
+		max_board_space,
+		max_hand_size,
+		max_deck_size,
+		min_deck_size,
 	)
 	
 	print("Changing to game scene...")
@@ -258,8 +266,8 @@ func start_game() -> void:
 	var coin: Card = get_card_from_blueprint(TheCoin, player2)
 	player2.add_to_hand(coin, player2.hand.size())
 	
-	Game.layout_cards(player1)
-	Game.layout_cards(player2)
+	layout_cards(player1)
+	layout_cards(player2)
 
 
 ## Sends a packet to end the [member current_player]'s turn. Returns if a packet was sent.

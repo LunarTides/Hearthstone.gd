@@ -137,6 +137,8 @@ func load_config() -> void:
 	
 	Game.max_board_space = config.get_value("Game", "max_board_space", Game.max_board_space)
 	Game.max_hand_size = config.get_value("Game", "max_hand_size", Game.max_hand_size)
+	Game.max_deck_size = config.get_value("Game", "max_deck_size", Game.max_deck_size)
+	Game.min_deck_size = config.get_value("Game", "min_deck_size", Game.min_deck_size)
 	
 	print("Config loaded:\n'''\n%s'''\n" % config.encode_to_text())
 
@@ -154,6 +156,8 @@ func save_config() -> void:
 	
 	config.set_value("Game", "max_board_space", Game.max_board_space)
 	config.set_value("Game", "max_hand_size", Game.max_hand_size)
+	config.set_value("Game", "max_deck_size", Game.max_deck_size)
+	config.set_value("Game", "min_deck_size", Game.min_deck_size)
 	
 	config.save(CONFIG_FILE_PATH)
 
@@ -235,16 +239,20 @@ func change_scene_to_file(file: StringName) -> void:
 
 ## Sends the server config options to the client.
 @rpc("authority", "call_remote", "reliable")
-func send_config(new_max_board_space: int, new_max_hand_size: int) -> void:
+func send_config(max_board_space: int, max_hand_size: int, max_deck_size: int, min_deck_size: int) -> void:
 	if is_server:
 		return
 	
-	Game.max_board_space = new_max_board_space
-	Game.max_hand_size = new_max_hand_size
+	Game.max_board_space = max_board_space
+	Game.max_hand_size = max_hand_size
+	Game.max_deck_size = max_deck_size
+	Game.min_deck_size = min_deck_size
 	
-	print("Config loaded:\n'''\nmax_board_space=%d\nmax_hand_size=%d\n'''\n" % [
-		Game.max_board_space,
-		Game.max_hand_size,
+	print("Config loaded:\n'''\nmax_board_space=%d\nmax_hand_size=%d\nmax_deck_size=%d\nmin_deck_size=%d\n'''\n" % [
+		max_board_space,
+		max_hand_size,
+		max_deck_size,
+		min_deck_size,
 	])
 
 
