@@ -1,13 +1,7 @@
-[gd_scene load_steps=5 format=3 uid="uid://bxxnfev5xa2hy"]
+[gd_scene load_steps=4 format=3 uid="uid://bxxnfev5xa2hy"]
 
 [ext_resource type="Script" path="res://scripts/scenes/game/end_turn_button.gd" id="1_pdxwn"]
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_84jdv"]
-albedo_color = Color(0.188235, 0.184314, 0, 1)
-
-[sub_resource type="BoxMesh" id="BoxMesh_0atkj"]
-material = SubResource("StandardMaterial3D_84jdv")
-size = Vector3(5, 1, 3)
+[ext_resource type="PackedScene" uid="uid://cfyc2ttl6e2o1" path="res://assets/models/end_turn/end_turn.blend" id="2_kwbsr"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_dgv56"]
 size = Vector3(5, 1, 3)
@@ -16,14 +10,16 @@ size = Vector3(5, 1, 3)
 script = ExtResource("1_pdxwn")
 mesh = NodePath("Mesh")
 
-[node name="Mesh" type="MeshInstance3D" parent="."]
-mesh = SubResource("BoxMesh_0atkj")
-skeleton = NodePath("../..")
+[node name="Mesh" parent="." instance=ExtResource("2_kwbsr")]
+transform = Transform3D(3, 0, 0, 0, -1.31134e-07, 3, 0, -3, -1.31134e-07, -28.825, 0, 2.33)
 
 [node name="Label3D" type="Label3D" parent="Mesh"]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0.5, 0)
+transform = Transform3D(0.333333, 0, 0, 0, 0.333333, 1.06581e-14, 0, -1.06581e-14, 0.333333, 9.608, 0.747, 0.035)
+modulate = Color(0, 0, 0, 1)
 text = "End Turn"
-font_size = 207
+font_size = 217
+outline_size = 0
+uppercase = true
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("BoxShape3D_dgv56")

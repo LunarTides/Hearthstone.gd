@@ -2,7 +2,7 @@ extends Area3D
 
 
 #region Exported Variables 
-@export var mesh: MeshInstance3D
+@export var mesh: Node3D
 #endregion
 
 
@@ -45,12 +45,12 @@ func _on_input_event(camera: Node, event: InputEvent, position: Vector3, normal:
 
 func _on_mouse_entered() -> void:
 	if not Game.is_players_turn:
-		mesh.get_active_material(0).albedo_color = Color.YELLOW
+		mesh.get_node("Border").get_active_material(0).albedo_color = Color.YELLOW
 		return
 	
-	mesh.get_active_material(0).albedo_color = Color.GREEN
+	mesh.get_node("Border").get_active_material(0).albedo_color = Color.GREEN
 
 
 func _on_mouse_exited() -> void:
-	mesh.get_active_material(0).albedo_color = Color.hex(0x302f00)
+	mesh.get_node("Border").get_active_material(0).albedo_color = Color.WHITE
 #endregion
