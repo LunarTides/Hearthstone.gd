@@ -274,8 +274,10 @@ func _input(event: InputEvent) -> void:
 	if not event.button_index == MOUSE_BUTTON_LEFT and not event.button_index == MOUSE_BUTTON_RIGHT:
 		return
 	
+	var pos: Vector3 = global_position
+	
 	is_dragging = false
-	var pos: Vector3 = position
+	_on_mouse_exited()
 	position = _old_position
 	
 	if event.button_index == MOUSE_BUTTON_LEFT:

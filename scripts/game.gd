@@ -170,6 +170,13 @@ func _input(event: InputEvent) -> void:
 	if key == "F2":
 		layout_cards(player)
 		layout_cards(opponent)
+	elif key == "F3":
+		if not Multiplayer.is_server:
+			error_text = "[color=yellow]REMEMBER TO DO THIS ON THE SERVER TOO"
+		else:
+			error_text = "[color=green]Set the current player's mana to 10"
+		
+		current_player.mana = 10
 #endregion
 
 

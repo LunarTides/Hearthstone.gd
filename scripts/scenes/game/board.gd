@@ -39,12 +39,14 @@ func _place_card(player: Player, card_node: CardNode, pos: Vector3) -> void:
 	for dict: Dictionary in card_node.released.get_connections():
 		card_node.released.disconnect(dict.callable)
 	
-	# TODO: Turn pos into index
-	var index: int = player.board.size()
-	
-	card_node.is_hovering = false
+	var index: int = _get_index(pos, player)
 	player.play_card(card_node.card, index)
-	card_node.is_hovering = true
+
+
+func _get_index(pos: Vector3, player: Player) -> int:
+	return Game.get_card_nodes_for_player(player).filter(func(card_node: CardNode) -> bool:
+		return card_node.global_position.x < pos.x and card_node.card.location == Enums.LOCATION.BOARD
+	).size()
 
 
 func _on_player_area_entered(player: Player, area: Area3D) -> void:
