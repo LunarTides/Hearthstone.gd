@@ -139,7 +139,6 @@ func _accept_summon_packet(player_id: int, info: Array) -> void:
 	var card: Card = Game.get_card_from_index(player, location, location_index)
 	
 	card.add_to_location(Enums.LOCATION.BOARD, board_index)
-	Game.layout_cards(player)
 
 
 func _accept_play_packet(player_id: int, info: Array) -> void:
@@ -190,7 +189,6 @@ func _accept_draw_cards_packet(player_id: int, info: Array) -> void:
 		card_node.card = card
 		
 		(await Game.wait_for_node("/root/Main")).add_child(card_node)
-		Game.layout_cards(player)
 
 
 func _accept_end_turn_packet(player_id: int, info: Array) -> void:

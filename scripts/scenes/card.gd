@@ -151,7 +151,6 @@ func layout() -> void:
 func _update() -> void:
 	if card.location == Enums.LOCATION.NONE:
 		card.remove_from_location()
-		Game.layout_cards(card.player)
 		queue_free()
 		return
 	

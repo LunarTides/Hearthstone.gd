@@ -77,8 +77,6 @@ var location: Enums.LOCATION = Enums.LOCATION.NONE:
 	set(new_location):
 		remove_from_location()
 		location = new_location
-		
-		Game.layout_cards(player)
 
 ## Returns the array where the card is stored according to it's [member location].
 var location_array: Array[Card]:

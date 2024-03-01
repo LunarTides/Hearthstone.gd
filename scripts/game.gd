@@ -155,6 +155,11 @@ func _ready() -> void:
 	get_tree().root.add_child.call_deferred(error_label, true)
 
 
+func _process(delta: float) -> void:
+	# Not great for performance.
+	layout_all_cards()
+
+
 func _input(event: InputEvent) -> void:
 	if event.is_released():
 		return
@@ -265,9 +270,6 @@ func start_game() -> void:
 	
 	var coin: Card = get_card_from_blueprint(TheCoin, player2)
 	player2.add_to_hand(coin, player2.hand.size())
-	
-	layout_cards(player1)
-	layout_cards(player2)
 
 
 ## Sends a packet to end the [member current_player]'s turn. Returns if a packet was sent.
@@ -278,6 +280,12 @@ func end_turn() -> bool:
 	
 	send_packet(Enums.PACKET_TYPE.END_TURN, current_player.id, [], true)
 	return true
+
+
+## Lays out all the cards. Only works client side.
+func layout_all_cards() -> void:
+	for card: CardNode in get_all_card_nodes():
+		card.layout()
 
 
 ## Lays out all the cards for the specified player. Only works client side.

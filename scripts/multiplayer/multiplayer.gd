@@ -325,5 +325,4 @@ func spawn_card(blueprint_path: String, player_id: int, location: Enums.LOCATION
 	card_node.card = card
 	
 	(await Game.wait_for_node("/root/Main")).add_child(card_node)
-	Game.layout_cards(card.player)
 #endregion
