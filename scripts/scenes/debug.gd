@@ -37,9 +37,23 @@ func _ready() -> void:
 
 
 func _input(event: InputEvent) -> void:
-	if event.as_text() == "F1" and event.is_pressed():
+	if event.is_released():
+		return
+	
+	var key: String = event.as_text()
+	
+	# Show debug panel
+	if key == "F1":
 		panel.visible = not panel.visible
 		show_hide_text.visible = not panel.visible
+	# Set 10 mana
+	elif key == "F2":
+		if not Multiplayer.is_server:
+			Game.error_text = "[color=yellow]REMEMBER TO DO THIS ON THE SERVER TOO"
+		else:
+			Game.error_text = "[color=green]Set the current player's mana to 10"
+		
+		Game.current_player.mana = 10
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
