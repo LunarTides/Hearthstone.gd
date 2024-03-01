@@ -13,6 +13,14 @@ signal released(position: Vector3)
 #region Constant Variables
 const MinionMesh: Resource = preload("res://assets/models/minion/minion.blend")
 const SpellMesh: Resource = preload("res://assets/models/spell/spell.blend")
+
+# There should be a better way of doing this.
+const CARD_BOUNDS_X: float = 9.05
+const CARD_BOUNDS_Y: float = -0.5
+const CARD_BOUNDS_Z: float = 13
+const CARD_ROTATION_Y_MULTIPLIER: float = 10.0
+const CARD_DISTANCE_X: float = 1.81
+const CARD_OFFSET_X: float = 6.0
 #endregion
 
 
@@ -186,16 +194,19 @@ func _layout_hand() -> void:
 	var player_weight: int = 1 if card.player == Game.player else -1
 	
 	# Integer division, but it's not a problem.
-	var half_hand_size: int = Game.max_hand_size / 2
+	var half_hand_size: int = ceil(card.player.hand.size() / 2)
 	
-	# TODO: If fewer cards, be middle (real)
-	position.x = -Game.CARD_BOUNDS_X + (card.index * Game.CARD_DISTANCE_X)
-	position.y = Game.CARD_BOUNDS_Y * abs(half_hand_size - 1 - card.index)
-	position.z = Game.CARD_BOUNDS_Z * player_weight
+	position.x = (CARD_OFFSET_X - (half_hand_size * 2)) + -CARD_BOUNDS_X + (card.index * CARD_DISTANCE_X)
+	position.y = CARD_BOUNDS_Y * abs(half_hand_size - card.index)
+	position.z = CARD_BOUNDS_Z * player_weight
 	
-	# If index < max_hand_size / 2, -rotation
-	if card.index != half_hand_size - 1:
-		rotation.y = deg_to_rad((Game.CARD_BOUNDS_ROTATION_Y + position.x) * -sign((card.index - half_hand_size) + player_weight))
+	if card.index != half_hand_size:
+		# Tilt it to the left/right.
+		rotation.y = deg_to_rad(CARD_ROTATION_Y_MULTIPLIER * player_weight * (half_hand_size - card.index))
+	
+	# Position it futher away the more rotated it is.
+	# This makes it easier to select the right card.
+	position.x -= rotation.y * player_weight
 	
 	# Rotate the card 180 degrees if it isn't already
 	if card.player != Game.player and rotation.y - PI < 0:
@@ -207,7 +218,7 @@ func _layout_board() -> void:
 	
 	rotation = Vector3.ZERO
 	
-	position.x = (card.index - 4) * 3.5 + Game.CARD_DISTANCE_X
+	position.x = (card.index - 4) * 3.5 + CARD_DISTANCE_X
 	position.y = 0
 	position.z = Game.board_node.player.position.z + player_weight * (
 		# I love hardcoded values

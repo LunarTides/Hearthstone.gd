@@ -13,13 +13,6 @@ signal game_started
 const CardScene: PackedScene = preload("res://scenes/card.tscn")
 const Sheep: Blueprint = preload("res://cards/sheep/sheep.tres")
 const TheCoin: Blueprint = preload("res://cards/the_coin/the_coin.tres")
-
-# There should be a better way of doing this.
-const CARD_BOUNDS_X: float = 9.05
-const CARD_BOUNDS_Y: float = -0.5
-const CARD_BOUNDS_Z: float = 13
-const CARD_BOUNDS_ROTATION_Y: float = 21.2
-const CARD_DISTANCE_X: float = 1.81
 #endregion
 
 

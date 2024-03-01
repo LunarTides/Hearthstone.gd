@@ -188,9 +188,9 @@ func _accept_draw_cards_packet(player_id: int, info: Array) -> void:
 		# Create card node.
 		var card_node: CardNode = Multiplayer.CardScene.instantiate()
 		card_node.card = card
-		card_node.layout()
 		
 		(await Game.wait_for_node("/root/Main")).add_child(card_node)
+		Game.layout_cards(player)
 
 
 func _accept_end_turn_packet(player_id: int, info: Array) -> void:
