@@ -89,6 +89,7 @@ var covered: bool:
 
 #region Private Variables
 var _tween: Tween
+var _should_layout: bool = true
 #endregion
 
 #region Onready Variables
@@ -121,7 +122,7 @@ func _process(_delta: float) -> void:
 #region Public Functions
 ## Change the position / rotation of the card to be correct.
 func layout() -> void:
-	if is_hovering:
+	if is_hovering or not _should_layout:
 		return
 	
 	position = Vector3.ONE
@@ -278,6 +279,7 @@ func _input(event: InputEvent) -> void:
 	is_dragging = false
 	_on_mouse_exited()
 	position = _old_position
+	_make_way()
 	
 	if event.button_index == MOUSE_BUTTON_LEFT:
 		released.emit(pos)
@@ -300,4 +302,29 @@ func _on_input_event(_camera: Node, event: InputEvent, position: Vector3, _norma
 	
 	if is_dragging:
 		global_position = Vector3(position.x, global_position.y, position.z)
+	
+	_make_way()
+
+
+func _make_way(stop: bool = false) -> void:
+	for card_node: CardNode in Game.get_card_nodes_for_player(card.player).filter(func(card_node: CardNode) -> bool:
+		return card_node != self and card_node.card.location == Enums.LOCATION.BOARD
+	):
+		if is_dragging:
+			card_node._make_way_for(self)
+		else:
+			card_node._stop_making_way()
+
+
+func _make_way_for(card_node: CardNode) -> void:
+	var bias: int = 1 if global_position.x > card_node.global_position.x else -1
+	
+	var tween: Tween = get_tree().create_tween()
+	tween.set_ease(Tween.EASE_OUT)
+	tween.tween_property(self, "position:x", _old_position.x + 2 * bias, 0.2)
+	_should_layout = false
+
+
+func _stop_making_way() -> void:
+	_should_layout = true
 #endregion
