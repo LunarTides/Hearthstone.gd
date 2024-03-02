@@ -54,7 +54,7 @@ var ban_list: Array[String] = []
 var is_server: bool:
 	get:
 		if not multiplayer.multiplayer_peer:
-			return false
+			return true
 		
 		return multiplayer.is_server()
 #endregion

@@ -278,7 +278,7 @@ func feedback(text: String, type: FeedbackType) -> void:
 	await get_tree().create_timer(1.0).timeout
 	
 	# Fade out
-	var tween: Tween = get_tree().create_tween()
+	var tween: Tween = create_tween()
 	tween.tween_property(error_label, "modulate:a", 0, 1)
 
 
