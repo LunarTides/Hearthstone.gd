@@ -275,13 +275,13 @@ func _ready() -> void:
 static func get_from_index(player: Player, location: Card.Location, index: int) -> Card:
 	match location:
 		Location.HAND:
-			return player.hand[index]
+			return Game.get_or_null(player.hand, index)
 		Location.DECK:
-			return player.deck[index]
+			return Game.get_or_null(player.deck, index)
 		Location.BOARD:
-			return player.board[index]
+			return Game.get_or_null(player.board, index)
 		Location.GRAVEYARD:
-			return player.graveyard[index]
+			return Game.get_or_null(player.graveyard, index)
 		_:
 			return null
 

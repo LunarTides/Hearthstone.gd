@@ -24,7 +24,7 @@ func _ready() -> void:
 		return
 	
 	# Make debugging easier
-	if OS.is_debug_build():
+	if OS.is_debug_build() and OS.has_feature("editor"):
 		_instance_socket = TCPServer.new()
 		for n: int in 4:
 			if _instance_socket.listen(5000 + n) == OK:
@@ -37,14 +37,18 @@ func _ready() -> void:
 			0:
 				# Instance 0 should host a server
 				host()
+				# Wait since it makes moving the window a LOT more consistant.
+				await get_tree().create_timer(0.1).timeout
 				get_window().position += Vector2i(500, 0)
 			1:
 				# Instance 1 should join the server
 				_on_join_button_pressed()
+				await get_tree().create_timer(0.1).timeout
 				get_window().position += Vector2i(-500, 500)
 			2:
 				# Instance 2 should join the server
 				_on_join_button_pressed()
+				await get_tree().create_timer(0.1).timeout
 				get_window().position += Vector2i(-500, -500)
 #endregion
 

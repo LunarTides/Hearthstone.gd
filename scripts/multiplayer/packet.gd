@@ -180,7 +180,7 @@ func _accept_play_packet(player_id: int, info: Array) -> void:
 	player.mana -= card.cost
 	
 	if card.types.has(Card.Type.MINION):
-		player.summon_card(card, board_index, false)
+		player.summon_card(card, board_index, false, true)
 		
 		card.trigger_ability(Card.Ability.BATTLECRY, false)
 	
@@ -207,7 +207,11 @@ func _accept_draw_cards_packet(player_id: int, info: Array) -> void:
 		var card: Card = player.deck.pop_back()
 		
 		if player.hand.size() >= Game.max_hand_size:
-			# Burn the card.
+			# TODO: Burn the card.
+			return
+		
+		if not card:
+			# TODO: Fatigue
 			return
 		
 		card.add_to_location(Card.Location.HAND, player.hand.size())

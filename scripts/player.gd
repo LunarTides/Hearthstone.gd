@@ -103,9 +103,10 @@ func play_card(card: Card, board_index: int, send_packet: bool = true) -> bool:
 
 
 ## Sends a packet for the player to summon a card. Returns if a packet was sent / success.
-func summon_card(card: Card, board_index: int, send_packet: bool = true) -> bool:
-	if board.size() >= Game.max_board_space:
-		return false
+func summon_card(card: Card, board_index: int, send_packet: bool = true, bypass_checks: bool = false) -> bool:
+	if not bypass_checks:
+		if board.size() >= Game.max_board_space:
+			return false
 	
 	Packet.send_if(send_packet, Packet.PacketType.SUMMON, id, [card.location, card.index, board_index], true)
 	return true
