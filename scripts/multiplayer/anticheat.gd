@@ -2,13 +2,25 @@ extends Node
 ## @experimental
 
 
+#region Enums
+enum Consequence {
+	## Drops the cheated packet.
+	DROP_PACKET,
+	## Drops the cheated packet and kicks the player.
+	KICK,
+	## Drops the cheated packet and bans the player.
+	BAN,
+}
+#endregion
+
+
 #region Public Functions
 ## Runs the anticheat on a packet.
-func run(packet_type: Enums.PACKET_TYPE, sender_peer_id: int, actor_player: Player, info: Array) -> bool:
+func run(packet_type: Packet.PacketType, sender_peer_id: int, actor_player: Player, info: Array) -> bool:
 	if Multiplayer.anticheat_level == 0:
 		return true
 	
-	var packet_name: String = Enums.PACKET_TYPE.keys()[packet_type]
+	var packet_name: String = Packet.PacketType.keys()[packet_type]
 	var sender_player: Player = Multiplayer.get_player_from_peer_id(sender_peer_id)
 	
 	# Packets sent from the server should bypass the anitcheat.
@@ -19,7 +31,7 @@ func run(packet_type: Enums.PACKET_TYPE, sender_peer_id: int, actor_player: Play
 	var method_name: String = "_run_" + packet_name.to_lower() + "_packet"
 	var method: Callable = self[method_name]
 	
-	assert(method, "No anticheat logic for '%s'" % Enums.PACKET_TYPE.keys()[packet_type])
+	assert(method, "No anticheat logic for '%s'" % Packet.PacketType.keys()[packet_type])
 	return method.call(sender_peer_id, sender_player, actor_player, info)
 #endregion
 
@@ -75,6 +87,7 @@ func _in_packet_history(info: Array, range: int, only_use_server_packets: bool =
 	
 	return false
 
+
 # Send feedback to the client. Optimized for the anticheat.
 func _feedback(text: String, sender_peer_id: int) -> void:
 	Multiplayer.feedback.rpc_id(sender_peer_id, "Anticheat Failed - %s" % text)
@@ -90,7 +103,7 @@ func _run_create_card_packet(sender_peer_id: int, sender_player: Player, actor_p
 		return false
 	
 	var blueprint_path: String = info[0]
-	var location: Enums.LOCATION = info[1]
+	var location: Card.Location = info[1]
 	var location_index: int = info[2]
 	
 	# Blueprint path needs to be valid.
@@ -103,12 +116,12 @@ func _run_create_card_packet(sender_peer_id: int, sender_player: Player, actor_p
 		_feedback("Only the server can do this.", sender_peer_id)
 		return false
 	
-	if location == Enums.LOCATION.HAND:
+	if location == Card.Location.HAND:
 		# The player needs to have enough space in their hand.
 		if _check(actor_player.hand.size() >= Game.max_hand_size, 1):
 			_feedback("You do not have enough space in your hand.", sender_peer_id)
 			return false
-	elif location == Enums.LOCATION.BOARD:
+	elif location == Card.Location.BOARD:
 		# The player needs to have enough space on their board.
 		if _check(actor_player.board.size() >= Game.max_board_space, 1):
 			_feedback("You do not have enough space on your board.", sender_peer_id)
@@ -136,7 +149,6 @@ func _run_draw_cards_packet(sender_peer_id: int, sender_player: Player, actor_pl
 
 # End Turn
 func _run_end_turn_packet(sender_peer_id: int, sender_player: Player, actor_player: Player, info: Array) -> bool:
-	
 	# The info needs to be correct.
 	if not _info_check(info, PackedInt32Array([])):
 		_feedback("Invalid END_TURN info.", sender_peer_id)
@@ -162,7 +174,7 @@ func _run_summon_packet(sender_peer_id: int, sender_player: Player, actor_player
 		_feedback("Invalid SUMMON info.", sender_peer_id)
 		return false
 	
-	var location: Enums.LOCATION = info[0]
+	var location: Card.Location = info[0]
 	var location_index: int = info[1]
 	var board_index: int = info[2]
 	
@@ -172,7 +184,7 @@ func _run_summon_packet(sender_peer_id: int, sender_player: Player, actor_player
 	if _check(not card, 1):
 		_feedback("The specified card does not exist in Player %d's %s at %d." % [
 			sender_player.id + 1,
-			Enums.LOCATION.keys()[location],
+			Card.Location.keys()[location],
 			location_index,
 		], sender_peer_id)
 		return false
@@ -193,7 +205,7 @@ func _run_summon_packet(sender_peer_id: int, sender_player: Player, actor_player
 		return false
 	
 	# The card should be in the player's hand.
-	if _check(card.location != Enums.LOCATION.HAND, 3):
+	if _check(card.location != Card.Location.HAND, 3):
 		_feedback("That card is not in your hand.", sender_peer_id)
 		return false
 	
@@ -212,7 +224,7 @@ func _run_play_packet(sender_peer_id: int, sender_player: Player, actor_player: 
 		_feedback("Invalid PLAY info.", sender_peer_id)
 		return false
 	
-	var location: Enums.LOCATION = info[0]
+	var location: Card.Location = info[0]
 	var location_index: int = info[1]
 	var board_index: int = info[2]
 	
@@ -222,7 +234,7 @@ func _run_play_packet(sender_peer_id: int, sender_player: Player, actor_player: 
 	if _check(not card, 1):
 		_feedback("The specified card does not exist in Player %d's %s at %d." % [
 			sender_player.id + 1,
-			Enums.LOCATION.keys()[location],
+			Card.Location.keys()[location],
 			location_index,
 		], sender_peer_id)
 		return false
@@ -243,12 +255,12 @@ func _run_play_packet(sender_peer_id: int, sender_player: Player, actor_player: 
 		return false
 	
 	# The card should be in the player's hand.
-	if _check(card.location != Enums.LOCATION.HAND, 3):
+	if _check(card.location != Card.Location.HAND, 3):
 		_feedback("That card is not in your card.", sender_peer_id)
 		return false
 	
 	# Minion
-	if card.types.has(Enums.TYPE.MINION):
+	if card.types.has(Card.Type.MINION):
 		# The player should have enough space on their board.
 		if _check(actor_player.board.size() >= Game.max_board_space, 1):
 			_feedback("You do not have enough space on the board.", sender_peer_id)
@@ -264,7 +276,7 @@ func _run_reveal_packet(sender_peer_id: int, sender_player: Player, actor_player
 		_feedback("Invalid REVEAL info.", sender_peer_id)
 		return false
 	
-	var location: Enums.LOCATION = info[0]
+	var location: Card.Location = info[0]
 	var index: int = info[1]
 	
 	# The player whose card gets revealed should be the same player as the one who sent the packet
@@ -282,9 +294,9 @@ func _run_trigger_ability_packet(sender_peer_id: int, sender_player: Player, act
 		_feedback("Invalid TRIGGER_ABILITY info.", sender_peer_id)
 		return false
 	
-	var location: Enums.LOCATION = info[0]
+	var location: Card.Location = info[0]
 	var location_index: int = info[1]
-	var ability: Enums.ABILITY = info[2]
+	var ability: Card.Ability = info[2]
 	
 	var card: Card = Game.get_card_from_index(actor_player, location, location_index)
 	
@@ -292,19 +304,19 @@ func _run_trigger_ability_packet(sender_peer_id: int, sender_player: Player, act
 	if _check(card == null, 1):
 		_feedback("The specified card does not exist in Player %d's %s at %d." % [
 			sender_player.id + 1,
-			Enums.LOCATION.keys()[location],
+			Card.Location.keys()[location],
 			location_index,
 		], sender_peer_id)
 		return false
 	
 	# The ability should exist.
-	if _check(!Enums.ABILITY.values().has(ability), 1):
+	if _check(!Card.Ability.values().has(ability), 1):
 		_feedback("The specified ability (%s) does not exist." % ability, sender_peer_id)
 		return false
 	
 	# The ability should exist on that card.
 	if _check(!card.abilities.has(ability), 1):
-		_feedback("The specified card does not have that ability (%s)." % Enums.ABILITY.keys()[ability], sender_peer_id)
+		_feedback("The specified card does not have that ability (%s)." % Card.Ability.keys()[ability], sender_peer_id)
 		return false
 	
 	# The player who sent the packet should own the card.

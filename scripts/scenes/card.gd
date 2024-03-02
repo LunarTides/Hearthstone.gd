@@ -59,6 +59,7 @@ const CARD_OFFSET_X: float = 6.0
 @export var spell_school_label: Label3D
 #endregion
 
+
 #region Public Variables
 ## Whether or not the player is hovering over this card.
 var is_hovering: bool = false
@@ -87,10 +88,12 @@ var covered: bool:
 			spell_school_label.hide()
 #endregion
 
+
 #region Private Variables
 var _tween: Tween
 var _should_layout: bool = true
 #endregion
+
 
 #region Onready Variables
 ## The mesh of the card.
@@ -106,12 +109,13 @@ var _should_layout: bool = true
 func _ready() -> void:
 	mesh.queue_free()
 	
-	if card.types.has(Enums.TYPE.MINION):
+	if card.types.has(Card.Type.MINION):
 		mesh = MinionMesh.instantiate()
-	if card.types.has(Enums.TYPE.SPELL):
+	if card.types.has(Card.Type.SPELL):
 		mesh = SpellMesh.instantiate()
 	
 	add_child(mesh)
+
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
@@ -130,13 +134,13 @@ func layout() -> void:
 	scale = Vector3.ONE
 	
 	match card.location:
-		Enums.LOCATION.HAND:
+		Card.Location.HAND:
 			_layout_hand()
 		
-		Enums.LOCATION.BOARD:
+		Card.Location.BOARD:
 			_layout_board()
 		
-		Enums.LOCATION.NONE:
+		Card.Location.NONE:
 			pass
 		
 		_:
@@ -150,7 +154,7 @@ func layout() -> void:
 
 #region Private Functions
 func _update() -> void:
-	if card.location == Enums.LOCATION.NONE:
+	if card.location == Card.Location.NONE:
 		card.remove_from_location()
 		queue_free()
 		return
@@ -169,23 +173,23 @@ func _update() -> void:
 	health_label.text = str(card.health)
 	
 	# Tribes
-	var tribe_keys: PackedStringArray = PackedStringArray(Enums.TRIBE.keys())
-	tribe_label.text = " / ".join(card.tribes.map(func(tribe: Enums.TRIBE) -> String: return tribe_keys[tribe].capitalize()))
+	var tribe_keys: PackedStringArray = PackedStringArray(Card.Tribe.keys())
+	tribe_label.text = " / ".join(card.tribes.map(func(tribe: Card.Tribe) -> String: return tribe_keys[tribe].capitalize()))
 	
 	# Spell schools
-	var spell_schools: PackedStringArray = PackedStringArray(Enums.SPELL_SCHOOL.keys())
-	spell_school_label.text = " / ".join(card.spell_schools.map(func(spell_school: Enums.SPELL_SCHOOL) -> String: return spell_schools[spell_school].capitalize()))
+	var spell_schools: PackedStringArray = PackedStringArray(Card.SpellSchool.keys())
+	spell_school_label.text = " / ".join(card.spell_schools.map(func(spell_school: Card.SpellSchool) -> String: return spell_schools[spell_school].capitalize()))
 	
 	# Rarity Color
 	var rarity_node: MeshInstance3D = mesh.get_node("Rarity")
-	rarity_node.mesh.surface_get_material(0).albedo_color = Enums.RARITY_COLOR.get(card.rarities[0])
+	rarity_node.mesh.surface_get_material(0).albedo_color = Card.RARITY_COLOR.get(card.rarities[0])
 	
 	# Show non-essential labels
-	if card.types.has(Enums.TYPE.MINION):
+	if card.types.has(Card.Type.MINION):
 		attack_label.show()
 		health_label.show()
 		tribe_label.show()
-	if card.types.has(Enums.TYPE.SPELL):
+	if card.types.has(Card.Type.SPELL):
 		spell_school_label.show()
 
 
@@ -308,7 +312,7 @@ func _on_input_event(_camera: Node, event: InputEvent, position: Vector3, _norma
 
 func _make_way(stop: bool = false) -> void:
 	for card_node: CardNode in Game.get_card_nodes_for_player(card.player).filter(func(card_node: CardNode) -> bool:
-		return card_node != self and card_node.card.location == Enums.LOCATION.BOARD
+		return card_node != self and card_node.card.location == Card.Location.BOARD
 	):
 		if is_dragging:
 			card_node._make_way_for(self)

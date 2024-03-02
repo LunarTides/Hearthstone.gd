@@ -2,14 +2,14 @@ extends Node
 
 
 #region Public Functions
-## Loads and decodes the specified [param deckcode]. Returns [code]{"class": Enums.CLASS, "cards": Array[Card]}[/code]
+## Loads and decodes the specified [param deckcode]. Returns [code]{"class": Player.Class, "cards": Array[Card]}[/code]
 func import(deckcode: String, player: Player, validate: bool = true) -> Dictionary:
 	# Reference:
 	# 1/1:30/1 - 30 Sheeps, Mage
 	# 1/1:20,2:5,3/1,2,3,4,5,6,7,8,9,a,b,c,d,e,f,10,11,12,13,14,15,16,17,18 - 1 copy of 20 cards, 2 copies of 5, Mage
 	var split: PackedStringArray = deckcode.split("/")
 	
-	var hero_class: Enums.CLASS = split[0].to_int() as Enums.CLASS
+	var hero_class: Player.Class = split[0].to_int() as Player.Class
 	var copy_definition: String = split[1]
 	var cards_string: String = split[2]
 	
@@ -63,7 +63,7 @@ func validate(deckcode: String) -> bool:
 
 
 #region Private Functions
-func _validate_deck(deckcode: String, hero_class: Enums.CLASS, cards: Array[Card]) -> bool:
+func _validate_deck(deckcode: String, hero_class: Player.Class, cards: Array[Card]) -> bool:
 	if deckcode == "1/1:30/1":
 		# TODO: Uncomment
 		#return OS.is_debug_build()
@@ -78,7 +78,7 @@ func _validate_deck(deckcode: String, hero_class: Enums.CLASS, cards: Array[Card
 		return false
 	
 	# The hero class should exist.
-	if not Enums.CLASS.values().has(hero_class):
+	if not Player.Class.values().has(hero_class):
 		return false
 	
 	return true

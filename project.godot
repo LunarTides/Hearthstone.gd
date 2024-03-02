@@ -18,7 +18,6 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-Enums="*res://scripts/enums.gd"
 Game="*res://scripts/game.gd"
 Multiplayer="*res://scripts/multiplayer/multiplayer.gd"
 Deckcode="*res://scripts/functions/deckcode.gd"

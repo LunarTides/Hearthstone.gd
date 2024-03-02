@@ -45,7 +45,7 @@ func _place_card(player: Player, card_node: CardNode, pos: Vector3) -> void:
 
 func _get_index(pos: Vector3, player: Player) -> int:
 	return Game.get_card_nodes_for_player(player).filter(func(card_node: CardNode) -> bool:
-		return card_node.global_position.x < pos.x and card_node.card.location == Enums.LOCATION.BOARD
+		return card_node.global_position.x < pos.x and card_node.card.location == Card.Location.BOARD
 	).size()
 
 
@@ -60,7 +60,7 @@ func _on_player_area_entered(player: Player, area: Area3D) -> void:
 	if player != Game.player:
 		return
 	
-	if card_node.card.location != Enums.LOCATION.HAND:
+	if card_node.card.location != Card.Location.HAND:
 		return
 	
 	card_node.released.connect(func(pos: Vector3) -> void: _place_card(player, card_node, pos))

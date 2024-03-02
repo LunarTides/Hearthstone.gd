@@ -2,6 +2,7 @@ extends Node
 ## Singleton for multiplayer stuff.
 ## @experimental
 
+
 #region Signals
 ## Emits when the server responds to a client's packet. Only responds to [method send_deckcode] for now.
 signal server_responded(success: bool)
@@ -36,7 +37,7 @@ var anticheat_level: int = -1:
 		return anticheat_level
 
 ## The action that should bw taken if the anticheat gets triggered.
-var anticheat_conseqence: Enums.ANTICHEAT_CONSEQUENCE = Enums.ANTICHEAT_CONSEQUENCE.DROP_PACKET
+var anticheat_conseqence: Anticheat.Consequence = Anticheat.Consequence.DROP_PACKET
 
 ## The players of the game.[br][br]
 ## Looks like this:
@@ -104,7 +105,7 @@ func _ready() -> void:
 #region Public Functions
 ## Sends a packet to the server that will be sent to all the clients.[br]
 ## This is used to sync every action.
-func send_packet(packet_type: Enums.PACKET_TYPE, player_id: int, info: Array, suppress_warning: bool = false) -> void:
+func send_packet(packet_type: Packet.PacketType, player_id: int, info: Array, suppress_warning: bool = false) -> void:
 	Packet.send_packet(packet_type, player_id, info, suppress_warning)
 
 
@@ -308,7 +309,7 @@ func start_game(deckcode1: String, deckcode2: String) -> void:
 
 ## Spawns in a card. THIS HAS TO BE CALLED SERVER SIDE. USE [method send_packet] FOR CLIENT SIDE.
 @rpc("authority", "call_local", "reliable")
-func spawn_card(blueprint_path: String, player_id: int, location: Enums.LOCATION, index: int) -> void:
+func spawn_card(blueprint_path: String, player_id: int, location: Card.Location, index: int) -> void:
 	var card: Card = Card.new()
 	card.blueprint = load(blueprint_path)
 	card.player = Game.get_player_from_id(player_id)

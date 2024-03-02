@@ -1,8 +1,26 @@
-extends Resource
 class_name Player
+extends Resource
 # TODO: Make more descriptive
 ## Player.
 ## @experimental
+
+
+#region Enums
+enum Class {
+	NEUTRAL,
+	MAGE,
+	DRUID,
+	HUNTER,
+	WARRIOR,
+	PRIEST,
+	SHAMAN,
+	PALADIN,
+	WARLOCK,
+	ROGUE,
+	DEMON_HUNTER,
+	DEATH_KNIGHT,
+}
+#endregion
 
 
 #region Public Variables
@@ -13,7 +31,7 @@ var name: String
 var id: int
 
 ## The player's class.
-var hero_class: Enums.CLASS
+var hero_class: Class
 
 ## How much mana the player currently has.
 var mana: int = 0
@@ -52,7 +70,7 @@ var peer_id: int
 #region Public Functions
 ## Sends a packet for the player to play a card. Returns if a packet was sent / success.
 func play_card(card: Card, board_index: int, send_packet: bool = true) -> bool:
-	if card.types.has(Enums.TYPE.MINION) and board.size() >= Game.max_board_space:
+	if card.types.has(Card.Type.MINION) and board.size() >= Game.max_board_space:
 		Game.feedback("You don't have enough space on the board.", Game.FeedbackType.ERROR)
 		return false
 	
@@ -64,7 +82,7 @@ func play_card(card: Card, board_index: int, send_packet: bool = true) -> bool:
 		Game.feedback("You don't have enough mana.", Game.FeedbackType.ERROR)
 		return false
 	
-	Game.send_packet_if(send_packet, Enums.PACKET_TYPE.PLAY, id, [card.location, card.index, board_index], true)
+	Game.send_packet_if(send_packet, Packet.PacketType.PLAY, id, [card.location, card.index, board_index], true)
 	return true
 
 
@@ -73,7 +91,7 @@ func summon_card(card: Card, board_index: int, send_packet: bool = true) -> bool
 	if board.size() >= Game.max_board_space:
 		return false
 	
-	Game.send_packet_if(send_packet, Enums.PACKET_TYPE.SUMMON, id, [card.location, card.index, board_index], true)
+	Game.send_packet_if(send_packet, Packet.PacketType.SUMMON, id, [card.location, card.index, board_index], true)
 	return true
 
 
@@ -82,9 +100,9 @@ func add_to_hand(card: Card, hand_index: int, send_packet: bool = true) -> bool:
 	if hand.size() >= Game.max_hand_size:
 		return false
 	
-	Game.send_packet_if(send_packet, Enums.PACKET_TYPE.CREATE_CARD, id, [
+	Game.send_packet_if(send_packet, Packet.PacketType.CREATE_CARD, id, [
 		card.blueprint.resource_path,
-		Enums.LOCATION.HAND,
+		Card.Location.HAND,
 		hand_index,
 	], true)
 	return true
@@ -92,9 +110,9 @@ func add_to_hand(card: Card, hand_index: int, send_packet: bool = true) -> bool:
 
 ## Sends a packet to add a card to the player's deck. Returns if a packet was sent / success.
 func add_to_deck(card: Card, deck_index: int, send_packet: bool = true) -> bool:
-	Game.send_packet_if(send_packet, Enums.PACKET_TYPE.CREATE_CARD, id, [
+	Game.send_packet_if(send_packet, Packet.PacketType.CREATE_CARD, id, [
 		card.blueprint.resource_path,
-		Enums.LOCATION.DECK,
+		Card.Location.DECK,
 		deck_index,
 	], true)
 	return true
@@ -102,6 +120,6 @@ func add_to_deck(card: Card, deck_index: int, send_packet: bool = true) -> bool:
 
 ## Sends a packet for the player to draw a card. Returns if a packet was sent / success.
 func draw_cards(amount: int, send_packet: bool = true) -> bool:
-	Game.send_packet_if(send_packet, Enums.PACKET_TYPE.DRAW_CARDS, id, [amount], true)
+	Game.send_packet_if(send_packet, Packet.PacketType.DRAW_CARDS, id, [amount], true)
 	return true
 #endregion

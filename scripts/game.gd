@@ -15,6 +15,12 @@ enum FeedbackType {
 	WARNING,
 	ERROR,
 }
+
+enum NullableBool {
+	FALSE,
+	TRUE,
+	NULL,
+}
 #endregion
 
 
@@ -191,15 +197,15 @@ func get_player_from_id(id: int) -> Player:
 
 
 ## Gets the [param player]'s [Card] in [param location] at [param index].
-func get_card_from_index(player: Player, location: Enums.LOCATION, index: int) -> Card:
+func get_card_from_index(player: Player, location: Card.Location, index: int) -> Card:
 	match location:
-		Enums.LOCATION.HAND:
+		Card.Location.HAND:
 			return player.hand[index]
-		Enums.LOCATION.DECK:
+		Card.Location.DECK:
 			return player.deck[index]
-		Enums.LOCATION.BOARD:
+		Card.Location.BOARD:
 			return player.board[index]
-		Enums.LOCATION.GRAVEYARD:
+		Card.Location.GRAVEYARD:
 			return player.graveyard[index]
 		_:
 			return null
@@ -268,10 +274,11 @@ func end_turn() -> bool:
 		feedback("It is not your turn.", FeedbackType.ERROR)
 		return false
 	
-	send_packet(Enums.PACKET_TYPE.END_TURN, current_player.id, [], true)
+	send_packet(Packet.PacketType.END_TURN, current_player.id, [], true)
 	return true
 
 
+## Makes [param text] pop up in the middle of the player's screen. Its color will be derived from [param type].
 func feedback(text: String, type: FeedbackType) -> void:
 	var error_label: RichTextLabel = get_tree().root.get_node("ErrorLabel") as RichTextLabel
 	error_label.modulate.a = 1
@@ -418,12 +425,12 @@ func exit_to_main_menu() -> void:
 
 ## Sends a packet to the server that will be sent to all the clients.[br]
 ## This is used to sync every action.
-func send_packet(packet_type: Enums.PACKET_TYPE, player_id: int, info: Array, suppress_warning: bool = false) -> void:
+func send_packet(packet_type: Packet.PacketType, player_id: int, info: Array, suppress_warning: bool = false) -> void:
 	Multiplayer.send_packet(packet_type, player_id, info, suppress_warning)
 
 
 ## Sends a packet if [param condition] is [code]true[/code]. If not, only apply the packet locally.
-func send_packet_if(condition: bool, packet_type: Enums.PACKET_TYPE, player_id: int, info: Array, suppress_warning: bool = false) -> void:
+func send_packet_if(condition: bool, packet_type: Packet.PacketType, player_id: int, info: Array, suppress_warning: bool = false) -> void:
 	if condition:
 		send_packet(packet_type, player_id, info, suppress_warning)
 	else:

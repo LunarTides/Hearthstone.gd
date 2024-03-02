@@ -1,6 +1,7 @@
 extends Control
 
 
+#region Exported Variables
 @export var show_hide_text: RichTextLabel
 
 @export var panel: Panel
@@ -21,8 +22,10 @@ extends Control
 @export var send_packet_type: OptionButton
 @export var send_packet_player: SpinBox
 @export var send_packet_info: LineEdit
+#endregion
 
 
+#region Internal Functions
 func _ready() -> void:
 	panel.hide()
 	show_hide_text.hide()
@@ -32,7 +35,7 @@ func _ready() -> void:
 	else:
 		queue_free()
 	
-	for key: String in Enums.PACKET_TYPE.keys():
+	for key: String in Packet.PacketType.keys():
 		send_packet_type.add_item(key)
 
 
@@ -79,10 +82,12 @@ func _process(delta: float) -> void:
 		var packet_string: String = Packet.get_readable_packet(packet[0], packet[1], packet[2], packet[3])
 		
 		latest_packet_label.text = "Latest Packet: %s" % packet_string
+#endregion
 
 
+#region Private Functions
 func _on_send_packet_button_pressed() -> void:
-	var packet_type: Enums.PACKET_TYPE = Enums.PACKET_TYPE.values()[send_packet_type.selected]
+	var packet_type: Packet.PacketType = Packet.PacketType.values()[send_packet_type.selected]
 	var player_id: int = send_packet_player.value
 	
 	var info: Variant = JSON.parse_string(send_packet_info.text)
@@ -95,3 +100,4 @@ func _on_send_packet_button_pressed() -> void:
 
 func _on_info_text_submitted(new_text: String) -> void:
 	_on_send_packet_button_pressed()
+#endregion

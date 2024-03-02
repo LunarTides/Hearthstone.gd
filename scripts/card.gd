@@ -10,6 +10,141 @@ extends Resource
 signal blueprint_updated(old_blueprint: Blueprint, new_blueprint: Blueprint)
 #endregion
 
+
+#region Enums
+enum Type {
+	NONE,
+	MINION,
+	SPELL,
+	WEAPON,
+	HERO,
+	LOCATION,
+	HEROPOWER,
+}
+
+enum Tribe {
+	NONE,
+	BEAST,
+	DEMON,
+	DRAGON,
+	ELEMENTAL,
+	MECH,
+	MURLOC,
+	NAGA,
+	PIRATE,
+	QUILBOAR,
+	TOTEM,
+	UNDEAD,
+	ALL,
+}
+
+enum SpellSchool {
+	NONE,
+	ARCANE,
+	FEL,
+	FIRE,
+	FROST,
+	HOLY,
+	NATURE,
+	SHADOW,
+}
+
+enum Rarity {
+	FREE,
+	COMMON,
+	RARE,
+	EPIC,
+	LEGENDARY,
+}
+
+enum Keyword {
+	DIVINE_SHIELD,
+	DORMANT,
+	LIFESTEAL,
+	POISONOUS,
+	REBORN,
+	RUSH,
+	STEALTH,
+	TAUNT,
+	TRADEABLE,
+	FORGE,
+	WINDFURY,
+	OUTCAST,
+	CAST_ON_DRAW,
+	SUMMON_ON_DRAW,
+	UNBREAKABLE,
+	UNLIMITED_ATTACKS,
+	CHARGE,
+	MEGA_WINDFURY,
+	ECHO,
+	MAGNETIC,
+	TWINSPELL,
+	ELUSIVE,
+	FROZEN,
+	IMMUNE,
+	CORRUPT,
+	COLOSSAL,
+	INFUSE,
+	CLEAVE,
+	TITAN,
+	FORGETFUL,
+	CANT_ATTACK,
+}
+
+enum Ability {
+	ADAPT,
+	BATTLECRY,
+	CAST,
+	COMBO,
+	DEATHRATTLE,
+	FINALE,
+	FRENZY,
+	HONORABLE_KILL,
+	INFUSE,
+	INSPIRE,
+	INVOKE,
+	OUTCAST,
+	OVERHEAL,
+	OVERKILL,
+	PASSIVE,
+	SPELLBURST,
+	START_OF_GAME,
+	HERO_POWER,
+	USE,
+	PLACEHOLDER,
+	CONDITION,
+	REMOVE,
+	TICK,
+	TEST,
+}
+
+enum CostType {
+	MANA,
+	ARMOR,
+	HEALTH,
+}
+
+enum Location {
+	NONE,
+	HAND,
+	DECK,
+	BOARD,
+	GRAVEYARD,
+}
+#endregion
+
+
+#region Constants
+const RARITY_COLOR: Dictionary = {
+	Rarity.FREE: Color.WHITE,
+	Rarity.COMMON: Color.GRAY,
+	Rarity.RARE: Color.BLUE,
+	Rarity.EPIC: Color.PURPLE,
+	Rarity.LEGENDARY: Color.GOLD,
+}
+#endregion
+
+
 #region Exported Variables
 ## The player that owns this card.
 @export var player: Player
@@ -22,6 +157,7 @@ signal blueprint_updated(old_blueprint: Blueprint, new_blueprint: Blueprint)
 		update_blueprint()
 #endregion
 
+
 #region Public Variables
 #region Blueprint Fields
 #region Common
@@ -29,30 +165,35 @@ var name: String
 var text: String
 var cost: int
 var texture: Texture2D
-var types: Array[Enums.TYPE]
-var classes: Array[Enums.CLASS]
-var rarities: Array[Enums.RARITY]
+var types: Array[Type]
+var classes: Array[Player.Class]
+var rarities: Array[Rarity]
 var collectible: bool
 var id: int
 #endregion
 
+
 #region Minion
-var tribes: Array[Enums.TRIBE]
+var tribes: Array[Tribe]
 #endregion
+
 
 #region Minion / Weapon
 var attack: int
 var health: int
 #endregion
 
+
 #region Spell
-var spell_schools: Array[Enums.SPELL_SCHOOL]
+var spell_schools: Array[SpellSchool]
 #endregion
+
 
 #region Hero
 var armor: int
 var heropower_id: int
 #endregion
+
 
 #region Location
 var durability: int
@@ -61,10 +202,10 @@ var cooldown: int
 #endregion
 
 
-## The card's keywords. Looks like this: [code]{Enums.KEYWORD: "Any additional info", Enums.KEYWORD.DORMANT: 2}[/code]
+## The card's keywords. Looks like this: [code]{Keyword: "Any additional info", Keyword.DORMANT: 2}[/code]
 var keywords: Dictionary
 
-## The card's abiltiies. Looks like this: [code]{Enums.ABILITY: Array[Callable]}[/code]
+## The card's abiltiies. Looks like this: [code]{Ability: Array[Callable]}[/code]
 var abilities: Dictionary
 
 ## Where the card is in it's [member location].
@@ -73,7 +214,7 @@ var index: int:
 		return location_array.find(self)
 
 ## Where the card is. E.g. HAND, BOARD, DECK, ...
-var location: Enums.LOCATION = Enums.LOCATION.NONE:
+var location: Location = Location.NONE:
 	set(new_location):
 		remove_from_location()
 		location = new_location
@@ -82,15 +223,15 @@ var location: Enums.LOCATION = Enums.LOCATION.NONE:
 var location_array: Array[Card]:
 	get:
 		match location:
-			Enums.LOCATION.HAND:
+			Location.HAND:
 				return player.hand
-			Enums.LOCATION.DECK:
+			Location.DECK:
 				return player.deck
-			Enums.LOCATION.BOARD:
+			Location.BOARD:
 				return player.board
-			Enums.LOCATION.GRAVEYARD:
+			Location.GRAVEYARD:
 				return player.graveyard
-			Enums.LOCATION.NONE:
+			Location.NONE:
 				return []
 			_:
 				push_error("Invalid Location")
@@ -103,7 +244,7 @@ var card_node: CardNode:
 		return Game.get_all_card_nodes().filter(func(card_node: CardNode) -> bool: return card_node.card == self)[0]
 
 ## Overrides [member is_hidden] if not set to [code]NULL[/code].
-var override_is_hidden: Enums.NULLABLE_BOOL = Enums.NULLABLE_BOOL.NULL
+var override_is_hidden: Game.NullableBool = Game.NullableBool.NULL
 
 ## Whether or not the card is hidden. If it is, it will be covered by the [CardNode]. Cannot be set, set [member override_is_hidden] instead.
 var is_hidden: bool:
@@ -111,12 +252,12 @@ var is_hidden: bool:
 		if Multiplayer.is_server:
 			return false
 		
-		if override_is_hidden == Enums.NULLABLE_BOOL.FALSE:
+		if override_is_hidden == Game.NullableBool.FALSE:
 			return false
-		if override_is_hidden == Enums.NULLABLE_BOOL.TRUE:
+		if override_is_hidden == Game.NullableBool.TRUE:
 			return true
 		
-		return player != Game.player and (location == Enums.LOCATION.HAND or location == Enums.LOCATION.DECK)
+		return player != Game.player and (location == Location.HAND or location == Location.DECK)
 #endregion
 
 
@@ -144,7 +285,7 @@ func remove_from_location() -> void:
 
 
 ## Add the card to the correct [param index] in it's [member location].
-func add_to_location(new_location: Enums.LOCATION, index: int) -> void:
+func add_to_location(new_location: Location, index: int) -> void:
 	remove_from_location()
 	
 	location = new_location
@@ -152,17 +293,17 @@ func add_to_location(new_location: Enums.LOCATION, index: int) -> void:
 
 
 ## Triggers an ability.
-func trigger_ability(ability: Enums.ABILITY, send_packet: bool = true) -> bool:
+func trigger_ability(ability: Ability, send_packet: bool = true) -> bool:
 	if not abilities.has(ability):
 		return false
 	
-	Game.send_packet_if(send_packet, Enums.PACKET_TYPE.TRIGGER_ABILITY, player.id, [location, index, ability])
+	Game.send_packet_if(send_packet, Packet.PacketType.TRIGGER_ABILITY, player.id, [location, index, ability])
 	
 	return true
 
 
 ## Adds an ability to this card.
-func add_ability(ability_name: Enums.ABILITY, callback: Callable) -> void:
+func add_ability(ability_name: Ability, callback: Callable) -> void:
 	if not abilities.has(ability_name):
 		abilities[ability_name] = []
 	

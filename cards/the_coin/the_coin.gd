@@ -7,16 +7,16 @@ func _ready(player: Player, card: Card) -> void:
 	#text = "Gain 1 Mana Crystal this turn only."
 	#cost = 0
 	#texture = load("res://cards/the-coin/the-coin.png")
-	#types = Array[Enums.TYPE.SPELL]
-	#classes = Array[Enums.CLASS.NEUTRAL]
-	#rarities = Array[Enums.RARITY.FREE]
+	#types = Array[Card.Type.SPELL]
+	#classes = Array[Player.Class.NEUTRAL]
+	#rarities = Array[Card.Rarity.FREE]
 	#collectible = false
 	#id = 2
 	#
-	#spell_schools = Array[Enums.SPELL_SCHOOL.NONE]
+	#spell_schools = Array[Card.SpellSchool.NONE]
 	
 	
-	card.add_ability(Enums.ABILITY.CAST, cast)
+	card.add_ability(Card.Ability.CAST, cast)
 
 
 func cast(player: Player, card: Card) -> void:
