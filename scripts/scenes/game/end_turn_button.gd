@@ -11,14 +11,12 @@ func _ready() -> void:
 	rotation.x = deg_to_rad(180 if Game.player == Game.player2 else 0)
 	
 	Packet.packet_received_before.connect(func(_sender_peer_id: int, packet_type: Packet.PacketType, player_id: int, _info: Array) -> void:
-		if not packet_type == Packet.PacketType.END_TURN:
+		if packet_type != Packet.PacketType.END_TURN:
 			return
-		
-		var tween: Tween = get_tree().create_tween()
-		tween.set_trans(Tween.TRANS_BACK)
 		
 		var degrees: float = 180 if player_id == Game.player.id else 0
 		
+		var tween: Tween = create_tween().set_trans(Tween.TRANS_BACK)
 		tween.tween_property(self, "rotation:x", deg_to_rad(degrees), 0.5)
 	)
 #endregion

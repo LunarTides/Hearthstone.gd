@@ -25,6 +25,15 @@ func _input(event: InputEvent) -> void:
 	
 	if key == "Escape":
 		toggle()
+	
+	elif key == "L":
+		var tween: Tween = create_tween().set_ease(Tween.EASE_OUT)
+		tween.tween_property(self, "position:x", position.x + 100, 2.0)
+		
+		await get_tree().create_timer(1.0).timeout
+		
+		tween.stop()
+		tween.kill()
 
 
 func _gui_input(event: InputEvent) -> void:

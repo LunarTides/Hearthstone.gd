@@ -130,10 +130,6 @@ func layout() -> void:
 	if is_hovering or not _should_layout:
 		return
 	
-	position = Vector3.ONE
-	rotation = Vector3.ZERO
-	scale = Vector3.ONE
-	
 	var result: Dictionary = {}
 	
 	match card.location:
@@ -264,6 +260,8 @@ func _layout_hand() -> Dictionary:
 	new_position.y = CARD_BOUNDS_Y * abs(half_hand_size - card.index)
 	new_position.z = CARD_BOUNDS_Z * player_weight
 	
+	new_rotation = Vector3.ZERO
+	
 	if card.index != half_hand_size:
 		# Tilt it to the left/right.
 		new_rotation.y = deg_to_rad(CARD_ROTATION_Y_MULTIPLIER * player_weight * (half_hand_size - card.index))
@@ -275,6 +273,8 @@ func _layout_hand() -> Dictionary:
 	# Rotate the card 180 degrees if it isn't already
 	if card.player != Game.player and new_rotation.y - PI < 0:
 		new_rotation.y += PI
+	
+	new_scale = Vector3.ONE
 	
 	return {
 		"position": new_position,
@@ -304,6 +304,8 @@ func _layout_board() -> Dictionary:
 	if Game.is_player_1 and card.player == Game.opponent:
 		new_position.z += 1
 	
+	new_scale = Vector3.ONE
+	
 	return {
 		"position": new_position,
 		"rotation": new_rotation,
@@ -317,20 +319,20 @@ func _on_mouse_entered() -> void:
 	
 	is_hovering = true
 	if _layout_tween:
-		_layout_tween.set_speed_scale(1.35)
-		# CRITICAL: Find a way to not have to wait
-		await _layout_tween.finished
-		#_layout_tween.kill()
+		_layout_tween.kill()
 	
 	# Animate
 	var player_weight: int = 1 if card.player == Game.player else -1
 	
+	# For some ungodly reason, if time is below 0.47, the tween gets reverted???
+	var time: float = 0.47
+		
 	_hover_tween = create_tween()
-	_hover_tween.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
-	_hover_tween.parallel().tween_property(self, "position:y", 1, 0.1)
-	_hover_tween.parallel().tween_property(self, "position:z", position.z - (4 * player_weight), 0.1)
-	_hover_tween.parallel().tween_property(self, "rotation:y", 0, 0.1)
-	_hover_tween.parallel().tween_property(self, "scale", Vector3(2, 2, 2), 0.1)
+	_hover_tween.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_EXPO)
+	_hover_tween.tween_property(self, "position:y", 1, time)
+	_hover_tween.parallel().tween_property(self, "position:z", position.z - (4 * player_weight), time)
+	_hover_tween.parallel().tween_property(self, "rotation:y", 0, time)
+	_hover_tween.parallel().tween_property(self, "scale", Vector3(2, 2, 2), time)
 
 
 func _on_mouse_exited() -> void:
