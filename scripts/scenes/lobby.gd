@@ -11,10 +11,41 @@ extends Control
 #endregion
 
 
+#region Private Variables
+var _instance_num: int = -1
+var _instance_socket: TCPServer 
+#endregion
+
+
 #region Internal Functions
 func _ready() -> void:
 	if OS.get_cmdline_args().has("--server") or OS.has_feature("dedicated_server") or DisplayServer.get_name() == "headless":
 		host()
+		return
+	
+	# Make debugging easier
+	if OS.is_debug_build():
+		_instance_socket = TCPServer.new()
+		for n: int in 4:
+			if _instance_socket.listen(5000 + n) == OK:
+				_instance_num = n
+				break
+
+		assert(_instance_num >= 0, "Unable to determine instance number. Seems like all TCP ports are in use")	
+			
+		match _instance_num:
+			0:
+				# Instance 0 should host a server
+				host()
+				get_window().position += Vector2i(500, 0)
+			1:
+				# Instance 1 should join the server
+				_on_join_button_pressed()
+				get_window().position += Vector2i(-500, 500)
+			2:
+				# Instance 2 should join the server
+				_on_join_button_pressed()
+				get_window().position += Vector2i(-500, -500)
 #endregion
 
 
