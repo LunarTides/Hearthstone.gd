@@ -1,0 +1,70 @@
+[gd_scene load_steps=2 format=3 uid="uid://dxp0opjgunx6p"]
+
+[ext_resource type="Script" path="res://scripts/scenes/settings_menu.gd" id="1_wqkmw"]
+
+[node name="SettingsMenu" type="Panel" node_paths=PackedStringArray("vsync", "fullscreen", "resolution")]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -273.0
+offset_top = -273.0
+offset_right = 273.0
+offset_bottom = 273.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_wqkmw")
+vsync = NodePath("TabContainer/Video/Vsync")
+fullscreen = NodePath("TabContainer/Video/Fullscreen")
+resolution = NodePath("TabContainer/Video/Resolution")
+
+[node name="TabContainer" type="TabContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 31.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Video" type="Control" parent="TabContainer"]
+layout_mode = 2
+
+[node name="Vsync" type="CheckBox" parent="TabContainer/Video"]
+layout_mode = 0
+offset_right = 24.0
+offset_bottom = 24.0
+text = "V-Sync"
+
+[node name="Fullscreen" type="OptionButton" parent="TabContainer/Video"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 53.0
+offset_right = 53.0
+offset_bottom = 73.0
+
+[node name="Resolution" type="OptionButton" parent="TabContainer/Video"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 107.0
+offset_right = 53.0
+offset_bottom = 127.0
+
+[node name="BackButton" type="Button" parent="."]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -46.0
+offset_top = 62.0
+offset_bottom = 115.0
+grow_horizontal = 0
+mouse_filter = 1
+theme_override_font_sizes/font_size = 31
+text = "X"
+
+[connection signal="toggled" from="TabContainer/Video/Vsync" to="." method="_on_vsync_toggled"]
+[connection signal="item_selected" from="TabContainer/Video/Fullscreen" to="." method="_on_fullscreen_item_selected"]
+[connection signal="item_selected" from="TabContainer/Video/Resolution" to="." method="_on_resolution_item_selected"]
+[connection signal="pressed" from="BackButton" to="." method="_on_back_button_pressed"]

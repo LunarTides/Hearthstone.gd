@@ -25,8 +25,7 @@ enum NullableBool {
 
 
 #region Constant Variables
-const CardScene: PackedScene = preload("res://scenes/card.tscn")
-const TheCoin: Blueprint = preload("res://cards/the_coin/the_coin.tres")
+const THE_COIN: Blueprint = preload("res://cards/the_coin/the_coin.tres")
 #endregion
 
 
@@ -155,18 +154,6 @@ func _ready() -> void:
 	get_tree().root.add_child.call_deferred(error_label, true)
 
 
-func _input(event: InputEvent) -> void:
-	if event.is_released():
-		return
-	
-	var key: String = event.as_text()
-	
-	# TODO: Make a better way to quit
-	if key == "Escape":
-		OS.set_restart_on_exit(false)
-		Multiplayer.quit()
-
-
 func _notification(what: int) -> void:
 	# Save on quit.
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
@@ -229,7 +216,7 @@ func start_game() -> void:
 	var deckcodes: Dictionary = Multiplayer._deckcodes
 	Multiplayer.start_game.rpc(deckcodes[player1.peer_id], deckcodes[player2.peer_id])
 	
-	var coin: Card = Card.get_from_blueprint(TheCoin, player2)
+	var coin: Card = Card.get_from_blueprint(THE_COIN, player2)
 	player2.add_to_hand(coin, player2.hand.size())
 
 
