@@ -44,7 +44,7 @@ func _place_card(player: Player, card_node: CardNode, pos: Vector3) -> void:
 
 
 func _get_index(pos: Vector3, player: Player) -> int:
-	return Game.get_card_nodes_for_player(player).filter(func(card_node: CardNode) -> bool:
+	return CardNode.get_all_owned_by(player).filter(func(card_node: CardNode) -> bool:
 		return card_node.global_position.x < pos.x and card_node.card.location == Card.Location.BOARD
 	).size()
 

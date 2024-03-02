@@ -155,8 +155,8 @@ func _accept_summon_packet(player_id: int, info: Array) -> void:
 	var location_index: int = info[1]
 	var board_index: int = info[2]
 	
-	var player: Player = Game.get_player_from_id(player_id)
-	var card: Card = Game.get_card_from_index(player, location, location_index)
+	var player: Player = Player.get_from_id(player_id)
+	var card: Card = Card.get_from_index(player, location, location_index)
 	
 	card.add_to_location(Card.Location.BOARD, board_index)
 
@@ -166,8 +166,8 @@ func _accept_play_packet(player_id: int, info: Array) -> void:
 	var location_index: int = info[1]
 	var board_index: int = info[2]
 	
-	var player: Player = Game.get_player_from_id(player_id)
-	var card: Card = Game.get_card_from_index(player, location, location_index)
+	var player: Player = Player.get_from_id(player_id)
+	var card: Card = Card.get_from_index(player, location, location_index)
 	
 	player.mana -= card.cost
 	
@@ -193,7 +193,7 @@ func _accept_create_card_packet(player_id: int, info: Array) -> void:
 func _accept_draw_cards_packet(player_id: int, info: Array) -> void:
 	var amount: int = info[0]
 	
-	var player: Player = Game.get_player_from_id(player_id)
+	var player: Player = Player.get_from_id(player_id)
 	
 	for _i: int in amount:
 		var card: Card = player.deck.pop_back()
@@ -228,8 +228,8 @@ func _accept_reveal_packet(player_id: int, info: Array) -> void:
 	var location: Card.Location = info[0]
 	var location_index: int = info[1]
 	
-	var player: Player = Game.get_player_from_id(player_id)
-	var card: Card = Game.get_card_from_index(player, location, location_index)
+	var player: Player = Player.get_from_id(player_id)
+	var card: Card = Card.get_from_index(player, location, location_index)
 	
 	card.override_is_hidden = Game.NullableBool.FALSE
 
@@ -239,8 +239,8 @@ func _accept_trigger_ability_packet(player_id: int, info: Array) -> void:
 	var location_index: int = info[1]
 	var ability: Card.Ability = info[2]
 	
-	var player: Player = Game.get_player_from_id(player_id)
-	var card: Card = Game.get_card_from_index(player, location, location_index)
+	var player: Player = Player.get_from_id(player_id)
+	var card: Card = Card.get_from_index(player, location, location_index)
 	
 	for ability_callback: Callable in card.abilities[ability]:
 		ability_callback.call(player, card)

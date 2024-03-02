@@ -2,6 +2,7 @@ extends Resource
 class_name Blueprint
 
 
+#region Exported Variables
 #region Common
 @export_category("Common")
 @export var name: String
@@ -46,4 +47,22 @@ class_name Blueprint
 @export_category("Location")
 @export var durability: int
 @export var cooldown: int
+#endregion
+#endregion
+
+
+#region Static Functions
+## Creates a [Blueprint] from the specified [param id]. Returns [code]null[/code] if no such blueprint exists.
+static func get_from_id(id: int) -> Blueprint:
+	var files: Array[String] = Game.get_all_files_from_path("res://cards")
+	
+	for file_path: String in files:
+		if not file_path.contains(".tres"):
+			continue
+		
+		var blueprint: Blueprint = load(file_path)
+		if blueprint.id == id:
+			return blueprint
+	
+	return null
 #endregion

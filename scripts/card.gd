@@ -241,7 +241,7 @@ var location_array: Array[Card]:
 ## The [CardNode] of the card.
 var card_node: CardNode:
 	get:
-		return Game.get_all_card_nodes().filter(func(card_node: CardNode) -> bool: return card_node.card == self)[0]
+		return CardNode.get_all().filter(func(card_node: CardNode) -> bool: return card_node.card == self)[0]
 
 ## Overrides [member is_hidden] if not set to [code]NULL[/code].
 var override_is_hidden: Game.NullableBool = Game.NullableBool.NULL
@@ -267,6 +267,48 @@ func _ready() -> void:
 		blueprint._ready(player, self)
 	
 	update_blueprint()
+#endregion
+
+
+#region Static Functions
+## Gets the [param player]'s [Card] in [param location] at [param index].
+static func get_from_index(player: Player, location: Card.Location, index: int) -> Card:
+	match location:
+		Location.HAND:
+			return player.hand[index]
+		Location.DECK:
+			return player.deck[index]
+		Location.BOARD:
+			return player.board[index]
+		Location.GRAVEYARD:
+			return player.graveyard[index]
+		_:
+			return null
+
+
+## Gets all [Card]s for the specified player.
+static func get_all_owned_by(player: Player) -> Array[Card]:
+	return get_all().filter(func(card: Card) -> bool: return card.player == player)
+
+
+## Gets all [Card]s currently in the game scene.
+static func get_all() -> Array[Card]:
+	var array: Array[Card] = []
+	
+	array.assign(CardNode.get_all().map(func(card_node: CardNode) -> Card:
+		return card_node.card
+	))
+	
+	return array
+
+
+
+## Creates a card with the specified [param blueprint] with the specified [param player] as its owner.
+static func get_from_blueprint(blueprint: Blueprint, player: Player) -> Card:
+	var card: Card = Card.new()
+	card.blueprint = blueprint
+	card.player = player
+	return card
 #endregion
 
 

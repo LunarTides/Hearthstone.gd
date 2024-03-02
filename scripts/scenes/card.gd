@@ -152,6 +152,45 @@ func layout() -> void:
 #endregion
 
 
+#region Static Functions
+## Gets all [CardNode]s for the specified player.
+static func get_all_owned_by(player: Player) -> Array[CardNode]:
+	var array: Array[CardNode] = []
+	
+	array.assign(get_all().filter(func(card_node: CardNode) -> bool:
+		if not card_node.card:
+			return false
+		
+		return card_node.card.player == player
+	))
+	
+	return array
+
+
+## Gets all [CardNode]s currently in the game scene.
+static func get_all() -> Array[CardNode]:
+	var array: Array[CardNode] = []
+	var tree: SceneTree = Engine.get_main_loop()
+	
+	array.assign(tree.get_nodes_in_group("Cards").filter(func(card_node: CardNode) -> bool:
+		return not card_node.is_queued_for_deletion()
+	))
+	return array
+
+
+## Lays out all the cards. Only works client side.
+static func layout_all() -> void:
+	for card: CardNode in get_all():
+		card.layout()
+
+
+## Lays out all the cards for the specified player. Only works client side.
+static func layout_all_owned_by(player: Player) -> void:
+	for card: CardNode in get_all_owned_by(player):
+		card.layout()
+#endregion
+
+
 #region Private Functions
 func _update() -> void:
 	if card.location == Card.Location.NONE:
@@ -311,7 +350,7 @@ func _on_input_event(_camera: Node, event: InputEvent, position: Vector3, _norma
 
 
 func _make_way(stop: bool = false) -> void:
-	for card_node: CardNode in Game.get_card_nodes_for_player(card.player).filter(func(card_node: CardNode) -> bool:
+	for card_node: CardNode in CardNode.get_all_owned_by(card.player).filter(func(card_node: CardNode) -> bool:
 		return card_node != self and card_node.card.location == Card.Location.BOARD
 	):
 		if is_dragging:

@@ -26,7 +26,6 @@ enum NullableBool {
 
 #region Constant Variables
 const CardScene: PackedScene = preload("res://scenes/card.tscn")
-const Sheep: Blueprint = preload("res://cards/sheep/sheep.tres")
 const TheCoin: Blueprint = preload("res://cards/the_coin/the_coin.tres")
 #endregion
 
@@ -158,7 +157,7 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	# Not great for performance.
-	layout_all_cards()
+	CardNode.layout_all()
 
 
 func _input(event: InputEvent) -> void:
@@ -182,35 +181,6 @@ func _notification(what: int) -> void:
 
 
 #region Public Functions
-## Gets the [Player] with the specified [param id].
-func get_player_from_id(id: int) -> Player:
-	if multiplayer.is_server():
-		if id == 0:
-			return _player1_server
-		else:
-			return _player2_server
-	
-	if id == 0:
-		return player1
-	else:
-		return player2
-
-
-## Gets the [param player]'s [Card] in [param location] at [param index].
-func get_card_from_index(player: Player, location: Card.Location, index: int) -> Card:
-	match location:
-		Card.Location.HAND:
-			return player.hand[index]
-		Card.Location.DECK:
-			return player.deck[index]
-		Card.Location.BOARD:
-			return player.board[index]
-		Card.Location.GRAVEYARD:
-			return player.graveyard[index]
-		_:
-			return null
-
-
 ## Starts the game. Assigns an id to each player and changes scene to the game scene.
 ## Only the server can do this.
 func start_game() -> void:
@@ -264,7 +234,7 @@ func start_game() -> void:
 	var deckcodes: Dictionary = Multiplayer._deckcodes
 	Multiplayer.start_game.rpc(deckcodes[player1.peer_id], deckcodes[player2.peer_id])
 	
-	var coin: Card = get_card_from_blueprint(TheCoin, player2)
+	var coin: Card = Card.get_from_blueprint(TheCoin, player2)
 	player2.add_to_hand(coin, player2.hand.size())
 
 
@@ -312,81 +282,6 @@ func feedback(text: String, type: FeedbackType) -> void:
 	tween.tween_property(error_label, "modulate:a", 0, 1)
 
 
-## Lays out all the cards. Only works client side.
-func layout_all_cards() -> void:
-	for card: CardNode in get_all_card_nodes():
-		card.layout()
-
-
-## Lays out all the cards for the specified player. Only works client side.
-func layout_cards(player: Player) -> void:
-	for card: CardNode in get_card_nodes_for_player(player):
-		card.layout()
-
-
-## Gets all [Card]s for the specified player.
-func get_cards_for_player(player: Player) -> Array[Card]:
-	return get_all_cards().filter(func(card: Card) -> bool: return card.player == player)
-
-
-## Gets all [Card]s currently in the game scene.
-func get_all_cards() -> Array[Card]:
-	var array: Array[Card] = []
-	
-	array.assign(get_all_card_nodes().map(func(card_node: CardNode) -> Card:
-		return card_node.card
-	))
-	
-	return array
-
-
-## Gets all [CardNode]s for the specified player.
-func get_card_nodes_for_player(player: Player) -> Array[CardNode]:
-	var array: Array[CardNode] = []
-	
-	array.assign(get_all_card_nodes().filter(func(card_node: CardNode) -> bool:
-		if not card_node.card:
-			return false
-		
-		return card_node.card.player == player
-	))
-	
-	return array
-
-
-## Gets all [CardNode]s currently in the game scene.
-func get_all_card_nodes() -> Array[CardNode]:
-	# ???
-	var array: Array[CardNode] = []
-	array.assign(get_tree().get_nodes_in_group("Cards").filter(func(card_node: CardNode) -> bool:
-		return not card_node.is_queued_for_deletion()
-	))
-	return array
-
-
-## Creates a [Blueprint] from the specified [param id]. Returns [code]null[/code] if no such blueprint exists.
-func get_blueprint_from_id(id: int) -> Blueprint:
-	var files: Array[String] = get_all_files_from_path("res://cards")
-	
-	for file_path: String in files:
-		if not file_path.contains(".tres"):
-			continue
-		
-		var blueprint: Blueprint = load(file_path)
-		if blueprint.id == id:
-			return blueprint
-	
-	return null
-
-
-## Creates a card with the specified [param blueprint] with the specified [param player] as its owner.
-func get_card_from_blueprint(blueprint: Blueprint, player: Player) -> Card:
-	var card: Card = Card.new()
-	card.blueprint = blueprint
-	card.player = player
-	return card
-
-
 ## Returns all filenames from the specified [param path].
 func get_all_files_from_path(path: String) -> Array[String]:  
 	var file_paths: Array[String] = []  
@@ -419,7 +314,7 @@ func wait_for_node(node_path: NodePath) -> Node:
 
 
 ## Exits to the main menu. You might want to use [code]Multiplayer.quit[/code] instead.
-func exit_to_main_menu() -> void:
+func exit_to_lobby() -> void:
 	get_tree().change_scene_to_file("res://scenes/lobby.tscn")
 
 

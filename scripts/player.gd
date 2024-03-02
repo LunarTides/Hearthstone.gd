@@ -57,13 +57,29 @@ var graveyard: Array[Card]
 ## The player's opponent.
 var opponent: Player:
 	get:
-		return Game.get_player_from_id(1 - id)
+		return Player.get_from_id(1 - id)
 
 ## The player's deckcode.
 var deckcode: String
 
 ## The player's peer id.
 var peer_id: int
+#endregion
+
+
+#region Static Functions
+## Gets the [Player] with the specified [param id].
+static func get_from_id(id: int) -> Player:
+	if Multiplayer.is_server:
+		if id == 0:
+			return Game._player1_server
+		else:
+			return Game._player2_server
+	
+	if id == 0:
+		return Game.player1
+	else:
+		return Game.player2
 #endregion
 
 

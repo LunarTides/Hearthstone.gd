@@ -177,7 +177,7 @@ func join(ip_address: String, port: int) -> void:
 	multiplayer.multiplayer_peer = Multiplayer.peer
 
 
-## Quits to main menu. Use this instead of [code]Game.exit_to_main_menu[/code].
+## Quits to main menu. Use this instead of [code]Game.exit_to_lobby[/code].
 func quit() -> void:
 	# CRITICAL: This function crashes clients somehow?
 	save_config()
@@ -194,7 +194,7 @@ func quit() -> void:
 	if _is_server:
 		get_tree().quit()
 	else:
-		Game.exit_to_main_menu()
+		Game.exit_to_lobby()
 #endregion
 
 
@@ -214,14 +214,14 @@ func assign_player(id: int) -> void:
 	
 	var client_peer_id: int = multiplayer.get_unique_id()
 	Multiplayer.players[client_peer_id] = Game.player
-	Game.get_player_from_id(id).peer_id = client_peer_id
+	Player.get_from_id(id).peer_id = client_peer_id
 	
 	for peer: int in multiplayer.get_peers():
 		if peer == 1:
 			continue
 		
 		Multiplayer.players[peer] = Game.opponent
-		Game.get_player_from_id(1 - id).peer_id = peer
+		Player.get_from_id(1 - id).peer_id = peer
 		break
 
 
@@ -298,7 +298,7 @@ func start_game(deckcode1: String, deckcode2: String) -> void:
 	for i: int in 2:
 		var deckcode: String = Game.player1.deckcode if i == 0 else Game.player2.deckcode
 		
-		var player: Player = Game.get_player_from_id(i)
+		var player: Player = Player.get_from_id(i)
 		var deck: Dictionary = Deckcode.import(deckcode, player, is_server)
 		
 		player.hero_class = deck.class
@@ -312,7 +312,7 @@ func start_game(deckcode1: String, deckcode2: String) -> void:
 func spawn_card(blueprint_path: String, player_id: int, location: Card.Location, index: int) -> void:
 	var card: Card = Card.new()
 	card.blueprint = load(blueprint_path)
-	card.player = Game.get_player_from_id(player_id)
+	card.player = Player.get_from_id(player_id)
 	card.add_to_location(location, index)
 	
 	var card_node: CardNode = CardScene.instantiate()

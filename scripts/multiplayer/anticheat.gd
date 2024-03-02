@@ -178,7 +178,7 @@ func _run_summon_packet(sender_peer_id: int, sender_player: Player, actor_player
 	var location_index: int = info[1]
 	var board_index: int = info[2]
 	
-	var card: Card = Game.get_card_from_index(sender_player, location, location_index)
+	var card: Card = Card.get_from_index(sender_player, location, location_index)
 	
 	# The card should exist.
 	if _check(not card, 1):
@@ -228,7 +228,7 @@ func _run_play_packet(sender_peer_id: int, sender_player: Player, actor_player: 
 	var location_index: int = info[1]
 	var board_index: int = info[2]
 	
-	var card: Card = Game.get_card_from_index(sender_player, location, location_index)
+	var card: Card = Card.get_from_index(sender_player, location, location_index)
 	
 	# The card should exist.
 	if _check(not card, 1):
@@ -298,7 +298,7 @@ func _run_trigger_ability_packet(sender_peer_id: int, sender_player: Player, act
 	var location_index: int = info[1]
 	var ability: Card.Ability = info[2]
 	
-	var card: Card = Game.get_card_from_index(actor_player, location, location_index)
+	var card: Card = Card.get_from_index(actor_player, location, location_index)
 	
 	# The card should exist.
 	if _check(card == null, 1):

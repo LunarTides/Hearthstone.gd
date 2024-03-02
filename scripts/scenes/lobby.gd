@@ -59,7 +59,7 @@ func host() -> void:
 #region Private Functions
 func _on_join_button_pressed() -> void:
 	if not Deckcode.validate(deckcode.text):
-		Game.error_text = "Invalid deckcode."
+		Game.feedback("Invalid deckcode.", Game.FeedbackType.ERROR)
 		push_warning("Invalid deckcode.")
 		return
 	
