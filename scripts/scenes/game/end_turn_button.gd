@@ -37,7 +37,7 @@ func _on_input_event(camera: Node, event: InputEvent, position: Vector3, normal:
 		return
 	
 	if Multiplayer.is_server and Game.is_players_turn:
-		Game.error_text = "The server is the ultimate authority. This would work without this safeguard."
+		Game.feedback("The server is the ultimate authority. This would work without this safeguard.", Game.FeedbackType.WARNING)
 		return
 	
 	Game.end_turn()

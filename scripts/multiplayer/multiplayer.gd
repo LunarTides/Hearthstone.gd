@@ -98,13 +98,6 @@ func _ready() -> void:
 		print("Client connected, starting game...")
 		Game.start_game()
 	)
-
-
-func _notification(what: int) -> void:
-	# Save on quit.
-	if what == NOTIFICATION_WM_CLOSE_REQUEST:
-		OS.set_restart_on_exit(false)
-		quit()
 #endregion
 
 
@@ -282,13 +275,13 @@ func server_response(success: bool, text: String = "") -> void:
 	server_responded.emit(success)
 
 
-## Sends feedback to the client using [member Game.error_text].
+## Sends feedback to the client using [member Game.feedback].
 @rpc("authority", "call_remote", "reliable")
 func feedback(text: String) -> void:
 	text = "[Server]: %s" % text
 	
 	print(text)
-	Game.error_text = text
+	Game.feedback(text, Game.FeedbackType.ERROR)
 
 
 ## Sends all the information needed to start the game to the clients.

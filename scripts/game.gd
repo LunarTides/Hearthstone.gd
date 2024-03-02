@@ -9,6 +9,15 @@ signal game_started
 #endregion
 
 
+#region Enums
+enum FeedbackType {
+	INFO,
+	WARNING,
+	ERROR,
+}
+#endregion
+
+
 #region Constant Variables
 const CardScene: PackedScene = preload("res://scenes/card.tscn")
 const Sheep: Blueprint = preload("res://cards/sheep/sheep.tres")
@@ -108,20 +117,6 @@ var max_players: int = 2
 var board_node: BoardNode:
 	get:
 		return get_tree().root.get_node("Main/Board") as BoardNode
-
-## Returns an error label.
-var error_text: String:
-	set(new_error_text):
-		error_text = new_error_text
-		
-		var error_label: RichTextLabel = get_tree().root.get_node("ErrorLabel") as RichTextLabel
-		error_label.modulate.a = 1
-		error_label.text = "[center][color=red]" + error_text
-		
-		await get_tree().create_timer(1.0).timeout
-		
-		var tween: Tween = get_tree().create_tween()
-		tween.tween_property(error_label, "modulate:a", 0, 1)
 #endregion
 
 
@@ -168,6 +163,13 @@ func _input(event: InputEvent) -> void:
 	
 	# TODO: Make a better way to quit
 	if key == "Escape":
+		OS.set_restart_on_exit(false)
+		Multiplayer.quit()
+
+
+func _notification(what: int) -> void:
+	# Save on quit.
+	if what == NOTIFICATION_WM_CLOSE_REQUEST:
 		OS.set_restart_on_exit(false)
 		Multiplayer.quit()
 #endregion
@@ -263,11 +265,44 @@ func start_game() -> void:
 ## Sends a packet to end the [member current_player]'s turn. Returns if a packet was sent.
 func end_turn() -> bool:
 	if not is_players_turn:
-		error_text = "It is not your turn."
+		feedback("It is not your turn.", FeedbackType.ERROR)
 		return false
 	
 	send_packet(Enums.PACKET_TYPE.END_TURN, current_player.id, [], true)
 	return true
+
+
+func feedback(text: String, type: FeedbackType) -> void:
+	var error_label: RichTextLabel = get_tree().root.get_node("ErrorLabel") as RichTextLabel
+	error_label.modulate.a = 1
+	
+	# Get color from `type`.
+	var color: String = ""
+	
+	match type:
+		FeedbackType.INFO:
+			pass
+		
+		FeedbackType.WARNING:
+			color = "yellow"
+		
+		FeedbackType.ERROR:
+			color = "red"
+		
+		_:
+			assert(false, "Invalid feedback type: %s" % type)
+	
+	error_label.text = "[center]%s%s" % [
+		("[color=%s]" % color) if color else "",
+		text,
+	]
+	
+	# Wait 1 second
+	await get_tree().create_timer(1.0).timeout
+	
+	# Fade out
+	var tween: Tween = get_tree().create_tween()
+	tween.tween_property(error_label, "modulate:a", 0, 1)
 
 
 ## Lays out all the cards. Only works client side.

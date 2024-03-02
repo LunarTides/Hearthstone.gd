@@ -49,9 +49,9 @@ func _input(event: InputEvent) -> void:
 	# Set 10 mana
 	elif key == "F2":
 		if not Multiplayer.is_server:
-			Game.error_text = "[color=yellow]REMEMBER TO DO THIS ON THE SERVER TOO"
+			Game.feedback("REMEMBER TO DO THIS ON THE SERVER TOO", Game.FeedbackType.WARNING)
 		else:
-			Game.error_text = "[color=green]Set the current player's mana to 10"
+			Game.feedback("Set the current player's mana to 10", Game.FeedbackType.INFO)
 		
 		Game.current_player.mana = 10
 
@@ -87,7 +87,7 @@ func _on_send_packet_button_pressed() -> void:
 	
 	var info: Variant = JSON.parse_string(send_packet_info.text)
 	if typeof(info) != TYPE_ARRAY:
-		Game.error_text = "The info needs to be a valid JSON Array."
+		Game.feedback("The info needs to be a valid JSON Array.", Game.FeedbackType.ERROR)
 		return
 	
 	Game.send_packet(packet_type, player_id, info, true)

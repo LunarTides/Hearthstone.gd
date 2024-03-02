@@ -53,15 +53,15 @@ var peer_id: int
 ## Sends a packet for the player to play a card. Returns if a packet was sent / success.
 func play_card(card: Card, board_index: int, send_packet: bool = true) -> bool:
 	if card.types.has(Enums.TYPE.MINION) and board.size() >= Game.max_board_space:
-		Game.error_text = "You don't have enough space on the board."
+		Game.feedback("You don't have enough space on the board.", Game.FeedbackType.ERROR)
 		return false
 	
 	if not Game.is_players_turn:
-		Game.error_text = "It is not your turn."
+		Game.feedback("It is not your turn.", Game.FeedbackType.ERROR)
 		return false
 	
 	if mana < card.cost:
-		Game.error_text = "You don't have enough mana."
+		Game.feedback("You don't have enough mana.", Game.FeedbackType.ERROR)
 		return false
 	
 	Game.send_packet_if(send_packet, Enums.PACKET_TYPE.PLAY, id, [card.location, card.index, board_index], true)
