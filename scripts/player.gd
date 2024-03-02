@@ -98,7 +98,7 @@ func play_card(card: Card, board_index: int, send_packet: bool = true) -> bool:
 		Game.feedback("You don't have enough mana.", Game.FeedbackType.ERROR)
 		return false
 	
-	Game.send_packet_if(send_packet, Packet.PacketType.PLAY, id, [card.location, card.index, board_index], true)
+	Packet.send_if(send_packet, Packet.PacketType.PLAY, id, [card.location, card.index, board_index], true)
 	return true
 
 
@@ -107,7 +107,7 @@ func summon_card(card: Card, board_index: int, send_packet: bool = true) -> bool
 	if board.size() >= Game.max_board_space:
 		return false
 	
-	Game.send_packet_if(send_packet, Packet.PacketType.SUMMON, id, [card.location, card.index, board_index], true)
+	Packet.send_if(send_packet, Packet.PacketType.SUMMON, id, [card.location, card.index, board_index], true)
 	return true
 
 
@@ -116,7 +116,7 @@ func add_to_hand(card: Card, hand_index: int, send_packet: bool = true) -> bool:
 	if hand.size() >= Game.max_hand_size:
 		return false
 	
-	Game.send_packet_if(send_packet, Packet.PacketType.CREATE_CARD, id, [
+	Packet.send_if(send_packet, Packet.PacketType.CREATE_CARD, id, [
 		card.blueprint.resource_path,
 		Card.Location.HAND,
 		hand_index,
@@ -126,7 +126,7 @@ func add_to_hand(card: Card, hand_index: int, send_packet: bool = true) -> bool:
 
 ## Sends a packet to add a card to the player's deck. Returns if a packet was sent / success.
 func add_to_deck(card: Card, deck_index: int, send_packet: bool = true) -> bool:
-	Game.send_packet_if(send_packet, Packet.PacketType.CREATE_CARD, id, [
+	Packet.send_if(send_packet, Packet.PacketType.CREATE_CARD, id, [
 		card.blueprint.resource_path,
 		Card.Location.DECK,
 		deck_index,
@@ -136,6 +136,6 @@ func add_to_deck(card: Card, deck_index: int, send_packet: bool = true) -> bool:
 
 ## Sends a packet for the player to draw a card. Returns if a packet was sent / success.
 func draw_cards(amount: int, send_packet: bool = true) -> bool:
-	Game.send_packet_if(send_packet, Packet.PacketType.DRAW_CARDS, id, [amount], true)
+	Packet.send_if(send_packet, Packet.PacketType.DRAW_CARDS, id, [amount], true)
 	return true
 #endregion

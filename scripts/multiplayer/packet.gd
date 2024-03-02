@@ -45,7 +45,7 @@ var history: Array[Array] = []
 
 #region Public Functions
 ## Returns a packet in a readable format. E.g. [Packet]: Server (Player: 1): [PLAY] [1, 0, 1]
-func get_readable_packet(sender_peer_id: int, packet_type: PacketType, player_id: int, info: Array) -> String:
+func get_readable(sender_peer_id: int, packet_type: PacketType, player_id: int, info: Array) -> String:
 	var packet_name: String = PacketType.keys()[packet_type]
 	
 	return "[Packet]: %s (Player: %d): [%s] %s" % [
@@ -58,28 +58,36 @@ func get_readable_packet(sender_peer_id: int, packet_type: PacketType, player_id
 
 ## Sends a packet to the server that will be sent to all the clients.[br]
 ## This is used to sync every action.
-func send_packet(packet_type: PacketType, player_id: int, info: Array, suppress_warning: bool = false) -> void:
+func send(packet_type: PacketType, player_id: int, info: Array, suppress_warning: bool = false) -> void:
 	# Only send the "Sending packet" message on non-debug builds since it spams the console with garbage.
 	if not OS.is_debug_build() and not is_server:
-		print("Sending packet: " + get_readable_packet(multiplayer.get_unique_id(), packet_type, player_id, info))
+		print("Sending packet: " + get_readable(multiplayer.get_unique_id(), packet_type, player_id, info))
 	
 	if is_server and not suppress_warning:
 		push_warning("A packet is being sent from the server. These packets bypass the anticheat. Be careful.")
 	
-	_send_packet.rpc_id(1, packet_type, player_id, info)
+	_send.rpc_id(1, packet_type, player_id, info)
+
+
+## Sends a packet if [param condition] is [code]true[/code]. If not, only apply the packet locally.
+func send_if(condition: bool, packet_type: Packet.PacketType, player_id: int, info: Array, suppress_warning: bool = false) -> void:
+	if condition:
+		send(packet_type, player_id, info, suppress_warning)
+	else:
+		_accept(packet_type, multiplayer.get_unique_id(), player_id, info)
 #endregion
 
 
 #region Private Functions
 @rpc("any_peer", "call_local", "reliable")
-func _send_packet(packet_type: PacketType, player_id: int, info: Array) -> void:
-	var result: PacketFailureType = __send_packet(packet_type, player_id, info)
+func _send(packet_type: PacketType, player_id: int, info: Array) -> void:
+	var result: PacketFailureType = __send(packet_type, player_id, info)
 	
 	if result != PacketFailureType.NONE:
 		push_warning("Packet dropped with code [%s] ^^^^" % PacketFailureType.keys()[result])
 
 
-func __send_packet(packet_type: PacketType, player_id: int, info: Array) -> PacketFailureType:
+func __send(packet_type: PacketType, player_id: int, info: Array) -> PacketFailureType:
 	if not is_server:
 		return PacketFailureType.IS_CLIENT
 	
@@ -89,7 +97,7 @@ func __send_packet(packet_type: PacketType, player_id: int, info: Array) -> Pack
 	var actor_player: Player = Multiplayer.players.values().filter(func(player: Player) -> bool: return player.id == player_id)[0]
 	
 	var packet_name: String = PacketType.keys()[packet_type]
-	print(get_readable_packet(sender_peer_id, packet_type, player_id, info))
+	print(get_readable(sender_peer_id, packet_type, player_id, info))
 	
 	# Anticheat
 	if not Anticheat.run(packet_type, sender_peer_id, actor_player, info):
@@ -125,14 +133,14 @@ func __send_packet(packet_type: PacketType, player_id: int, info: Array) -> Pack
 		return PacketFailureType.UNKNOWN
 	
 	# Broadcast the packet to all clients & server
-	_accept_packet.rpc(packet_type, sender_peer_id, player_id, info)
+	_accept.rpc(packet_type, sender_peer_id, player_id, info)
 	
 	return PacketFailureType.NONE
 
 
 #region Accept Packet Functions
 @rpc("authority", "call_local", "reliable")
-func _accept_packet(packet_type: PacketType, sender_peer_id: int, player_id: int, info: Array) -> void:
+func _accept(packet_type: PacketType, sender_peer_id: int, player_id: int, info: Array) -> void:
 	var packet_name: String = PacketType.keys()[packet_type]
 	
 	packet_received_before.emit(sender_peer_id, packet_type, player_id, info)

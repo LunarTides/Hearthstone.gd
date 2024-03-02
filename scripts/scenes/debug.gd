@@ -79,7 +79,7 @@ func _process(delta: float) -> void:
 	
 	if Packet.history.size() > 0:
 		var packet: Array = Packet.history[-1]
-		var packet_string: String = Packet.get_readable_packet(packet[0], packet[1], packet[2], packet[3])
+		var packet_string: String = Packet.get_readable(packet[0], packet[1], packet[2], packet[3])
 		
 		latest_packet_label.text = "Latest Packet: %s" % packet_string
 #endregion
@@ -95,7 +95,7 @@ func _on_send_packet_button_pressed() -> void:
 		Game.feedback("The info needs to be a valid JSON Array.", Game.FeedbackType.ERROR)
 		return
 	
-	Game.send_packet(packet_type, player_id, info, true)
+	Packet.send(packet_type, player_id, info, true)
 
 
 func _on_info_text_submitted(new_text: String) -> void:

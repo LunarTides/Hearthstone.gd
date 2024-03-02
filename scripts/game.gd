@@ -155,11 +155,6 @@ func _ready() -> void:
 	get_tree().root.add_child.call_deferred(error_label, true)
 
 
-func _process(delta: float) -> void:
-	# Not great for performance.
-	CardNode.layout_all()
-
-
 func _input(event: InputEvent) -> void:
 	if event.is_released():
 		return
@@ -244,7 +239,7 @@ func end_turn() -> bool:
 		feedback("It is not your turn.", FeedbackType.ERROR)
 		return false
 	
-	send_packet(Packet.PacketType.END_TURN, current_player.id, [], true)
+	Packet.send(Packet.PacketType.END_TURN, current_player.id, [], true)
 	return true
 
 
@@ -316,18 +311,4 @@ func wait_for_node(node_path: NodePath) -> Node:
 ## Exits to the main menu. You might want to use [code]Multiplayer.quit[/code] instead.
 func exit_to_lobby() -> void:
 	get_tree().change_scene_to_file("res://scenes/lobby.tscn")
-
-
-## Sends a packet to the server that will be sent to all the clients.[br]
-## This is used to sync every action.
-func send_packet(packet_type: Packet.PacketType, player_id: int, info: Array, suppress_warning: bool = false) -> void:
-	Multiplayer.send_packet(packet_type, player_id, info, suppress_warning)
-
-
-## Sends a packet if [param condition] is [code]true[/code]. If not, only apply the packet locally.
-func send_packet_if(condition: bool, packet_type: Packet.PacketType, player_id: int, info: Array, suppress_warning: bool = false) -> void:
-	if condition:
-		send_packet(packet_type, player_id, info, suppress_warning)
-	else:
-		Packet._accept_packet(packet_type, multiplayer.get_unique_id(), player_id, info)
 #endregion

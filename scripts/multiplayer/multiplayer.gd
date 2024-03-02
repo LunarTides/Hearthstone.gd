@@ -103,12 +103,6 @@ func _ready() -> void:
 
 
 #region Public Functions
-## Sends a packet to the server that will be sent to all the clients.[br]
-## This is used to sync every action.
-func send_packet(packet_type: Packet.PacketType, player_id: int, info: Array, suppress_warning: bool = false) -> void:
-	Packet.send_packet(packet_type, player_id, info, suppress_warning)
-
-
 ## Loads the config file specified at [constant CONFIG_FILE_PATH]. Only used by the server.
 func load_config() -> void:
 	if not is_server:
@@ -307,7 +301,7 @@ func start_game(deckcode1: String, deckcode2: String) -> void:
 		player.draw_cards(3 if player.id == 0 else 4, false)
 
 
-## Spawns in a card. THIS HAS TO BE CALLED SERVER SIDE. USE [method send_packet] FOR CLIENT SIDE.
+## Spawns in a card. THIS HAS TO BE CALLED SERVER SIDE. USE [method Packet.send] FOR CLIENT SIDE.
 @rpc("authority", "call_local", "reliable")
 func spawn_card(blueprint_path: String, player_id: int, location: Card.Location, index: int) -> void:
 	var card: Card = Card.new()

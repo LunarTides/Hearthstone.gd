@@ -339,7 +339,7 @@ func trigger_ability(ability: Ability, send_packet: bool = true) -> bool:
 	if not abilities.has(ability):
 		return false
 	
-	Game.send_packet_if(send_packet, Packet.PacketType.TRIGGER_ABILITY, player.id, [location, index, ability])
+	Packet.send_if(send_packet, Packet.PacketType.TRIGGER_ABILITY, player.id, [location, index, ability])
 	
 	return true
 

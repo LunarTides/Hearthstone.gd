@@ -213,6 +213,8 @@ func _update() -> void:
 		queue_free()
 		return
 	
+	layout()
+	
 	if card.is_hidden:
 		covered = true
 		return
@@ -318,6 +320,7 @@ func _on_mouse_entered() -> void:
 		_layout_tween.set_speed_scale(1.35)
 		# CRITICAL: Find a way to not have to wait
 		await _layout_tween.finished
+		#_layout_tween.kill()
 	
 	# Animate
 	var player_weight: int = 1 if card.player == Game.player else -1
