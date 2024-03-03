@@ -143,7 +143,7 @@ func _input(event: InputEvent) -> void:
 
 #region Public Functions
 ## Change the position / rotation of the card to be correct.
-func layout() -> void:
+func layout(instant: bool = false) -> void:
 	if is_hovering or not _should_layout:
 		return
 	
@@ -169,10 +169,18 @@ func layout() -> void:
 	var new_rotation: Vector3 = result.rotation
 	var new_scale: Vector3 = result.scale
 	
-	_layout_tween = create_tween().set_ease(Tween.EASE_OUT).set_parallel()
-	_layout_tween.tween_property(self, "position", new_position, 0.5)
-	_layout_tween.tween_property(self, "rotation", new_rotation, 0.5)
-	_layout_tween.tween_property(self, "scale", new_scale, 0.5)
+	if instant:
+		position = new_position
+		rotation = new_rotation
+		scale = new_scale
+	else:
+		if _layout_tween:
+			_layout_tween.kill()
+		
+		_layout_tween = create_tween().set_ease(Tween.EASE_OUT).set_parallel()
+		_layout_tween.tween_property(self, "position", new_position, 0.5)
+		_layout_tween.tween_property(self, "rotation", new_rotation, 0.5)
+		_layout_tween.tween_property(self, "scale", new_scale, 0.5)
 	
 	_old_position = new_position
 	_old_rotation = new_rotation
@@ -351,9 +359,7 @@ func _start_hover() -> void:
 	
 	# Animate
 	var player_weight: int = 1 if card.player == Game.player else -1
-	
-	# For some ungodly reason, if time is below 0.47, the tween gets reverted???
-	var time: float = 0.47
+	var time: float = 0.1
 	
 	_hover_tween = create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_EXPO).set_parallel()
 	_hover_tween.tween_property(self, "position:y", 1, time)
@@ -370,6 +376,7 @@ func _stop_hover() -> void:
 		_hover_tween.kill()
 	
 	is_hovering = false
+	layout(true)
 
 
 func _start_dragging() -> void:
@@ -424,4 +431,5 @@ func _make_way_for(card_node: CardNode) -> void:
 
 func _stop_making_way() -> void:
 	_should_layout = true
+	layout()
 #endregion
