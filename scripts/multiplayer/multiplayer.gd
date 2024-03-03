@@ -299,6 +299,8 @@ func start_game(deckcode1: String, deckcode2: String) -> void:
 		player.deck = deck.cards
 		
 		player.draw_cards(3 if player.id == 0 else 4, false)
+	
+	Game.game_started.emit()
 
 
 ## Spawns in a card. THIS HAS TO BE CALLED SERVER SIDE. USE [method Packet.send] FOR CLIENT SIDE.

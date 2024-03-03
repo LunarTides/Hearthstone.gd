@@ -24,9 +24,9 @@ func _ready() -> void:
 		return
 	
 	# Make debugging easier
-	if OS.is_debug_build() and OS.has_feature("editor"):
+	if OS.has_feature("editor"):
 		_instance_socket = TCPServer.new()
-		for n: int in 4:
+		for n: int in 3:
 			if _instance_socket.listen(5000 + n) == OK:
 				_instance_num = n
 				break

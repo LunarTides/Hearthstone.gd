@@ -37,6 +37,10 @@ func _ready() -> void:
 	
 	for key: String in Packet.PacketType.keys():
 		send_packet_type.add_item(key)
+	
+	Game.game_started.connect(func() -> void:
+		send_packet_player.value = Game.player.id
+	)
 
 
 func _input(event: InputEvent) -> void:

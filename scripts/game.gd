@@ -211,8 +211,6 @@ func start_game() -> void:
 	player1.empty_mana = 1
 	player1.mana = 1
 	
-	game_started.emit()
-	
 	var deckcodes: Dictionary = Multiplayer._deckcodes
 	Multiplayer.start_game.rpc(deckcodes[player1.peer_id], deckcodes[player2.peer_id])
 	
@@ -297,7 +295,7 @@ func wait_for_node(node_path: NodePath) -> Node:
 
 ## Exits to the main menu. You might want to use [code]Multiplayer.quit[/code] instead.
 func exit_to_lobby() -> void:
-	get_tree().change_scene_to_file("res://scenes/lobby.tscn")
+	get_tree().change_scene_to_file.call_deferred("res://scenes/lobby.tscn")
 
 
 ## Returns [code]array[index][/code] if it exists, otherwise it returns [code]null[/code].

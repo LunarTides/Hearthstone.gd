@@ -171,6 +171,7 @@ offset_left = 264.0
 offset_top = 299.0
 offset_right = 451.0
 offset_bottom = 330.0
+text = "[]"
 placeholder_text = "Info"
 
 [node name="Button" type="Button" parent="Panel/SendPacket"]
