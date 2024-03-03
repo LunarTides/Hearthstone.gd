@@ -12,7 +12,7 @@ signal server_responded(success: bool)
 #region Constant Variables
 const CardScene: PackedScene = preload("res://scenes/card.tscn")
 
-const CONFIG_FILE_PATH: String = "./server.conf"
+const CONFIG_FILE_PATH: String = "./server.cfg"
 #endregion
 
 

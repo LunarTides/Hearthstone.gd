@@ -121,6 +121,23 @@ func _ready() -> void:
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
 	_update()
+
+
+func _input(event: InputEvent) -> void:
+	if not is_dragging:
+		return
+	
+	# Release lmb
+	if not event is InputEventMouseButton:
+		return
+	
+	if not event.is_released():
+		return
+	
+	if not event.button_index == MOUSE_BUTTON_LEFT and not event.button_index == MOUSE_BUTTON_RIGHT:
+		return
+	
+	_stop_dragging(event.button_index == MOUSE_BUTTON_LEFT)
 #endregion
 
 
@@ -152,10 +169,10 @@ func layout() -> void:
 	var new_rotation: Vector3 = result.rotation
 	var new_scale: Vector3 = result.scale
 	
-	_layout_tween = create_tween().set_ease(Tween.EASE_OUT)
-	_layout_tween.parallel().tween_property(self, "position", new_position, 0.5)
-	_layout_tween.parallel().tween_property(self, "rotation", new_rotation, 0.5)
-	_layout_tween.parallel().tween_property(self, "scale", new_scale, 0.5)
+	_layout_tween = create_tween().set_ease(Tween.EASE_OUT).set_parallel()
+	_layout_tween.tween_property(self, "position", new_position, 0.5)
+	_layout_tween.tween_property(self, "rotation", new_rotation, 0.5)
+	_layout_tween.tween_property(self, "scale", new_scale, 0.5)
 	
 	_old_position = new_position
 	_old_rotation = new_rotation
@@ -313,7 +330,18 @@ func _layout_board() -> Dictionary:
 	}
 
 
-func _on_mouse_entered() -> void:
+func _on_input_event(_camera: Node, event: InputEvent, pos: Vector3, _normal: Vector3, _shape_idx: int) -> void:
+	# Don't drag if this is an opposing card
+	if Game.player != card.player or Multiplayer.is_server:
+		return
+	
+	if event is InputEventMouseButton:
+		_start_dragging()
+	elif event is InputEventMouseMotion:
+		_process_dragging(pos)
+
+
+func _start_hover() -> void:
 	if is_dragging:
 		return
 	
@@ -326,16 +354,15 @@ func _on_mouse_entered() -> void:
 	
 	# For some ungodly reason, if time is below 0.47, the tween gets reverted???
 	var time: float = 0.47
-		
-	_hover_tween = create_tween()
-	_hover_tween.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_EXPO)
+	
+	_hover_tween = create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_EXPO).set_parallel()
 	_hover_tween.tween_property(self, "position:y", 1, time)
-	_hover_tween.parallel().tween_property(self, "position:z", position.z - (4 * player_weight), time)
-	_hover_tween.parallel().tween_property(self, "rotation:y", 0, time)
-	_hover_tween.parallel().tween_property(self, "scale", Vector3(2, 2, 2), time)
+	_hover_tween.tween_property(self, "position:z", position.z - (4 * player_weight), time)
+	_hover_tween.tween_property(self, "rotation:y", 0, time)
+	_hover_tween.tween_property(self, "scale", Vector3(2, 2, 2), time)
 
 
-func _on_mouse_exited() -> void:
+func _stop_hover() -> void:
 	if is_dragging:
 		return
 	
@@ -345,32 +372,7 @@ func _on_mouse_exited() -> void:
 	is_hovering = false
 
 
-func _input(event: InputEvent) -> void:
-	if not is_dragging:
-		return
-	
-	# Release lmb
-	if not event is InputEventMouseButton:
-		return
-	
-	if not event.is_released():
-		return
-	
-	if not event.button_index == MOUSE_BUTTON_LEFT and not event.button_index == MOUSE_BUTTON_RIGHT:
-		return
-	
-	var pos: Vector3 = global_position
-	
-	is_dragging = false
-	_on_mouse_exited()
-	position = _old_position
-	_make_way()
-	
-	if event.button_index == MOUSE_BUTTON_LEFT:
-		released.emit(pos)
-
-
-func _on_input_event(_camera: Node, event: InputEvent, position: Vector3, _normal: Vector3, _shape_idx: int) -> void:
+func _start_dragging() -> void:
 	if not is_hovering:
 		return
 	
@@ -378,16 +380,26 @@ func _on_input_event(_camera: Node, event: InputEvent, position: Vector3, _norma
 	if Game.player != card.player or Multiplayer.is_server:
 		return
 	
-	if event is InputEventMouseButton:
-		if event.is_released():
-			# Handled by _input
-			return
-		
-		is_dragging = true
+	is_dragging = true
+
+
+func _stop_dragging(released_lmb: bool) -> void:
+	var pos: Vector3 = global_position
 	
-	if is_dragging:
-		global_position = Vector3(position.x, global_position.y, position.z)
+	is_dragging = false
+	_stop_hover()
+	position = _old_position
+	_make_way()
 	
+	if released_lmb:
+		released.emit(pos)
+
+
+func _process_dragging(pos: Vector3) -> void:
+	if not is_dragging:
+		return
+	
+	global_position = Vector3(pos.x, global_position.y, pos.z)
 	_make_way()
 
 

@@ -1,4 +1,4 @@
 # Godot 4+ specific ignores
 .godot/
 **/*.blend1
-server.conf
+server.cfg
