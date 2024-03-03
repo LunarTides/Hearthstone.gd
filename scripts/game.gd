@@ -117,6 +117,15 @@ var min_deck_size: int = 30
 var max_players: int = 2
 # ------
 
+
+# There should be a better way of doing this.
+var card_bounds_x: float = -3.05
+var card_bounds_y: float = -0.5
+var card_bounds_z: float = 13
+var card_rotation_y_multiplier: float = 10.0
+var card_distance_x: float = 1.81
+
+
 ## Returns the board node
 var board_node: BoardNode:
 	get:

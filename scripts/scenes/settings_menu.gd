@@ -28,9 +28,23 @@ const FULLSCREEN_MODES: Dictionary = {
 
 
 #region Exported Variables
+#region Video
+@export_category("Video")
 @export var vsync: CheckBox
 @export var fullscreen: OptionButton
 @export var resolution: OptionButton
+#endregion
+
+
+#region Debug
+@export_category("Debug")
+@export var debug: Control
+@export var cbx: SpinBox
+@export var cby: SpinBox
+@export var cbz: SpinBox
+@export var crym: SpinBox
+@export var cdx: SpinBox
+#endregion
 #endregion
 
 
@@ -44,6 +58,7 @@ var is_dragging: bool = false
 func _ready() -> void:
 	hide()
 	
+	#region Video
 	# Vsync
 	vsync.button_pressed = DisplayServer.window_get_vsync_mode() != DisplayServer.VSYNC_DISABLED
 	
@@ -62,6 +77,19 @@ func _ready() -> void:
 	
 	var pixels: Vector2i = get_window().size
 	resolution.select(RESOLUTIONS.find(pixels))
+	#endregion
+	
+	
+	#region Debug
+	if not OS.is_debug_build():
+		debug.queue_free()
+	
+	cbx.value = Game.card_bounds_x
+	cby.value = Game.card_bounds_y
+	cbz.value = Game.card_bounds_z
+	crym.value = Game.card_rotation_y_multiplier
+	cdx.value = Game.card_distance_x
+	#endregion
 
 
 func _gui_input(event: InputEvent) -> void:
@@ -74,6 +102,7 @@ func _gui_input(event: InputEvent) -> void:
 
 
 #region Private Functions
+#region Video
 func _on_back_button_pressed() -> void:
 	hide()
 
@@ -92,4 +121,26 @@ func _on_fullscreen_item_selected(index: int) -> void:
 func _on_resolution_item_selected(index: int) -> void:
 	var pixels: Vector2i = RESOLUTIONS[index]
 	get_window().size = Vector2i(pixels.x, pixels.y)
+#endregion
+
+
+#region Debug
+func _on_cbx_value_changed(value: float) -> void:
+	Game.card_bounds_x = value
+
+func _on_cby_value_changed(value: float) -> void:
+	Game.card_bounds_y = value
+
+
+func _on_cbz_value_changed(value: float) -> void:
+	Game.card_bounds_z = value
+
+
+func _on_crym_value_changed(value: float) -> void:
+	Game.card_rotation_y_multiplier = value
+
+
+func _on_cdx_value_changed(value: float) -> void:
+	Game.card_distance_x = value
+#endregion
 #endregion

@@ -13,14 +13,6 @@ signal released(position: Vector3)
 #region Constant Variables
 const MinionMesh: Resource = preload("res://assets/models/minion/minion.blend")
 const SpellMesh: Resource = preload("res://assets/models/spell/spell.blend")
-
-# There should be a better way of doing this.
-const CARD_BOUNDS_X: float = 9.05
-const CARD_BOUNDS_Y: float = -0.5
-const CARD_BOUNDS_Z: float = 13
-const CARD_ROTATION_Y_MULTIPLIER: float = 10.0
-const CARD_DISTANCE_X: float = 1.81
-const CARD_OFFSET_X: float = 6.0
 #endregion
 
 
@@ -281,15 +273,15 @@ func _layout_hand() -> Dictionary:
 	# Integer division, but it's not a problem.
 	var half_hand_size: int = ceil(card.player.hand.size() / 2)
 	
-	new_position.x = (CARD_OFFSET_X - (half_hand_size * 2)) + -CARD_BOUNDS_X + (card.index * CARD_DISTANCE_X)
-	new_position.y = CARD_BOUNDS_Y * abs(half_hand_size - card.index)
-	new_position.z = CARD_BOUNDS_Z * player_weight
+	new_position.x = -(half_hand_size * 2) + Game.card_bounds_x + (card.index * Game.card_distance_x)
+	new_position.y = Game.card_bounds_y * abs(half_hand_size - card.index)
+	new_position.z = Game.card_bounds_z * player_weight
 	
 	new_rotation = Vector3.ZERO
 	
 	if card.index != half_hand_size:
 		# Tilt it to the left/right.
-		new_rotation.y = deg_to_rad(CARD_ROTATION_Y_MULTIPLIER * player_weight * (half_hand_size - card.index))
+		new_rotation.y = deg_to_rad(Game.card_rotation_y_multiplier * player_weight * (half_hand_size - card.index))
 	
 	# Position it futher away the more rotated it is.
 	# This makes it easier to select the right card.
@@ -317,7 +309,7 @@ func _layout_board() -> Dictionary:
 	
 	new_rotation = Vector3.ZERO
 	
-	new_position.x = (card.index - 4) * 3.5 + CARD_DISTANCE_X
+	new_position.x = (card.index - 4) * 3.5 + Game.card_distance_x
 	new_position.y = 0
 	new_position.z = Game.board_node.player.position.z + player_weight * (
 		# I love hardcoded values

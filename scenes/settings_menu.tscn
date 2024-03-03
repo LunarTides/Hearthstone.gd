@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/scenes/settings_menu.gd" id="1_wqkmw"]
 
-[node name="SettingsMenu" type="Panel" node_paths=PackedStringArray("vsync", "fullscreen", "resolution")]
+[node name="SettingsMenu" type="Panel" node_paths=PackedStringArray("vsync", "fullscreen", "resolution", "debug", "cbx", "cby", "cbz", "crym", "cdx")]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -18,6 +18,12 @@ script = ExtResource("1_wqkmw")
 vsync = NodePath("TabContainer/Video/Vsync")
 fullscreen = NodePath("TabContainer/Video/Fullscreen")
 resolution = NodePath("TabContainer/Video/Resolution")
+debug = NodePath("TabContainer/Debug")
+cbx = NodePath("TabContainer/Debug/CBX")
+cby = NodePath("TabContainer/Debug/CBY")
+cbz = NodePath("TabContainer/Debug/CBZ")
+crym = NodePath("TabContainer/Debug/CRYM")
+cdx = NodePath("TabContainer/Debug/CDX")
 
 [node name="TabContainer" type="TabContainer" parent="."]
 layout_mode = 1
@@ -27,8 +33,10 @@ anchor_bottom = 1.0
 offset_top = 31.0
 grow_horizontal = 2
 grow_vertical = 2
+current_tab = 1
 
 [node name="Video" type="Control" parent="TabContainer"]
+visible = false
 layout_mode = 2
 
 [node name="Vsync" type="CheckBox" parent="TabContainer/Video"]
@@ -51,6 +59,59 @@ offset_top = 107.0
 offset_right = 53.0
 offset_bottom = 127.0
 
+[node name="Debug" type="Control" parent="TabContainer"]
+layout_mode = 2
+
+[node name="CBX" type="SpinBox" parent="TabContainer/Debug"]
+layout_mode = 0
+offset_right = 83.0625
+offset_bottom = 31.0
+step = 0.1
+allow_greater = true
+allow_lesser = true
+update_on_text_changed = true
+prefix = "CBX"
+
+[node name="CBY" type="SpinBox" parent="TabContainer/Debug"]
+offset_top = 31.0
+offset_right = 83.0625
+offset_bottom = 62.0
+step = 0.1
+allow_greater = true
+allow_lesser = true
+update_on_text_changed = true
+prefix = "CBY"
+
+[node name="CBZ" type="SpinBox" parent="TabContainer/Debug"]
+offset_top = 62.0
+offset_right = 83.0625
+offset_bottom = 93.0
+step = 0.1
+allow_greater = true
+allow_lesser = true
+update_on_text_changed = true
+prefix = "CBZ"
+
+[node name="CRYM" type="SpinBox" parent="TabContainer/Debug"]
+offset_top = 93.0
+offset_right = 83.0625
+offset_bottom = 124.0
+step = 0.1
+allow_greater = true
+allow_lesser = true
+update_on_text_changed = true
+prefix = "CRYM"
+
+[node name="CDX" type="SpinBox" parent="TabContainer/Debug"]
+offset_top = 127.0
+offset_right = 83.0625
+offset_bottom = 158.0
+step = 0.1
+allow_greater = true
+allow_lesser = true
+update_on_text_changed = true
+prefix = "CDX"
+
 [node name="BackButton" type="Button" parent="."]
 layout_mode = 1
 anchors_preset = 1
@@ -67,4 +128,9 @@ text = "X"
 [connection signal="toggled" from="TabContainer/Video/Vsync" to="." method="_on_vsync_toggled"]
 [connection signal="item_selected" from="TabContainer/Video/Fullscreen" to="." method="_on_fullscreen_item_selected"]
 [connection signal="item_selected" from="TabContainer/Video/Resolution" to="." method="_on_resolution_item_selected"]
+[connection signal="value_changed" from="TabContainer/Debug/CBX" to="." method="_on_cbx_value_changed"]
+[connection signal="value_changed" from="TabContainer/Debug/CBY" to="." method="_on_cby_value_changed"]
+[connection signal="value_changed" from="TabContainer/Debug/CBZ" to="." method="_on_cbz_value_changed"]
+[connection signal="value_changed" from="TabContainer/Debug/CRYM" to="." method="_on_crym_value_changed"]
+[connection signal="value_changed" from="TabContainer/Debug/CDX" to="." method="_on_cdx_value_changed"]
 [connection signal="pressed" from="BackButton" to="." method="_on_back_button_pressed"]
