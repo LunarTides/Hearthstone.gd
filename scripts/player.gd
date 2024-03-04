@@ -80,6 +80,11 @@ static func get_from_id(id: int) -> Player:
 		return Game.player1
 	else:
 		return Game.player2
+
+
+## Returns the [Player] from the [param peer_id].
+static func get_from_peer_id(peer_id: int) -> Player:
+	return Multiplayer.players.get(peer_id)
 #endregion
 
 

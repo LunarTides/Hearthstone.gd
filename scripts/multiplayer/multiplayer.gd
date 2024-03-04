@@ -155,11 +155,6 @@ func get_ip_address(peer_id: int) -> String:
 	return peer.get_peer(peer_id).get_remote_address()
 
 
-## Returns the [Player] from the [param peer_id].
-func get_player_from_peer_id(peer_id: int) -> Player:
-	return players.get(peer_id)
-
-
 ## Kicks the player with the specified [param peer_id]. If [param force] is [code]true[/code] the [signal MultiplayerPeer.peer_disconnected] signal will not be emitted.
 func kick(peer_id: int, force: bool = false) -> void:
 	multiplayer.multiplayer_peer.disconnect_peer(peer_id, force)

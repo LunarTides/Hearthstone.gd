@@ -21,7 +21,7 @@ func run(packet_type: Packet.PacketType, sender_peer_id: int, actor_player: Play
 		return true
 	
 	var packet_name: String = Packet.PacketType.keys()[packet_type]
-	var sender_player: Player = Multiplayer.get_player_from_peer_id(sender_peer_id)
+	var sender_player: Player = Player.get_from_peer_id(sender_peer_id)
 	
 	# Packets sent from the server should bypass the anitcheat.
 	if sender_peer_id == 1:

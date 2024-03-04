@@ -93,7 +93,7 @@ func __send(packet_type: PacketType, player_id: int, info: Array) -> PacketFailu
 	
 	var sender_peer_id: int = multiplayer.get_remote_sender_id()
 	
-	var sender_player: Player = Multiplayer.get_player_from_peer_id(sender_peer_id)
+	var sender_player: Player = Player.get_from_peer_id(sender_peer_id)
 	var actor_player: Player = Multiplayer.players.values().filter(func(player: Player) -> bool: return player.id == player_id)[0]
 	
 	var packet_name: String = PacketType.keys()[packet_type]

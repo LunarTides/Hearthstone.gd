@@ -39,17 +39,23 @@ func _ready() -> void:
 				host()
 				# Wait since it makes moving the window a LOT more consistant.
 				await get_tree().create_timer(0.1).timeout
-				get_window().position += Vector2i(500, 0)
+				
+				@warning_ignore("integer_division")
+				get_window().position += Vector2i(get_window().size.x / 4, 0)
 			1:
 				# Instance 1 should join the server
 				_on_join_button_pressed()
 				await get_tree().create_timer(0.1).timeout
-				get_window().position += Vector2i(-500, 500)
+				
+				@warning_ignore("integer_division")
+				get_window().position += Vector2i(-(get_window().size.x / 4), get_window().size.y / 4)
 			2:
 				# Instance 2 should join the server
 				_on_join_button_pressed()
 				await get_tree().create_timer(0.1).timeout
-				get_window().position += Vector2i(-500, -500)
+				
+				@warning_ignore("integer_division")
+				get_window().position += Vector2i(-(get_window().size.x / 4), -(get_window().size.y / 4))
 #endregion
 
 

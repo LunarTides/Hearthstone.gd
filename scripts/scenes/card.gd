@@ -369,7 +369,7 @@ func _stop_hover() -> void:
 		_hover_tween.kill()
 	
 	is_hovering = false
-	layout(true)
+	layout()
 
 
 func _start_dragging() -> void:
@@ -388,7 +388,7 @@ func _stop_dragging(released_lmb: bool) -> void:
 	
 	is_dragging = false
 	_stop_hover()
-	position = _old_position
+	#position = _old_position
 	_make_way()
 	
 	if released_lmb:
