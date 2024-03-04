@@ -4,8 +4,29 @@ extends Node
 
 
 #region Signals
-## Emits when the game starts
+## Emits when the game starts.
 signal game_started
+
+## Emits whenever a card gets created for any player.
+signal card_created(card: Card, player: Player, sender_peer_id: int)
+
+## Emits whenever a card gets summoned for any player.
+signal card_summoned(card: Card, board_index: int, player: Player, sender_peer_id: int)
+
+## Emits whenever a card gets played for any player.
+signal card_played(card: Card, board_index: int, player: Player, sender_peer_id: int)
+
+## Emits whenever a card gets revealed for any player.
+signal card_revealed(card: Card, player: Player, sender_peer_id: int)
+
+## Emits whenever one of a card's abilities gets triggered for any player.
+signal card_ability_triggered(card: Card, ability: Card.Ability, player: Player, sender_peer_id: int)
+
+## Emits whenever some amount of gets gets drawn by any player.
+signal cards_drawn(amount: int, player: Player, sender_peer_id: int)
+
+## Emits when the any player's turn ends.
+signal turn_ended(player: Player, sender_peer_id: int)
 #endregion
 
 

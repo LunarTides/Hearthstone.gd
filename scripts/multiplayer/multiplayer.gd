@@ -300,7 +300,7 @@ func start_game(deckcode1: String, deckcode2: String) -> void:
 
 ## Spawns in a card. THIS HAS TO BE CALLED SERVER SIDE. USE [method Packet.send] FOR CLIENT SIDE.
 @rpc("authority", "call_local", "reliable")
-func spawn_card(blueprint_path: String, player_id: int, location: Card.Location, index: int) -> void:
+func spawn_card(blueprint_path: String, player_id: int, location: Card.Location, index: int) -> CardNode:
 	var card: Card = Card.new()
 	card.blueprint = load(blueprint_path)
 	card.player = Player.get_from_id(player_id)
@@ -310,4 +310,5 @@ func spawn_card(blueprint_path: String, player_id: int, location: Card.Location,
 	card_node.card = card
 	
 	(await Game.wait_for_node("/root/Main")).add_child(card_node)
+	return card_node
 #endregion

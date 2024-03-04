@@ -4,11 +4,10 @@ extends Node
 
 
 #region Signals
-## Emits when a packet gets received. Emits before the packet gets handled by the client who received it.
-signal packet_received_before(sender_peer_id: int, packet_type: PacketType, player_id: int, info: Array)
-
-## Emits when a packet gets received. Emits after the packet gets handled by the client who received it.
-signal packet_received_after(sender_peer_id: int, packet_type: PacketType, player_id: int, info: Array)
+## Emits when a packet gets received. EMITS BEFORE THE PACKET GETS HANDLED BY THE CLIENT WHO RECEIVED IT.[br]
+## [br]
+## [b]Use a signal from Game (E.g. [signal Game.card_summoned]) instead in most cases.[/b]
+signal packet_received(sender_peer_id: int, packet_type: PacketType, player_id: int, info: Array)
 #endregion
 
 
@@ -142,39 +141,37 @@ func __send(packet_type: PacketType, player_id: int, info: Array) -> PacketFailu
 @rpc("authority", "call_local", "reliable")
 func _accept(packet_type: PacketType, sender_peer_id: int, player_id: int, info: Array) -> void:
 	var packet_name: String = PacketType.keys()[packet_type]
+	var player: Player = Player.get_from_id(player_id)
 	
-	packet_received_before.emit(sender_peer_id, packet_type, player_id, info)
+	packet_received.emit(sender_peer_id, packet_type, player_id, info)
 	history.append([sender_peer_id, packet_type, player_id, info])
 	
 	var method_name: String = "_accept_" + packet_name.to_lower() + "_packet"
 	var method: Callable = self[method_name]
 	
 	assert(method, method_name + " doesn't exist.")
-	method.call(player_id, info)
-	
-	packet_received_after.emit(sender_peer_id, packet_type, player_id, info)
+	method.call(player, sender_peer_id, info)
 
 
 # Here are the functions that gets called on the clients + server when a packet gets sent. Handled in _accept_packet
-func _accept_summon_packet(player_id: int, info: Array) -> void:
+func _accept_summon_packet(player: Player, sender_peer_id: int, info: Array) -> void:
 	# TODO: Determine if cards should be found like this.
 	#		This is problematic if a card is in the NONE location.
 	var location: Card.Location = info[0]
 	var location_index: int = info[1]
 	var board_index: int = info[2]
 	
-	var player: Player = Player.get_from_id(player_id)
 	var card: Card = Card.get_from_index(player, location, location_index)
-	
 	card.add_to_location(Card.Location.BOARD, board_index)
+	
+	Game.card_summoned.emit(card, board_index, player, sender_peer_id)
 
 
-func _accept_play_packet(player_id: int, info: Array) -> void:
+func _accept_play_packet(player: Player, sender_peer_id: int, info: Array) -> void:
 	var location: Card.Location = info[0]
 	var location_index: int = info[1]
 	var board_index: int = info[2]
 	
-	var player: Player = Player.get_from_id(player_id)
 	var card: Card = Card.get_from_index(player, location, location_index)
 	
 	player.mana -= card.cost
@@ -188,20 +185,22 @@ func _accept_play_packet(player_id: int, info: Array) -> void:
 		card.trigger_ability(Card.Ability.CAST, false)
 		
 		card.location = Card.Location.NONE
+	
+	Game.card_played.emit(card, board_index, player, sender_peer_id)
 
 
-func _accept_create_card_packet(player_id: int, info: Array) -> void:
+func _accept_create_card_packet(player: Player, sender_peer_id: int, info: Array) -> void:
 	var blueprint_path: String = info[0]
 	var location: Card.Location = info[1]
 	var location_index: int = info[2]
 	
-	Multiplayer.spawn_card(blueprint_path, player_id, location, location_index)
-
-
-func _accept_draw_cards_packet(player_id: int, info: Array) -> void:
-	var amount: int = info[0]
+	var card_node: CardNode = await Multiplayer.spawn_card(blueprint_path, player.id, location, location_index)
 	
-	var player: Player = Player.get_from_id(player_id)
+	Game.card_created.emit(card_node.card, player, sender_peer_id)
+
+
+func _accept_draw_cards_packet(player: Player, sender_peer_id: int, info: Array) -> void:
+	var amount: int = info[0]
 	
 	for _i: int in amount:
 		var card: Card = player.deck.pop_back()
@@ -221,40 +220,45 @@ func _accept_draw_cards_packet(player_id: int, info: Array) -> void:
 		card_node.card = card
 		
 		(await Game.wait_for_node("/root/Main")).add_child(card_node)
-
-
-func _accept_end_turn_packet(player_id: int, info: Array) -> void:
-	Game.current_player = Game.opposing_player
-	Game.turn += 1
 	
-	var player: Player = Game.current_player
+	Game.cards_drawn.emit(amount, player, sender_peer_id)
+
+
+func _accept_end_turn_packet(sender_player: Player, sender_peer_id: int, info: Array) -> void:
+	var player: Player = sender_player.opponent
+	
+	Game.current_player = player
+	Game.turn += 1
 	
 	# TODO: Show the player's mana
 	player.empty_mana = min(player.empty_mana + 1, player.max_mana)
 	player.mana = player.empty_mana
 	
 	player.draw_cards(1, false)
+	
+	Game.turn_ended.emit(sender_player, sender_peer_id)
 
 
-func _accept_reveal_packet(player_id: int, info: Array) -> void:
+func _accept_reveal_packet(player: Player, sender_peer_id: int, info: Array) -> void:
 	var location: Card.Location = info[0]
 	var location_index: int = info[1]
 	
-	var player: Player = Player.get_from_id(player_id)
 	var card: Card = Card.get_from_index(player, location, location_index)
-	
 	card.override_is_hidden = Game.NullableBool.FALSE
+	
+	Game.card_revealed.emit(card, player, sender_peer_id)
 
 
-func _accept_trigger_ability_packet(player_id: int, info: Array) -> void:
+func _accept_trigger_ability_packet(player: Player, sender_peer_id: int, info: Array) -> void:
 	var location: Card.Location = info[0]
 	var location_index: int = info[1]
 	var ability: Card.Ability = info[2]
 	
-	var player: Player = Player.get_from_id(player_id)
 	var card: Card = Card.get_from_index(player, location, location_index)
 	
 	for ability_callback: Callable in card.abilities[ability]:
 		ability_callback.call(player, card)
+	
+	Game.card_ability_triggered.emit(card, ability, player, sender_peer_id)
 #endregion
 #endregion
