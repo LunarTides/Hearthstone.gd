@@ -74,10 +74,10 @@ func _info_check(info: Array, types: PackedInt32Array) -> bool:
 
 
 ## Returns if [param info] is in the history within [param range].
-func _in_packet_history(info: Array, range: int, only_use_server_packets: bool = false) -> bool:
-	range = range if range < Packet.history.size() else Packet.history.size()
+func _in_packet_history(info: Array, history_range: int, only_use_server_packets: bool = false) -> bool:
+	history_range = history_range if history_range < Packet.history.size() else Packet.history.size()
 	
-	for i: int in range:
+	for i: int in history_range:
 		var object: Array = Packet.history[-(i + 1)]
 		var peer_id: int = object[0]
 		var stored_info: Array = object[3]

@@ -92,6 +92,8 @@ func _process(delta: float) -> void:
 #region Private Functions
 func _on_send_packet_button_pressed() -> void:
 	var packet_type: Packet.PacketType = Packet.PacketType.values()[send_packet_type.selected]
+	
+	@warning_ignore("narrowing_conversion")
 	var player_id: int = send_packet_player.value
 	
 	var info: Variant = JSON.parse_string(send_packet_info.text)

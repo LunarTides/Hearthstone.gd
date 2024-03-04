@@ -271,7 +271,8 @@ func _layout_hand() -> Dictionary:
 	var player_weight: int = 1 if card.player == Game.player else -1
 	
 	# Integer division, but it's not a problem.
-	var half_hand_size: int = ceil(card.player.hand.size() / 2)
+	@warning_ignore("integer_division")
+	var half_hand_size: int = card.player.hand.size() / 2
 	
 	new_position.x = -(half_hand_size * 2) + Game.card_bounds_x + (card.index * Game.card_distance_x)
 	new_position.y = Game.card_bounds_y * abs(half_hand_size - card.index)
@@ -288,7 +289,7 @@ func _layout_hand() -> Dictionary:
 	new_position.x -= new_rotation.y * player_weight
 	
 	# Rotate the card 180 degrees if it isn't already
-	if card.player != Game.player and new_rotation.y - PI < 0:
+	if card.player != Game.player and new_rotation.y < PI:
 		new_rotation.y += PI
 	
 	new_scale = Vector3.ONE
