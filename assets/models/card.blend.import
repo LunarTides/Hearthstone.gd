@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://wo8um2c2cc47"
-path="res://.godot/imported/minion.blend-cfe83807f8630934118018d357804545.scn"
+uid="uid://cveuxgw02yxqq"
+path="res://.godot/imported/card.blend-e38b4cad42901d2c238d7af95fcdc29b.scn"
 
 [deps]
 
-source_file="res://assets/models/minion/minion.blend"
-dest_files=["res://.godot/imported/minion.blend-cfe83807f8630934118018d357804545.scn"]
+source_file="res://assets/models/card.blend"
+dest_files=["res://.godot/imported/card.blend-e38b4cad42901d2c238d7af95fcdc29b.scn"]
 
 [params]
 
@@ -29,19 +29,12 @@ animation/fps=30
 animation/trimming=false
 animation/remove_immutable_tracks=true
 import_script/path=""
-_subresources={
-"materials": {
-"Attack": {
-"use_external/enabled": false,
-"use_external/path": "res://assets/models/minion/attack_material.tres"
-}
-}
-}
+_subresources={}
 gltf/naming_version=1
 gltf/embedded_image_handling=1
-blender/nodes/visible=1
+blender/nodes/visible=0
 blender/nodes/punctual_lights=true
-blender/nodes/cameras=false
+blender/nodes/cameras=true
 blender/nodes/custom_properties=true
 blender/nodes/modifiers=1
 blender/meshes/colors=false

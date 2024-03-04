@@ -1,8 +1,8 @@
 [gd_scene load_steps=8 format=3 uid="uid://ccmb7s7hsvhju"]
 
 [ext_resource type="Script" path="res://scripts/scenes/card.gd" id="1_unaoi"]
+[ext_resource type="PackedScene" uid="uid://cveuxgw02yxqq" path="res://assets/models/card.blend" id="2_xxbfx"]
 [ext_resource type="Texture2D" uid="uid://c85sy5ncm0tn8" path="res://assets/card_cover.png" id="4_3o54t"]
-[ext_resource type="PackedScene" uid="uid://g4ot01icqg10" path="res://scenes/models/minion_model.tscn" id="5_p2mm2"]
 [ext_resource type="Texture2D" uid="uid://brfqmj5tkr3o6" path="res://cards/sheep/sheep.png" id="6_55k6d"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_vsdkf"]
@@ -28,7 +28,7 @@ health_label = NodePath("HealthLabel")
 tribe_label = NodePath("TribeLabel")
 spell_school_label = NodePath("SpellSchoolLabel")
 
-[node name="Mesh" parent="." instance=ExtResource("5_p2mm2")]
+[node name="Mesh" parent="." instance=ExtResource("2_xxbfx")]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("BoxShape3D_vsdkf")

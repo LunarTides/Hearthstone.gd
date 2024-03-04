@@ -11,8 +11,7 @@ signal released(position: Vector3)
 
 
 #region Constant Variables
-const MinionMesh: Resource = preload("res://assets/models/minion/minion.blend")
-const SpellMesh: Resource = preload("res://assets/models/spell/spell.blend")
+const CardMesh: Resource = preload("res://assets/models/card.blend")
 #endregion
 
 
@@ -102,13 +101,9 @@ var _should_layout: bool = true
 func _ready() -> void:
 	mesh.queue_free()
 	
-	if card.types.has(Card.Type.MINION):
-		mesh = MinionMesh.instantiate()
-	if card.types.has(Card.Type.SPELL):
-		mesh = SpellMesh.instantiate()
-	
+	# FIXME: This doesn't work with rarity.
+	mesh = CardMesh.instantiate()
 	add_child(mesh)
-
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
@@ -260,6 +255,14 @@ func _update() -> void:
 		tribe_label.show()
 	if card.types.has(Card.Type.SPELL):
 		spell_school_label.show()
+	
+	
+	if card.attack <= 0:
+		mesh.get_node("Attack").hide()
+	
+	if card.health <= 0:
+		mesh.get_node("Health").hide()
+		mesh.get_node("HealthFrame").hide()
 
 
 func _layout_hand() -> Dictionary:
