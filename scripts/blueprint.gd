@@ -1,11 +1,12 @@
-extends Resource
 class_name Blueprint
+extends Node3D
+## @experimental
 
 
 #region Exported Variables
 #region Common
 @export_category("Common")
-@export var name: String
+@export var card_name: String
 @export var text: String
 @export var cost: int
 @export var texture: Texture2D
@@ -48,21 +49,60 @@ class_name Blueprint
 @export var durability: int
 @export var cooldown: int
 #endregion
+
+@export_category("Other")
+@export var card: Card
+#endregion
+
+
+#region Public Variables
+var player: Player:
+	get:
+		if not card.player:
+			return Game.player
+		
+		return card.player
+#endregion
+
+
+#region Internal Functions
+func _ready() -> void:
+	card.blueprint = self
+	
+	if "setup" in self:
+		self["setup"].call()
 #endregion
 
 
 #region Static Functions
 ## Creates a [Blueprint] from the specified [param id]. Returns [code]null[/code] if no such blueprint exists.
-static func get_from_id(id: int) -> Blueprint:
+static func create_from_id(id: int, player: Player) -> Blueprint:
 	var files: Array[String] = Game.get_all_files_from_path("res://cards")
 	
 	for file_path: String in files:
-		if not file_path.contains(".tres"):
+		if not file_path.contains(".tscn"):
 			continue
 		
-		var blueprint: Blueprint = load(file_path)
+		var blueprint: Blueprint = load(file_path).instantiate()
+		
 		if blueprint.id == id:
+			var tree: SceneTree = Engine.get_main_loop()
+			tree.root.add_child(blueprint)
+			
+			blueprint.card.player = player
+			
 			return blueprint
 	
 	return null
+
+
+## Creates a [Blueprint] from the specified [param path].
+static func create_from_path(path: String, player: Player) -> Blueprint:
+	var blueprint: Blueprint = load(path).instantiate()
+	blueprint.card.player = player
+	
+	var tree: SceneTree = Engine.get_main_loop()
+	tree.root.add_child(blueprint)
+	
+	return blueprint
 #endregion

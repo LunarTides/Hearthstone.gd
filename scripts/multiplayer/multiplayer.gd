@@ -10,8 +10,6 @@ signal server_responded(success: bool)
 
 
 #region Constant Variables
-const CardScene: PackedScene = preload("res://scenes/card.tscn")
-
 const CONFIG_FILE_PATH: String = "./server.cfg"
 #endregion
 
@@ -254,6 +252,16 @@ func send_deckcode(deckcode: String) -> void:
 	server_response.rpc_id(sender_peer_id, true)
 
 
+## Creates a [Blueprint] from [param path].
+@rpc("authority", "call_local", "reliable")
+func create_blueprint_from_path(path: String, player_id: int, location: Card.Location, index: int) -> Blueprint:
+	var player: Player = Player.get_from_id(player_id)
+	var blueprint: Blueprint = Blueprint.create_from_path(path, player)
+	blueprint.card.add_to_location(location, index)
+	
+	return blueprint
+
+
 ## Sends a response from the server to the client.[br]
 ## [br]
 ## If [param text] is set, it will call [method feedback] on the client with that text too.
@@ -296,19 +304,4 @@ func start_game(deckcode1: String, deckcode2: String) -> void:
 		player.draw_cards(3 if player.id == 0 else 4, false)
 	
 	Game.game_started.emit()
-
-
-## Spawns in a card. THIS HAS TO BE CALLED SERVER SIDE. USE [method Packet.send] FOR CLIENT SIDE.
-@rpc("authority", "call_local", "reliable")
-func spawn_card(blueprint_path: String, player_id: int, location: Card.Location, index: int) -> CardNode:
-	var card: Card = Card.new()
-	card.blueprint = load(blueprint_path)
-	card.player = Player.get_from_id(player_id)
-	card.add_to_location(location, index)
-	
-	var card_node: CardNode = CardScene.instantiate()
-	card_node.card = card
-	
-	(await Game.wait_for_node("/root/Main")).add_child(card_node)
-	return card_node
 #endregion

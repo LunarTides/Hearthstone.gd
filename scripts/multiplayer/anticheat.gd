@@ -220,13 +220,14 @@ func _run_summon_packet(sender_peer_id: int, sender_player: Player, actor_player
 # Play
 func _run_play_packet(sender_peer_id: int, sender_player: Player, actor_player: Player, info: Array) -> bool:
 	# The info needs to be correct.
-	if not _info_check(info, PackedInt32Array([TYPE_INT, TYPE_INT, TYPE_INT])):
+	if not _info_check(info, PackedInt32Array([TYPE_INT, TYPE_INT, TYPE_INT, TYPE_VECTOR3])):
 		_feedback("Invalid PLAY info.", sender_peer_id)
 		return false
 	
 	var location: Card.Location = info[0]
 	var location_index: int = info[1]
 	var board_index: int = info[2]
+	var position: Vector3 = info[3]
 	
 	var card: Card = Card.get_from_index(sender_player, location, location_index)
 	

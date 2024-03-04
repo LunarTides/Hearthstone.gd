@@ -5,7 +5,7 @@ extends Blueprint
 
 
 # Called when the card is created
-func _ready(player: Player, card: Card) -> void:
+func setup(player: Player, card: Card) -> void:
 	card.add_ability(Card.Ability.BATTLECRY, battlecry)
 
 

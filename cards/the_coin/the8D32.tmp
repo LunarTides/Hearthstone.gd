@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3 uid="uid://c0cfpv6wh8gg5"]
+
+[ext_resource type="Script" path="res://cards/the_coin/the_coin.gd" id="1_bcjpn"]
+[ext_resource type="Texture2D" uid="uid://cj3i2247n3cjl" path="res://cards/the_coin/the_coin.png" id="2_rv7d8"]
+
+[node name="TheCoin" type="Node3D"]
+script = ExtResource("1_bcjpn")
+text = "Gain 1 Mana Crystal this turn only."
+texture = ExtResource("2_rv7d8")
+types = Array[int]([2])
+classes = Array[int]([0])
+rarities = Array[int]([0])
+id = 2
+spell_schools = Array[int]([0])

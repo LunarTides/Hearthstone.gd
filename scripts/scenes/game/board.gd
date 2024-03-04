@@ -21,7 +21,7 @@ var current_player: Area3D:
 
 
 #region Private Variables
-var _connected: Array[CardNode]
+var _connected: Array[Card]
 #endregion
 
 
@@ -35,48 +35,47 @@ func _ready() -> void:
 
 
 #region Private Functions
-func _place_card(player: Player, card_node: CardNode, pos: Vector3) -> void:
-	for dict: Dictionary in card_node.released.get_connections():
-		card_node.released.disconnect(dict.callable)
+func _place_card(player: Player, card: Card, pos: Vector3) -> void:
+	for dict: Dictionary in card.released.get_connections():
+		card.released.disconnect(dict.callable)
 	
 	var index: int = _get_index(pos, player)
-	player.play_card(card_node.card, index)
+	player.play_card(card, index)
 
 
 func _get_index(pos: Vector3, player: Player) -> int:
-	return CardNode.get_all_owned_by(player).filter(func(card_node: CardNode) -> bool:
-		return card_node.global_position.x < pos.x and card_node.card.location == Card.Location.BOARD
+	return Card.get_all_owned_by(player).filter(func(card: Card) -> bool:
+		return card.global_position.x < pos.x and card.location == Card.Location.BOARD
 	).size()
 
 
 func _on_player_area_entered(player: Player, area: Area3D) -> void:
-	if not area is CardNode:
+	if not area is Card:
 		return
 	
-	var card_node: CardNode = area as CardNode
-	var card: Card = card_node.card
+	var card: Card = area as Card
 	
 	# Dont care if the side of the board is wrong
 	if player != Game.player:
 		return
 	
-	if card_node.card.location != Card.Location.HAND:
+	if card.location != Card.Location.HAND:
 		return
 	
-	card_node.released.connect(func(pos: Vector3) -> void: _place_card(player, card_node, pos))
-	_connected.append(card_node)
+	card.released.connect(func(pos: Vector3) -> void: _place_card(player, card, pos))
+	_connected.append(card)
 
 
 func _on_player_area_exited(area: Area3D) -> void:
-	if not area is CardNode:
+	if not area is Card:
 		return
 	
-	var card_node: CardNode = area as CardNode
+	var card: Card = area as Card
 	
-	for dict: Dictionary in card_node.released.get_connections():
-		card_node.released.disconnect(dict.callable)
+	for dict: Dictionary in card.released.get_connections():
+		card.released.disconnect(dict.callable)
 	
-	_connected.erase(card_node)
+	_connected.erase(card)
 
 
 func _on_player_1_area_entered(area: Area3D) -> void:

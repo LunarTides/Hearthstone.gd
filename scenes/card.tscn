@@ -15,10 +15,10 @@ albedo_texture = ExtResource("4_3o54t")
 material = SubResource("StandardMaterial3D_c5svb")
 size = Vector2(3, 5)
 
-[node name="Card" type="Area3D" node_paths=PackedStringArray("texture", "cover", "name_label", "cost_label", "text_label", "attack_label", "health_label", "tribe_label", "spell_school_label") groups=["Cards"]]
+[node name="Card" type="Area3D" node_paths=PackedStringArray("texture_sprite", "cover", "name_label", "cost_label", "text_label", "attack_label", "health_label", "tribe_label", "spell_school_label") groups=["Cards"]]
 input_capture_on_drag = true
 script = ExtResource("1_unaoi")
-texture = NodePath("Texture")
+texture_sprite = NodePath("Texture")
 cover = NodePath("Cover")
 name_label = NodePath("NameLabel")
 cost_label = NodePath("CostLabel")

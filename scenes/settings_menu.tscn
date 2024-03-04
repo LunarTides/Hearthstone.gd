@@ -73,6 +73,7 @@ update_on_text_changed = true
 prefix = "CBX"
 
 [node name="CBY" type="SpinBox" parent="TabContainer/Debug"]
+layout_mode = 0
 offset_top = 31.0
 offset_right = 83.0625
 offset_bottom = 62.0
@@ -83,6 +84,7 @@ update_on_text_changed = true
 prefix = "CBY"
 
 [node name="CBZ" type="SpinBox" parent="TabContainer/Debug"]
+layout_mode = 0
 offset_top = 62.0
 offset_right = 83.0625
 offset_bottom = 93.0
@@ -93,6 +95,7 @@ update_on_text_changed = true
 prefix = "CBZ"
 
 [node name="CRYM" type="SpinBox" parent="TabContainer/Debug"]
+layout_mode = 0
 offset_top = 93.0
 offset_right = 83.0625
 offset_bottom = 124.0
@@ -103,6 +106,7 @@ update_on_text_changed = true
 prefix = "CRYM"
 
 [node name="CDX" type="SpinBox" parent="TabContainer/Debug"]
+layout_mode = 0
 offset_top = 127.0
 offset_right = 83.0625
 offset_bottom = 158.0

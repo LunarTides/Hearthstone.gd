@@ -18,6 +18,9 @@ var has_tried_upnp: bool = false
 
 #region Internal Functions
 func _exit_tree() -> void:
+	if OS.is_debug_build():
+		return
+	
 	# Wait for thread finish here to handle game exit while the thread is running.
 	if thread:
 		thread.wait_to_finish()
@@ -27,6 +30,9 @@ func _exit_tree() -> void:
 #region Public Functions
 ## Tries to setup UPnP on [member thread]. Emits [member upnp_completed] on completion.
 func setup(server_port: int) -> void:
+	if OS.is_debug_build():
+		return
+	
 	thread = Thread.new()
 	thread.start(_upnp_setup.bind(server_port))
 	has_tried_upnp = true

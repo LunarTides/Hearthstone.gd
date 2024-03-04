@@ -171,8 +171,13 @@ func _accept_play_packet(player: Player, sender_peer_id: int, info: Array) -> vo
 	var location: Card.Location = info[0]
 	var location_index: int = info[1]
 	var board_index: int = info[2]
+	var position: Vector3 = info[3]
 	
 	var card: Card = Card.get_from_index(player, location, location_index)
+	card.override_is_hidden = Game.NullableBool.FALSE
+	
+	await card.tween_to(0.3, position, Vector3.ZERO, Vector3.ONE)
+	card._should_layout = true
 	
 	player.mana -= card.cost
 	
@@ -180,9 +185,11 @@ func _accept_play_packet(player: Player, sender_peer_id: int, info: Array) -> vo
 		player.summon_card(card, board_index, false, true)
 		
 		card.trigger_ability(Card.Ability.BATTLECRY, false)
+		await Game.card_ability_triggered
 	
 	if card.types.has(Card.Type.SPELL):
 		card.trigger_ability(Card.Ability.CAST, false)
+		await Game.card_ability_triggered
 		
 		card.location = Card.Location.NONE
 	
@@ -194,9 +201,10 @@ func _accept_create_card_packet(player: Player, sender_peer_id: int, info: Array
 	var location: Card.Location = info[1]
 	var location_index: int = info[2]
 	
-	var card_node: CardNode = await Multiplayer.spawn_card(blueprint_path, player.id, location, location_index)
+	var card: Card = Blueprint.create_from_path(blueprint_path, player).card
+	card.add_to_location(location, location_index)
 	
-	Game.card_created.emit(card_node.card, player, sender_peer_id)
+	Game.card_created.emit(card, player, sender_peer_id)
 
 
 func _accept_draw_cards_packet(player: Player, sender_peer_id: int, info: Array) -> void:
@@ -213,13 +221,8 @@ func _accept_draw_cards_packet(player: Player, sender_peer_id: int, info: Array)
 			# TODO: Fatigue
 			return
 		
-		card.add_to_location(Card.Location.HAND, player.hand.size())
-		
 		# Create card node.
-		var card_node: CardNode = Multiplayer.CardScene.instantiate()
-		card_node.card = card
-		
-		(await Game.wait_for_node("/root/Main")).add_child(card_node)
+		card.add_to_location(Card.Location.HAND, player.hand.size())
 	
 	Game.cards_drawn.emit(amount, player, sender_peer_id)
 
@@ -257,7 +260,7 @@ func _accept_trigger_ability_packet(player: Player, sender_peer_id: int, info: A
 	var card: Card = Card.get_from_index(player, location, location_index)
 	
 	for ability_callback: Callable in card.abilities[ability]:
-		ability_callback.call(player, card)
+		await ability_callback.call()
 	
 	Game.card_ability_triggered.emit(card, ability, player, sender_peer_id)
 #endregion

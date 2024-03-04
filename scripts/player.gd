@@ -103,7 +103,7 @@ func play_card(card: Card, board_index: int, send_packet: bool = true) -> bool:
 		Game.feedback("You don't have enough mana.", Game.FeedbackType.ERROR)
 		return false
 	
-	Packet.send_if(send_packet, Packet.PacketType.PLAY, id, [card.location, card.index, board_index], true)
+	Packet.send_if(send_packet, Packet.PacketType.PLAY, id, [card.location, card.index, board_index, card.position], true)
 	return true
 
 
@@ -123,7 +123,7 @@ func add_to_hand(card: Card, hand_index: int, send_packet: bool = true) -> bool:
 		return false
 	
 	Packet.send_if(send_packet, Packet.PacketType.CREATE_CARD, id, [
-		card.blueprint.resource_path,
+		card.blueprint.get_script().resource_path.replace(".gd", ".tscn"),
 		Card.Location.HAND,
 		hand_index,
 	], true)

@@ -48,7 +48,12 @@ func import(deckcode: String, player: Player, validate: bool = true) -> Dictiona
 			i += 1
 		
 		for _i: int in copies:
-			cards.append(Card.get_from_blueprint(Blueprint.get_from_id(id), player))
+			var blueprint: Blueprint = Blueprint.create_from_id(id, player)
+			
+			if player:
+				blueprint.card.add_to_location(Card.Location.DECK, player.deck.size())
+			
+			cards.append(blueprint.card)
 	
 	if validate and not _validate_deck(deckcode, hero_class, cards):
 		return {}

@@ -45,11 +45,6 @@ enum NullableBool {
 #endregion
 
 
-#region Constant Variables
-const THE_COIN: Blueprint = preload("res://cards/the_coin/the_coin.tres")
-#endregion
-
-
 #region Public Variables
 ## The player assigned to this client.
 var player: Player:
@@ -244,8 +239,7 @@ func start_game() -> void:
 	var deckcodes: Dictionary = Multiplayer._deckcodes
 	Multiplayer.start_game.rpc(deckcodes[player1.peer_id], deckcodes[player2.peer_id])
 	
-	var coin: Card = Card.get_from_blueprint(THE_COIN, player2)
-	player2.add_to_hand(coin, player2.hand.size())
+	Multiplayer.create_blueprint_from_path.rpc("res://cards/the_coin/the_coin.tscn", player2.id, Card.Location.HAND, player2.hand.size())
 
 
 ## Sends a packet to end the [member current_player]'s turn. Returns if a packet was sent.
@@ -305,7 +299,7 @@ func get_all_files_from_path(path: String) -> Array[String]:
 		if dir.current_is_dir():  
 			file_paths += get_all_files_from_path(file_path)  
 		else:
-			if file_path.ends_with(".tres.remap"):
+			if file_path.ends_with(".tscn.remap"):
 				file_path = file_path.replace(".remap", "")
 			file_paths.append(file_path)  
 		
