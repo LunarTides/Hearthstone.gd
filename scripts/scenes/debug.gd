@@ -28,12 +28,14 @@ extends Control
 #region Internal Functions
 func _ready() -> void:
 	panel.hide()
+	fps_label.hide()
 	show_hide_text.hide()
 	
 	if OS.is_debug_build():
 		show_hide_text.show()
 	else:
-		queue_free()
+		fps_label.show()
+		return
 	
 	for key: String in Packet.PacketType.keys():
 		send_packet_type.add_item(key)
@@ -44,13 +46,14 @@ func _ready() -> void:
 
 
 func _input(event: InputEvent) -> void:
-	if event.is_released():
+	if not OS.is_debug_build() or event.is_released():
 		return
 	
 	var key: String = event.as_text()
 	
 	# Show debug panel
 	if key == "F1":
+		fps_label.visible = not panel.visible
 		panel.visible = not panel.visible
 		show_hide_text.visible = not panel.visible
 	# Set 10 mana
@@ -66,6 +69,10 @@ func _input(event: InputEvent) -> void:
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	fps_label.text = "FPS: %d" % Performance.get_monitor(Performance.TIME_FPS)
+	
+	if not OS.is_debug_build():
+		return
+	
 	object_count_label.text = "Object Count: %d" % Performance.get_monitor(Performance.OBJECT_COUNT)
 	node_count_label.text = "Node Count: %d" % Performance.get_monitor(Performance.OBJECT_NODE_COUNT)
 	orphan_count_label.text = "Orphan Count: %d" % Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT)
@@ -91,6 +98,9 @@ func _process(delta: float) -> void:
 
 #region Private Functions
 func _on_send_packet_button_pressed() -> void:
+	if not OS.is_debug_build():
+		return
+	
 	var packet_type: Packet.PacketType = Packet.PacketType.values()[send_packet_type.selected]
 	
 	@warning_ignore("narrowing_conversion")

@@ -13,7 +13,7 @@ mouse_filter = 2
 script = ExtResource("1_u7nor")
 show_hide_text = NodePath("ShowHideText")
 panel = NodePath("Panel")
-fps_label = NodePath("Panel/FPS")
+fps_label = NodePath("FPS")
 object_count_label = NodePath("Panel/ObjectCount")
 node_count_label = NodePath("Panel/NodeCount")
 orphan_count_label = NodePath("Panel/OrphanCount")
@@ -40,14 +40,6 @@ offset_bottom = 23.0
 mouse_filter = 2
 bbcode_enabled = true
 text = "[right]Press [b]F1[/b] to show/hide."
-fit_content = true
-
-[node name="FPS" type="RichTextLabel" parent="Panel"]
-layout_mode = 0
-offset_right = 576.0
-offset_bottom = 23.0
-mouse_filter = 2
-text = "FPS: -1"
 fit_content = true
 
 [node name="ObjectCount" type="RichTextLabel" parent="Panel"]
@@ -189,6 +181,14 @@ offset_bottom = 23.0
 mouse_filter = 2
 bbcode_enabled = true
 text = "Press [b]F1[/b] to show/hide debug menu."
+fit_content = true
+
+[node name="FPS" type="RichTextLabel" parent="."]
+layout_mode = 0
+offset_right = 576.0
+offset_bottom = 23.0
+mouse_filter = 2
+text = "FPS: -1"
 fit_content = true
 
 [connection signal="text_submitted" from="Panel/SendPacket/Info" to="." method="_on_info_text_submitted"]
