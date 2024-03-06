@@ -134,6 +134,9 @@ func save_config() -> void:
 	if not is_server:
 		return
 	
+	if FileAccess.file_exists(CONFIG_FILE_PATH):
+		return
+	
 	var config: ConfigFile = ConfigFile.new()
 	config.set_value("Server", "port", port)
 	config.set_value("Server", "anticheat_level", -1 if anticheat_level >= 10000 else anticheat_level)
