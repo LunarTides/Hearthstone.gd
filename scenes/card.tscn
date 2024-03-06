@@ -1,8 +1,9 @@
-[gd_scene load_steps=8 format=3 uid="uid://ccmb7s7hsvhju"]
+[gd_scene load_steps=9 format=3 uid="uid://ccmb7s7hsvhju"]
 
 [ext_resource type="Script" path="res://scripts/scenes/card.gd" id="1_unaoi"]
 [ext_resource type="PackedScene" uid="uid://cveuxgw02yxqq" path="res://assets/models/card.blend" id="2_xxbfx"]
 [ext_resource type="Texture2D" uid="uid://c85sy5ncm0tn8" path="res://assets/card_cover.png" id="4_3o54t"]
+[ext_resource type="Script" path="res://scripts/blueprint_viewer.gd" id="5_7rqca"]
 [ext_resource type="Texture2D" uid="uid://brfqmj5tkr3o6" path="res://cards/sheep/sheep.png" id="6_55k6d"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_vsdkf"]
@@ -84,6 +85,9 @@ width = 1000.0
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 visible = false
 mesh = SubResource("PlaneMesh_383yb")
+
+[node name="Viewer" type="Node" parent="."]
+script = ExtResource("5_7rqca")
 
 [connection signal="input_event" from="." to="." method="_on_input_event"]
 [connection signal="mouse_entered" from="." to="." method="_start_hover"]

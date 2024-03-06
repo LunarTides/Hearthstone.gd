@@ -526,6 +526,45 @@ static func get_from_index(player: Player, location: Card.Location, index: int) 
 			return Game.get_or_null(player.graveyard, index)
 		_:
 			return null
+
+
+# This is in a static function to work in editor scripts.
+static func _update_card(card: Card, blueprint: Blueprint) -> void:
+	card.texture_sprite.texture = blueprint.texture
+	card.name_label.text = blueprint.card_name
+	card.cost_label.text = str(blueprint.cost)
+	card.text_label.text = blueprint.text
+	card.attack_label.text = str(blueprint.attack)
+	card.health_label.text = str(blueprint.health)
+	
+	# Tribes
+	var tribe_keys: PackedStringArray = PackedStringArray(Card.Tribe.keys())
+	card.tribe_label.text = " / ".join(blueprint.tribes.map(func(tribe: Card.Tribe) -> String: return tribe_keys[tribe].capitalize()))
+	
+	# Spell schools
+	var spell_school_keys: PackedStringArray = PackedStringArray(Card.SpellSchool.keys())
+	card.spell_school_label.text = " / ".join(blueprint.spell_schools.map(func(spell_school: Card.SpellSchool) -> String: return spell_school_keys[spell_school].capitalize()))
+	
+	# Rarity Color
+	var rarity_node: MeshInstance3D = card.get_node("Mesh/Rarity")
+	
+	var rarity_material: StandardMaterial3D = StandardMaterial3D.new()
+	rarity_material.albedo_color = Card.RARITY_COLOR.get(blueprint.rarities[0])
+	rarity_node.set_surface_override_material(0, rarity_material)
+	
+	# Show non-essential labels
+	if blueprint.types.has(Card.Type.MINION):
+		card.tribe_label.show()
+	if blueprint.types.has(Card.Type.SPELL):
+		card.spell_school_label.show()
+	
+	
+	card.get_node("Mesh/Attack").visible = blueprint.attack > 0
+	card.attack_label.visible = blueprint.attack > 0
+	
+	card.get_node("Mesh/Health").visible = blueprint.health > 0
+	card.get_node("Mesh/HealthFrame").visible = blueprint.health > 0
+	card.health_label.visible = blueprint.health > 0
 #endregion
 
 
@@ -555,43 +594,7 @@ func _update() -> void:
 	show()
 	layout()
 	
-	texture_sprite.texture = texture
-	name_label.text = card_name
-	cost_label.text = str(cost)
-	text_label.text = text
-	attack_label.text = str(attack)
-	health_label.text = str(health)
-	
-	# Tribes
-	var tribe_keys: PackedStringArray = PackedStringArray(Card.Tribe.keys())
-	tribe_label.text = " / ".join(tribes.map(func(tribe: Card.Tribe) -> String: return tribe_keys[tribe].capitalize()))
-	
-	# Spell schools
-	var spell_school_keys: PackedStringArray = PackedStringArray(Card.SpellSchool.keys())
-	spell_school_label.text = " / ".join(spell_schools.map(func(spell_school: Card.SpellSchool) -> String: return spell_school_keys[spell_school].capitalize()))
-	
-	# Rarity Color
-	var rarity_node: MeshInstance3D = mesh.get_node("Rarity")
-	
-	var rarity_material: StandardMaterial3D = StandardMaterial3D.new()
-	rarity_material.albedo_color = Card.RARITY_COLOR.get(rarities[0])
-	rarity_node.set_surface_override_material(0, rarity_material)
-	
-	# Show non-essential labels
-	if types.has(Card.Type.MINION):
-		attack_label.show()
-		health_label.show()
-		tribe_label.show()
-	if types.has(Card.Type.SPELL):
-		spell_school_label.show()
-	
-	
-	if attack <= 0:
-		mesh.get_node("Attack").hide()
-	
-	if health <= 0:
-		mesh.get_node("Health").hide()
-		mesh.get_node("HealthFrame").hide()
+	Card._update_card(self, blueprint)
 
 
 func _layout_hand() -> Dictionary:
