@@ -11,119 +11,62 @@ extends Control
 #endregion
 
 
-#region Private Variables
-var _instance_num: int = -1
-var _instance_socket: TCPServer 
-#endregion
-
-
 #region Internal Functions
 func _ready() -> void:
 	if OS.get_cmdline_args().has("--server") or OS.has_feature("dedicated_server") or DisplayServer.get_name() == "headless":
 		host()
 		return
-	
-	# Make debugging easier
-	if OS.has_feature("editor"):
-		_instance_socket = TCPServer.new()
-		for n: int in 3:
-			if _instance_socket.listen(5000 + n) == OK:
-				_instance_num = n
-				break
-
-		assert(_instance_num >= 0, "Unable to determine instance number. Seems like all TCP ports are in use")	
-			
-		match _instance_num:
-			0:
-				# Instance 0 should host a server
-				host()
-				# Wait since it makes moving the window a LOT more consistant.
-				await get_tree().create_timer(0.1).timeout
-				
-				@warning_ignore("integer_division")
-				get_window().position += Vector2i(get_window().size.x / 4, 0)
-			1:
-				# Instance 1 should join the server
-				_on_join_button_pressed()
-				await get_tree().create_timer(0.1).timeout
-				
-				@warning_ignore("integer_division")
-				get_window().position += Vector2i(-(get_window().size.x / 4), get_window().size.y / 4)
-			2:
-				# Instance 2 should join the server
-				_on_join_button_pressed()
-				await get_tree().create_timer(0.1).timeout
-				
-				@warning_ignore("integer_division")
-				get_window().position += Vector2i(-(get_window().size.x / 4), -(get_window().size.y / 4))
 #endregion
 
 
 #region Public Functions
 ## Makes the game start hosting a server.
 func host() -> void:
-	# Will not really work with a dedicated server but there it nothing i can do.
-	OS.set_restart_on_exit(true, ["--server"])
-	
-	join_button.hide()
-	host_button.hide()
-	ip_address.hide()
-	port.hide()
-	deckcode.hide()
-	
 	info_label.text = "Please wait for a client to connect..."
-	info_label.show()
+	_toggle()
 	
-	Multiplayer.peer.create_server(Multiplayer.port, Multiplayer.max_clients)
-	multiplayer.multiplayer_peer = Multiplayer.peer
-	
-	Multiplayer.load_config()
-	
-	# UPnP
-	if not UPnP.has_tried_upnp:
-		print("Attempting to use UPnP. Please wait...")
-		UPnP.setup(Multiplayer.port)
-		
-		UPnP.upnp_completed.connect(func(err: int) -> void:
-			if err == OK:
-				print("UPnP setup completed successfully. You do not need to port forward.")
-			else:
-				print("UPnP setup failed, you will need to port-forward port %s (TCP/UDP) manually." % Multiplayer.port)
-		)
-	
-	print("Waiting for a client to connect...")
+	Multiplayer.host()
 	
 	Game.game_started.connect(func() -> void: info_label.text = "A game is in progress.")
 #endregion
 
 
 #region Private Functions
+func _toggle() -> void:
+	join_button.visible = not join_button.visible
+	host_button.visible = not host_button.visible
+	ip_address.visible = not ip_address.visible
+	port.visible = not port.visible
+	deckcode.visible = not deckcode.visible
+	
+	info_label.visible = not info_label.visible
+
+
 func _on_join_button_pressed() -> void:
 	if not Deckcode.validate(deckcode.text):
 		Game.feedback("Invalid deckcode.", Game.FeedbackType.ERROR)
 		push_warning("Invalid deckcode.")
 		return
 	
+	info_label.text = "Waiting for response from server..."
+	_toggle()
+	
 	Multiplayer.join(
 		ip_address.text,
 		port.text.to_int() if port.text.is_valid_int() else 4545,
+		deckcode.text,
 	)
 	
 	multiplayer.connected_to_server.connect(func() -> void:
-		Multiplayer.send_deckcode.rpc_id(1, deckcode.text)
-		
-		Multiplayer.server_responded.connect(func(success: bool) -> void:
+		Multiplayer.server_responded.connect(func(success: bool, error_message: String) -> void:
 			if not success:
+				_toggle()
+				
+				push_error(error_message)
+				Game.feedback(error_message, Game.FeedbackType.ERROR)
 				return
 			
-			join_button.hide()
-			host_button.hide()
-			ip_address.hide()
-			port.hide()
-			deckcode.hide()
-			
 			info_label.text = "Waiting for another player..."
-			info_label.show()
 		)
 	)
 

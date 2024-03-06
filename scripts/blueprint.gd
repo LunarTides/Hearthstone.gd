@@ -71,6 +71,18 @@ func _ready() -> void:
 	
 	if "setup" in self:
 		self["setup"].call()
+	
+	if Engine.get_main_loop().current_scene == self:
+		assert(false, "Playing blueprints scenes directly is not implemented yet. See https://github.com/LunarTides/Hearthstone.gd/issues/2")
+#endregion
+
+
+#region Public Functions
+func setup_blueprint(player: Player) -> void:
+	card.player = player
+	
+	var tree: SceneTree = Engine.get_main_loop()
+	tree.root.add_child(self)
 #endregion
 
 
@@ -86,11 +98,7 @@ static func create_from_id(id: int, player: Player) -> Blueprint:
 		var blueprint: Blueprint = load(file_path).instantiate()
 		
 		if blueprint.id == id:
-			var tree: SceneTree = Engine.get_main_loop()
-			tree.root.add_child(blueprint)
-			
-			blueprint.card.player = player
-			
+			blueprint.setup_blueprint(player)
 			return blueprint
 	
 	return null
@@ -98,11 +106,12 @@ static func create_from_id(id: int, player: Player) -> Blueprint:
 
 ## Creates a [Blueprint] from the specified [param path].
 static func create_from_path(path: String, player: Player) -> Blueprint:
-	var blueprint: Blueprint = load(path).instantiate()
-	blueprint.card.player = player
-	
-	var tree: SceneTree = Engine.get_main_loop()
-	tree.root.add_child(blueprint)
-	
+	return Blueprint.create_from_packed_scene(load(path), player)
+
+
+## Creates a [Blueprint] from the specified [param packed_scene].
+static func create_from_packed_scene(packed_scene: PackedScene, player: Player) -> Blueprint:
+	var blueprint: Blueprint = packed_scene.instantiate()
+	blueprint.setup_blueprint(player)
 	return blueprint
 #endregion

@@ -146,6 +146,8 @@ var card_distance_x: float = 1.81
 var board_node: BoardNode:
 	get:
 		return get_tree().root.get_node("Main/Board") as BoardNode
+
+var instance_num: int = -1
 #endregion
 
 
@@ -177,7 +179,41 @@ func _ready() -> void:
 	
 	error_label.name = "ErrorLabel"
 	get_tree().root.add_child.call_deferred(error_label, true)
+	
+	# Make debugging easier
+	if OS.has_feature("editor"):
+		var _instance_socket: TCPServer = TCPServer.new()
+		
+		for n: int in 3:
+			if _instance_socket.listen(5000 + n) == OK:
+				instance_num = n
+				break
 
+		assert(instance_num >= 0, "Unable to determine instance number. Seems like all TCP ports are in use")	
+			
+		match instance_num:
+			0:
+				# Instance 0 should host a server
+				Multiplayer.host()
+				# Wait since it makes moving the window a LOT more consistant.
+				await get_tree().create_timer(0.1).timeout
+				
+				@warning_ignore("integer_division")
+				get_window().position += Vector2i(get_window().size.x / 4, 0)
+			1:
+				# Instance 1 should join the server
+				Multiplayer.join("localhost", 4545, "1/1:30/1")
+				await get_tree().create_timer(0.1).timeout
+				
+				@warning_ignore("integer_division")
+				get_window().position += Vector2i(-(get_window().size.x / 4), get_window().size.y / 4)
+			2:
+				# Instance 2 should join the server
+				Multiplayer.join("localhost", 4545, "1/1:30/1")
+				await get_tree().create_timer(0.1).timeout
+				
+				@warning_ignore("integer_division")
+				get_window().position += Vector2i(-(get_window().size.x / 4), -(get_window().size.y / 4))
 
 func _notification(what: int) -> void:
 	# Save on quit.

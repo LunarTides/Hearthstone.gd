@@ -81,6 +81,7 @@ func _ready() -> void:
 		if ip_address in ban_list:
 			# Kick
 			print("Banned player (%s) is trying to join. Kicking..." % ip_address)
+			server_response.rpc_id(id, false, "You are banned.")
 			kick(id, true)
 			return
 		
@@ -162,9 +163,39 @@ func kick(peer_id: int, force: bool = false) -> void:
 
 
 ## Joins a server at the specified [param ip_address] and [param port].
-func join(ip_address: String, port: int) -> void:
+func join(ip_address: String, port: int, deckcode: String) -> void:
 	peer.create_client(ip_address if ip_address else "localhost", port)
-	multiplayer.multiplayer_peer = Multiplayer.peer
+	multiplayer.multiplayer_peer = peer
+	
+	multiplayer.connected_to_server.connect(func() -> void:
+		# For some reason, we need to specify `Multiplayer` here.
+		Multiplayer.send_deckcode.rpc_id(1, deckcode)
+	)
+
+
+## Hosts a server at [member port].
+func host() -> void:
+	# Will not really work with a dedicated server but there it nothing i can do.
+	OS.set_restart_on_exit(true, ["--server"])
+	
+	peer.create_server(port, max_clients)
+	multiplayer.multiplayer_peer = peer
+	
+	load_config()
+	
+	# UPnP
+	if not UPnP.has_tried_upnp:
+		print("Attempting to use UPnP. Please wait...")
+		UPnP.setup(port)
+		
+		UPnP.upnp_completed.connect(func(err: int) -> void:
+			if err == OK:
+				print("UPnP setup completed successfully. You do not need to port forward.")
+			else:
+				print("UPnP setup failed, you will need to port-forward port %s (TCP/UDP) manually." % port)
+		)
+	
+	print("Waiting for a client to connect...")
 
 
 ## Quits to main menu. Use this instead of [code]Game.exit_to_lobby[/code].
@@ -192,10 +223,6 @@ func quit() -> void:
 ## Assigns [param id] to a client. CAN ONLY BE RPC CALLED SERVER SIDE.
 @rpc("authority", "call_remote", "reliable")
 func assign_player(id: int) -> void:
-	if is_server:
-		push_error("Trying to do `assign_player` on server.")
-		return
-	
 	Game.player = Player.new()
 	Game.player.id = id
 	
@@ -270,10 +297,7 @@ func create_blueprint_from_path(path: String, player_id: int, location: Card.Loc
 ## If [param text] is set, it will call [method feedback] on the client with that text too.
 @rpc("authority", "call_remote", "reliable")
 func server_response(success: bool, text: String = "") -> void:
-	if text:
-		feedback(text)
-	
-	server_responded.emit(success)
+	server_responded.emit(success, text)
 
 
 ## Sends feedback to the client using [member Game.feedback].
