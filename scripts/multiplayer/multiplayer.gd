@@ -136,7 +136,7 @@ func save_config() -> void:
 	
 	var config: ConfigFile = ConfigFile.new()
 	config.set_value("Server", "port", port)
-	config.set_value("Server", "anticheat_level", anticheat_level)
+	config.set_value("Server", "anticheat_level", -1 if anticheat_level >= 10000 else anticheat_level)
 	config.set_value("Server", "anticheat_consequence", anticheat_conseqence)
 	config.set_value("Server", "ban_list", ban_list)
 	

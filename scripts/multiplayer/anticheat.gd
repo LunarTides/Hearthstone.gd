@@ -199,6 +199,13 @@ func _run_summon_packet(sender_peer_id: int, sender_player: Player, actor_player
 		_feedback("You are not authorized to summon a card on behalf of your opponent.", sender_peer_id)
 		return false
 	
+	# The card should be summonable
+	if _check(not card.types.has(Card.Type.MINION) and not card.types.has(Card.Type.LOCATION), 2):
+		_feedback("A minion with these types (%s) cannot be summoned." % ", ".join(card.types.map(func(type: Card.Type) -> String:
+			return Card.Type.keys()[type]
+		)), sender_peer_id)
+		return false
+	
 	# Only the server can do this.
 	if _check(true, 2):
 		_feedback("Only the server can do this.", sender_peer_id)
