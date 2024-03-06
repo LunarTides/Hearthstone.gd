@@ -185,11 +185,11 @@ func _accept_play_packet(player: Player, sender_peer_id: int, info: Array) -> vo
 		player.summon_card(card, board_index, false, true)
 		
 		card.trigger_ability(Card.Ability.BATTLECRY, false)
-		await Game.card_ability_triggered
+		await card._wait_for_ability(Card.Ability.BATTLECRY)
 	
 	if card.types.has(Card.Type.SPELL):
 		card.trigger_ability(Card.Ability.CAST, false)
-		await Game.card_ability_triggered
+		await card._wait_for_ability(Card.Ability.CAST)
 		
 		card.location = Card.Location.NONE
 	

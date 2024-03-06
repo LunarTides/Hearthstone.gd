@@ -530,6 +530,17 @@ static func get_from_index(player: Player, location: Card.Location, index: int) 
 
 
 #region Private Functions
+func _wait_for_ability(target_ability: Ability) -> void:
+	while true:
+		var info: Array = await Game.card_ability_triggered
+		
+		var card: Card = info[0]
+		var ability: Ability = info[1]
+		
+		if card == self and ability == target_ability:
+			break
+
+
 func _update() -> void:
 	if location == Card.Location.NONE:
 		remove_from_location()
