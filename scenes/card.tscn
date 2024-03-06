@@ -2,9 +2,9 @@
 
 [ext_resource type="Script" path="res://scripts/scenes/card.gd" id="1_unaoi"]
 [ext_resource type="PackedScene" uid="uid://cveuxgw02yxqq" path="res://assets/models/card.blend" id="2_xxbfx"]
+[ext_resource type="Texture2D" uid="uid://d30626m6lrq4g" path="res://cards/texture_template.png" id="3_7120y"]
 [ext_resource type="Texture2D" uid="uid://c85sy5ncm0tn8" path="res://assets/card_cover.png" id="4_3o54t"]
 [ext_resource type="Script" path="res://scripts/blueprint_viewer.gd" id="5_7rqca"]
-[ext_resource type="Texture2D" uid="uid://brfqmj5tkr3o6" path="res://cards/sheep/sheep.png" id="6_55k6d"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_vsdkf"]
 size = Vector3(3, 1, 5)
@@ -35,8 +35,8 @@ spell_school_label = NodePath("SpellSchoolLabel")
 shape = SubResource("BoxShape3D_vsdkf")
 
 [node name="Texture" type="Sprite3D" parent="."]
-transform = Transform3D(1.28, 0, 0, 0, -5.59506e-08, 1.28, 0, -1.28, -5.59506e-08, 0.141785, 0, -1.2414)
-texture = ExtResource("6_55k6d")
+transform = Transform3D(1.28, 0, 0, 0, -5.59506e-08, 1.28, 0, -1.28, -5.59506e-08, 0.0166034, 0, -1.30495)
+texture = ExtResource("3_7120y")
 
 [node name="NameLabel" type="Label3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0.259917, -0.0302144)
