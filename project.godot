@@ -34,7 +34,3 @@ gdscript/warnings/shadowed_variable_base_class=0
 gdscript/warnings/untyped_declaration=2
 gdscript/warnings/inferred_declaration=2
 gdscript/warnings/confusable_local_declaration=0
-
-[editor_plugins]
-
-enabled=PackedStringArray()
