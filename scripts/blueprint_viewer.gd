@@ -8,7 +8,11 @@ func _process(delta: float) -> void:
 		queue_free()
 		return
 	
-	var blueprint: Blueprint = Engine.get_main_loop().edited_scene_root
+	var root: Node = Engine.get_main_loop().edited_scene_root
+	if not root is Blueprint:
+		return
+	
+	var blueprint: Blueprint = root
 	var card: Card = blueprint.get_node("Card")
 	
 	if not card is Card:
