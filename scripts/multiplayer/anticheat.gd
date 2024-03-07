@@ -160,8 +160,8 @@ func _run_attack_packet(sender_peer_id: int, sender_player: Player, actor_player
 			_feedback("You own the target card.", sender_peer_id)
 			return false
 	
-	# TODO: Implement this when attacking players is added.
-	if attack_mode == Packet.AttackMode.CARD_VS_PLAYER or attack_mode == Packet.AttackMode.PLAYER_VS_CARD or attack_mode == Packet.AttackMode.PLAYER_VS_PLAYER:
+	# TODO: Implement this when player attacking is added.
+	if attack_mode == Packet.AttackMode.PLAYER_VS_CARD or attack_mode == Packet.AttackMode.PLAYER_VS_PLAYER:
 		return false
 	
 	return true

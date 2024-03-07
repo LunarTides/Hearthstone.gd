@@ -33,6 +33,12 @@ var id: int
 ## The player's class.
 var hero_class: Class
 
+## How much health the player has.
+var health: int = 30
+
+## The maximum number that [member health] can go to.
+var max_health: int = 30
+
 ## How much mana the player currently has.
 var mana: int = 0
 

@@ -825,8 +825,8 @@ func _start_attacking() -> void:
 	if target is Card:
 		if target.location != Location.BOARD:
 			return
-		
-		attack_target(target) 
+	
+	attack_target(target) 
 
 
 func _make_way(stop: bool = false) -> void:

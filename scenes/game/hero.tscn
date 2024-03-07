@@ -1,0 +1,28 @@
+[gd_scene load_steps=5 format=3 uid="uid://bqysxy7jrd0fk"]
+
+[ext_resource type="Script" path="res://scripts/scenes/game/hero.gd" id="1_ulxhm"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1qoa2"]
+albedo_color = Color(0.454902, 0.568627, 0.34902, 1)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_aflfs"]
+material = SubResource("StandardMaterial3D_1qoa2")
+size = Vector2(5, 5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_lhl38"]
+size = Vector3(5, 0.001, 5)
+
+[node name="Hero" type="Area3D" node_paths=PackedStringArray("health_label")]
+script = ExtResource("1_ulxhm")
+health_label = NodePath("HealthLabel")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("PlaneMesh_aflfs")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_lhl38")
+
+[node name="HealthLabel" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
+text = "Health: 30/30"
+font_size = 152

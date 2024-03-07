@@ -61,21 +61,38 @@ func _input_event(camera: Camera3D, event: InputEvent, pos: Vector3, normal: Vec
 		var collider: Area3D = collisions[0]
 		
 		if collider is Card:
+			var player: Player = collider.player
+			
 			if not flags & CAN_SELECT_CARDS:
 				Game.feedback("You cannot select cards here.", Game.FeedbackType.ERROR)
 				return _remove()
 				
-			if collider.player == Game.player and not flags & CAN_SELECT_FRIENDLY_TARGETS:
+			if player == Game.player and not flags & CAN_SELECT_FRIENDLY_TARGETS:
 				Game.feedback("You cannot select friendly cards here.", Game.FeedbackType.ERROR)
 				return _remove()
-			if collider.player == Game.opponent and not flags & CAN_SELECT_ENEMY_TARGETS:
+			if player == Game.opponent and not flags & CAN_SELECT_ENEMY_TARGETS:
 				Game.feedback("You cannot select enemy cards here.", Game.FeedbackType.ERROR)
 				return _remove()
 			
 			card_selected.emit(collider)
 			target_selected.emit(collider)
 		
-		# TODO: Add selecting heroes
+		if collider is HeroNode:
+			var player: Player = collider.player
+			
+			if not flags & CAN_SELECT_HEROES:
+				Game.feedback("You cannot select heroes here.", Game.FeedbackType.ERROR)
+				return _remove()
+				
+			if player == Game.player and not flags & CAN_SELECT_FRIENDLY_TARGETS:
+				Game.feedback("You cannot select the friendly hero here.", Game.FeedbackType.ERROR)
+				return _remove()
+			if player == Game.opponent and not flags & CAN_SELECT_ENEMY_TARGETS:
+				Game.feedback("You cannot select the enemy hero here.", Game.FeedbackType.ERROR)
+				return _remove()
+			
+			player_selected.emit(player)
+			target_selected.emit(player)
 	
 	return _remove()
 #endregion

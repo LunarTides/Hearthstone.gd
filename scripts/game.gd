@@ -377,7 +377,9 @@ func _attack_attacker_is_player_and_target_is_card(attacker: Player, target: Car
 
 
 func _attack_attacker_is_card_and_target_is_player(attacker: Card, target: Player) -> void:
-	pass
+	target.health -= attacker.attack
+	
+	attacker.has_attacked_this_turn = true
 
 
 func _attack_attacker_is_card_and_target_is_card(attacker: Card, target: Card) -> void:
