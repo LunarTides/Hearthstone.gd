@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/scenes/debug.gd" id="1_u7nor"]
 
-[node name="Debug" type="Control" node_paths=PackedStringArray("show_hide_text", "panel", "fps_label", "object_count_label", "node_count_label", "orphan_count_label", "resource_count_label", "process_time_label", "physics_process_time_label", "server_config_label", "peer_id_label", "player_id_label", "latest_packet_label", "send_packet_type", "send_packet_player", "send_packet_info")]
+[node name="Debug" type="Control" node_paths=PackedStringArray("show_hide_disabled_text", "show_hide_enabled_text", "fps_disabled_label", "panel", "fps_label", "object_count_label", "node_count_label", "orphan_count_label", "resource_count_label", "process_time_label", "physics_process_time_label", "server_config_label", "peer_id_label", "player_id_label", "latest_packet_label", "debug_buttons_card_id", "send_packet_type", "send_packet_player", "send_packet_info")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -11,38 +11,44 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("1_u7nor")
-show_hide_text = NodePath("ShowHideText")
-panel = NodePath("Panel")
-fps_label = NodePath("FPS")
-object_count_label = NodePath("Panel/ObjectCount")
-node_count_label = NodePath("Panel/NodeCount")
-orphan_count_label = NodePath("Panel/OrphanCount")
-resource_count_label = NodePath("Panel/ResourceCount")
-process_time_label = NodePath("Panel/ProcessTime")
-physics_process_time_label = NodePath("Panel/PhysicsProcessTime")
-server_config_label = NodePath("Panel/ServerConfig")
-peer_id_label = NodePath("Panel/PeerId")
-player_id_label = NodePath("Panel/PlayerId")
-latest_packet_label = NodePath("Panel/LatestPacket")
-send_packet_type = NodePath("Panel/SendPacket/Type")
-send_packet_player = NodePath("Panel/SendPacket/Player")
-send_packet_info = NodePath("Panel/SendPacket/Info")
+show_hide_disabled_text = NodePath("ShowHideDisabledText")
+show_hide_enabled_text = NodePath("ShowHideEnabledText")
+fps_disabled_label = NodePath("FPSDisabled")
+panel = NodePath("TabContainer")
+fps_label = NodePath("TabContainer/Info/FPS")
+object_count_label = NodePath("TabContainer/Info/ObjectCount")
+node_count_label = NodePath("TabContainer/Info/NodeCount")
+orphan_count_label = NodePath("TabContainer/Info/OrphanCount")
+resource_count_label = NodePath("TabContainer/Info/ResourceCount")
+process_time_label = NodePath("TabContainer/Info/ProcessTime")
+physics_process_time_label = NodePath("TabContainer/Info/PhysicsProcessTime")
+server_config_label = NodePath("TabContainer/Info/ServerConfig")
+peer_id_label = NodePath("TabContainer/Info/PeerId")
+player_id_label = NodePath("TabContainer/Info/PlayerId")
+latest_packet_label = NodePath("TabContainer/Info/LatestPacket")
+debug_buttons_card_id = NodePath("TabContainer/Debug Buttons/CardID")
+send_packet_type = NodePath("TabContainer/Send Packet/Type")
+send_packet_player = NodePath("TabContainer/Send Packet/Player")
+send_packet_info = NodePath("TabContainer/Send Packet/Info")
 
-[node name="Panel" type="Panel" parent="."]
+[node name="TabContainer" type="TabContainer" parent="."]
 layout_mode = 0
 offset_right = 576.0
-offset_bottom = 340.0
+offset_bottom = 297.0
+drag_to_rearrange_enabled = true
 
-[node name="ShowHideText" type="RichTextLabel" parent="Panel"]
+[node name="Info" type="Control" parent="TabContainer"]
+layout_mode = 2
+
+[node name="FPS" type="RichTextLabel" parent="TabContainer/Info"]
 layout_mode = 0
-offset_right = 568.0
+offset_right = 576.0
 offset_bottom = 23.0
 mouse_filter = 2
-bbcode_enabled = true
-text = "[right]Press [b]F1[/b] to show/hide."
+text = "FPS: -1"
 fit_content = true
 
-[node name="ObjectCount" type="RichTextLabel" parent="Panel"]
+[node name="ObjectCount" type="RichTextLabel" parent="TabContainer/Info"]
 layout_mode = 0
 offset_top = 23.0
 offset_right = 576.0
@@ -51,7 +57,7 @@ mouse_filter = 2
 text = "Object Count: -1"
 fit_content = true
 
-[node name="NodeCount" type="RichTextLabel" parent="Panel"]
+[node name="NodeCount" type="RichTextLabel" parent="TabContainer/Info"]
 layout_mode = 0
 offset_top = 46.0
 offset_right = 576.0
@@ -60,7 +66,7 @@ mouse_filter = 2
 text = "Node Count: -1"
 fit_content = true
 
-[node name="OrphanCount" type="RichTextLabel" parent="Panel"]
+[node name="OrphanCount" type="RichTextLabel" parent="TabContainer/Info"]
 layout_mode = 0
 offset_top = 69.0
 offset_right = 576.0
@@ -69,7 +75,7 @@ mouse_filter = 2
 text = "Orphan Count: -1"
 fit_content = true
 
-[node name="ResourceCount" type="RichTextLabel" parent="Panel"]
+[node name="ResourceCount" type="RichTextLabel" parent="TabContainer/Info"]
 layout_mode = 0
 offset_top = 92.0
 offset_right = 576.0
@@ -78,7 +84,7 @@ mouse_filter = 2
 text = "Resource Count: -1"
 fit_content = true
 
-[node name="ProcessTime" type="RichTextLabel" parent="Panel"]
+[node name="ProcessTime" type="RichTextLabel" parent="TabContainer/Info"]
 layout_mode = 0
 offset_top = 115.0
 offset_right = 576.0
@@ -87,7 +93,7 @@ mouse_filter = 2
 text = "Process Time: -1"
 fit_content = true
 
-[node name="PhysicsProcessTime" type="RichTextLabel" parent="Panel"]
+[node name="PhysicsProcessTime" type="RichTextLabel" parent="TabContainer/Info"]
 layout_mode = 0
 offset_top = 138.0
 offset_right = 576.0
@@ -96,14 +102,14 @@ mouse_filter = 2
 text = "Physics Process Time: -1"
 fit_content = true
 
-[node name="HSeparator" type="HSeparator" parent="Panel"]
+[node name="HSeparator" type="HSeparator" parent="TabContainer/Info"]
 layout_mode = 0
 offset_top = 161.0
 offset_right = 576.0
 offset_bottom = 174.0
 mouse_filter = 2
 
-[node name="ServerConfig" type="RichTextLabel" parent="Panel"]
+[node name="ServerConfig" type="RichTextLabel" parent="TabContainer/Info"]
 layout_mode = 0
 offset_top = 174.0
 offset_right = 576.0
@@ -112,7 +118,7 @@ mouse_filter = 2
 text = "Server Config: null"
 fit_content = true
 
-[node name="PeerId" type="RichTextLabel" parent="Panel"]
+[node name="PeerId" type="RichTextLabel" parent="TabContainer/Info"]
 layout_mode = 0
 offset_top = 197.0
 offset_right = 576.0
@@ -121,7 +127,7 @@ mouse_filter = 2
 text = "Peer ID: -1"
 fit_content = true
 
-[node name="PlayerId" type="RichTextLabel" parent="Panel"]
+[node name="PlayerId" type="RichTextLabel" parent="TabContainer/Info"]
 layout_mode = 0
 offset_top = 220.0
 offset_right = 576.0
@@ -130,52 +136,105 @@ mouse_filter = 2
 text = "Player ID: -1"
 fit_content = true
 
-[node name="LatestPacket" type="RichTextLabel" parent="Panel"]
+[node name="LatestPacket" type="RichTextLabel" parent="TabContainer/Info"]
 layout_mode = 0
 offset_top = 243.0
 offset_right = 576.0
 offset_bottom = 266.0
 text = "Latest Packet: null"
 
-[node name="SendPacket" type="Control" parent="Panel"]
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
+[node name="Debug Buttons" type="Control" parent="TabContainer"]
+visible = false
+layout_mode = 2
 
-[node name="Type" type="OptionButton" parent="Panel/SendPacket"]
+[node name="CardID" type="SpinBox" parent="TabContainer/Debug Buttons"]
 layout_mode = 0
-offset_top = 299.0
-offset_right = 121.0
-offset_bottom = 330.0
+offset_right = 83.0625
+offset_bottom = 31.0
+tooltip_text = "Card ID"
+min_value = 1.0
+value = 1.0
+allow_greater = true
+prefix = "ID"
+select_all_on_focus = true
 
-[node name="Player" type="SpinBox" parent="Panel/SendPacket"]
+[node name="GivePlayer1Button" type="Button" parent="TabContainer/Debug Buttons"]
+offset_top = 46.0
+offset_right = 83.0
+offset_bottom = 77.0
+text = "Give Card to Player 1"
+
+[node name="GivePlayer2Button" type="Button" parent="TabContainer/Debug Buttons"]
+offset_left = 178.0
+offset_top = 46.0
+offset_right = 347.0
+offset_bottom = 77.0
+text = "Give Card to Player 2"
+
+[node name="EndTurnButton" type="Button" parent="TabContainer/Debug Buttons"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -31.0
+offset_right = 78.0
+grow_vertical = 0
+text = "End Turn"
+
+[node name="Send Packet" type="Control" parent="TabContainer"]
+visible = false
+layout_mode = 2
+
+[node name="Type" type="OptionButton" parent="TabContainer/Send Packet"]
 layout_mode = 0
-offset_left = 181.0
-offset_top = 299.0
-offset_right = 264.062
-offset_bottom = 330.0
+offset_right = 288.0
+offset_bottom = 31.0
+tooltip_text = "Packet Type"
+
+[node name="Player" type="SpinBox" parent="TabContainer/Send Packet"]
+layout_mode = 0
+offset_top = 31.0
+offset_right = 304.0
+offset_bottom = 62.0
+tooltip_text = "Player ID
+
+0: Player who starts first
+1: Player who starts with The Coin"
 max_value = 1.0
 prefix = "P"
+select_all_on_focus = true
 
-[node name="Info" type="LineEdit" parent="Panel/SendPacket"]
+[node name="Info" type="LineEdit" parent="TabContainer/Send Packet"]
 layout_mode = 0
-offset_left = 264.0
-offset_top = 299.0
-offset_right = 451.0
-offset_bottom = 330.0
+offset_top = 62.0
+offset_right = 288.0
+offset_bottom = 93.0
+tooltip_text = "Info"
 text = "[]"
 placeholder_text = "Info"
+select_all_on_focus = true
 
-[node name="Button" type="Button" parent="Panel/SendPacket"]
+[node name="Button" type="Button" parent="TabContainer/Send Packet"]
 layout_mode = 0
-offset_left = 461.0
-offset_top = 299.0
-offset_right = 564.0
-offset_bottom = 330.0
+offset_top = 115.0
+offset_right = 103.0
+offset_bottom = 146.0
 text = "Send Packet"
 
-[node name="ShowHideText" type="RichTextLabel" parent="."]
+[node name="ShowHideEnabledText" type="RichTextLabel" parent="."]
 layout_mode = 0
+offset_top = 31.0
+offset_right = 568.0
+offset_bottom = 54.0
+mouse_filter = 2
+bbcode_enabled = true
+text = "[right]Press [b]F1[/b] to show/hide."
+fit_content = true
+metadata/_edit_lock_ = true
+
+[node name="ShowHideDisabledText" type="RichTextLabel" parent="."]
+visible = false
+layout_mode = 2
 offset_right = 568.0
 offset_bottom = 23.0
 mouse_filter = 2
@@ -183,13 +242,16 @@ bbcode_enabled = true
 text = "Press [b]F1[/b] to show/hide debug menu."
 fit_content = true
 
-[node name="FPS" type="RichTextLabel" parent="."]
-layout_mode = 0
+[node name="FPSDisabled" type="RichTextLabel" parent="."]
+visible = false
 offset_right = 576.0
 offset_bottom = 23.0
 mouse_filter = 2
 text = "FPS: -1"
 fit_content = true
 
-[connection signal="text_submitted" from="Panel/SendPacket/Info" to="." method="_on_info_text_submitted"]
-[connection signal="pressed" from="Panel/SendPacket/Button" to="." method="_on_send_packet_button_pressed"]
+[connection signal="pressed" from="TabContainer/Debug Buttons/GivePlayer1Button" to="." method="_on_give_player_1_button_pressed"]
+[connection signal="pressed" from="TabContainer/Debug Buttons/GivePlayer2Button" to="." method="_on_give_player_2_button_pressed"]
+[connection signal="pressed" from="TabContainer/Debug Buttons/EndTurnButton" to="." method="_on_end_turn_button_pressed"]
+[connection signal="text_submitted" from="TabContainer/Send Packet/Info" to="." method="_on_info_text_submitted"]
+[connection signal="pressed" from="TabContainer/Send Packet/Button" to="." method="_on_send_packet_button_pressed"]

@@ -7,7 +7,7 @@ extends Node3D
 #region Common
 @export_category("Common")
 @export var card_name: String
-@export var text: String
+@export_multiline var text: String
 @export var cost: int
 @export var texture: Texture2D
 @export var types: Array[Card.Type]
