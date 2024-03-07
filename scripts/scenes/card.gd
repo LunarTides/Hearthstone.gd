@@ -171,6 +171,8 @@ enum Location {
 
 ## The spell school label of the card.
 @export var spell_school_label: Label3D
+
+@export var attack_particles: GPUParticles3D
 #endregion
 
 
@@ -330,8 +332,6 @@ var _should_layout: bool = true
 @onready var mesh: Node3D = $Mesh
 
 @onready var _old_position: Vector3 = position
-@onready var _old_rotation: Vector3 = rotation
-@onready var _old_scale: Vector3 = scale
 #endregion
 
 
@@ -343,6 +343,8 @@ func _ready() -> void:
 		if location == Location.BOARD:
 			exhausted = false
 	)
+	
+	attack_particles.visibility_parent = get_tree().root.get_path()
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -506,8 +508,6 @@ func layout(instant: bool = false) -> void:
 		_layout_tween.tween_property(self, "scale", new_scale, 0.5)
 	
 	_old_position = new_position
-	_old_rotation = new_rotation
-	_old_scale = new_scale
 #endregion
 
 
@@ -632,10 +632,21 @@ func _update() -> void:
 	
 	# TODO: Should this be done here?
 	if health <= 0 and location == Location.BOARD:
+		var old_scale: Vector3 = scale
+		
+		var tween: Tween = create_tween()
+		tween.tween_property(self, "scale", Vector3.ZERO, 0.5).set_ease(Tween.EASE_OUT)
+		
+		await tween.finished
+		
 		add_to_location(Location.GRAVEYARD, player.graveyard.size())
 		override_is_hidden = Game.NullableBool.NULL
 		# HACK: Disabling the collision so it doesn't interfere.
 		$CollisionShape3D.disabled = true
+		
+		await get_tree().process_frame
+		
+		scale = old_scale
 		return
 	
 	show()

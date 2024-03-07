@@ -377,14 +377,32 @@ func _attack_attacker_is_player_and_target_is_card(attacker: Player, target: Car
 
 
 func _attack_attacker_is_card_and_target_is_player(attacker: Card, target: Player) -> void:
+	# TODO: Add effects
 	target.health -= attacker.attack
 	
 	attacker.has_attacked_this_turn = true
 
 
 func _attack_attacker_is_card_and_target_is_card(attacker: Card, target: Card) -> void:
+	attacker.has_attacked_this_turn = true
+	
+	# Animation
+	target.layout(true)
+	
+	await attacker.do_effects(func() -> void:
+		var _old_position: Vector3 = attacker.global_position
+		
+		var tween: Tween = attacker.create_tween()
+		tween.tween_property(attacker, "global_position", target.global_position, 0.5).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_QUINT)
+		tween.tween_callback(func() -> void:
+			target.attack_particles.restart()
+		)
+		tween.tween_property(attacker, "global_position", _old_position, 0.5).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUINT)
+		
+		await tween.finished
+		await target.attack_particles.finished
+	)
+	
 	target.health -= attacker.attack
 	attacker.health -= target.attack
-	
-	attacker.has_attacked_this_turn = true
 #endregion

@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://ccmb7s7hsvhju"]
+[gd_scene load_steps=12 format=3 uid="uid://ccmb7s7hsvhju"]
 
 [ext_resource type="Script" path="res://scripts/scenes/card.gd" id="1_unaoi"]
 [ext_resource type="PackedScene" uid="uid://cveuxgw02yxqq" path="res://assets/models/card.blend" id="2_xxbfx"]
@@ -16,7 +16,20 @@ albedo_texture = ExtResource("4_3o54t")
 material = SubResource("StandardMaterial3D_c5svb")
 size = Vector2(3, 5)
 
-[node name="Card" type="Area3D" node_paths=PackedStringArray("texture_sprite", "cover", "name_label", "cost_label", "text_label", "attack_label", "health_label", "tribe_label", "spell_school_label") groups=["Cards"]]
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_hfjn2"]
+lifetime_randomness = 0.59
+radial_velocity_min = 1.0
+radial_velocity_max = 4.0
+gravity = Vector3(0, 0, 0)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fxir4"]
+albedo_color = Color(0.352941, 0.211765, 0, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_i3iba"]
+material = SubResource("StandardMaterial3D_fxir4")
+size = Vector3(0.1, 0.1, 0.1)
+
+[node name="Card" type="Area3D" node_paths=PackedStringArray("texture_sprite", "cover", "name_label", "cost_label", "text_label", "attack_label", "health_label", "tribe_label", "spell_school_label", "attack_particles") groups=["Cards"]]
 input_capture_on_drag = true
 script = ExtResource("1_unaoi")
 texture_sprite = NodePath("Texture")
@@ -28,6 +41,7 @@ attack_label = NodePath("AttackLabel")
 health_label = NodePath("HealthLabel")
 tribe_label = NodePath("TribeLabel")
 spell_school_label = NodePath("SpellSchoolLabel")
+attack_particles = NodePath("AttackParticles")
 
 [node name="Mesh" parent="." instance=ExtResource("2_xxbfx")]
 
@@ -84,6 +98,14 @@ width = 1000.0
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 visible = false
 mesh = SubResource("PlaneMesh_383yb")
+
+[node name="AttackParticles" type="GPUParticles3D" parent="."]
+emitting = false
+amount = 500
+one_shot = true
+explosiveness = 1.0
+process_material = SubResource("ParticleProcessMaterial_hfjn2")
+draw_pass_1 = SubResource("BoxMesh_i3iba")
 
 [node name="Viewer" type="Node" parent="."]
 script = ExtResource("5_7rqca")
