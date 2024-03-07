@@ -415,19 +415,18 @@ func add_ability(ability_name: Ability, callback: Callable) -> void:
 	abilities[ability_name].append(callback)
 
 
-func attack_target(target: Variant, send_packet: bool = true) -> void:
+## Makes this card attack a [Card] or [Player].
+func attack_target(target: Variant, send_packet: bool = true) -> bool:
 	if not target:
 		Game.feedback("That target is not valid.", Game.FeedbackType.ERROR)
-		return
+		return false
 	
 	if target is Card:
-		if target.player != Game.opponent:
-			Game.feedback("You can't attack your own cards.", Game.FeedbackType.ERROR)
-			return
-		
 		Packet.send_if(send_packet, Packet.PacketType.ATTACK, player.id, [Packet.AttackMode.CARD_VS_CARD, location, index, target.location, target.index])
 	else:
 		Packet.send_if(send_packet, Packet.PacketType.ATTACK, player.id, [Packet.AttackMode.CARD_VS_PLAYER, location, index, target.id, 0])
+	
+	return true
 
 
 ## Sets up the card to do an effect (particles, animations, etc...) in [param callback].
@@ -631,9 +630,11 @@ func _update() -> void:
 		hide()
 		return
 	
+	# TODO: Should this be done here?
 	if health <= 0 and location == Location.BOARD:
 		add_to_location(Location.GRAVEYARD, player.graveyard.size())
 		override_is_hidden = Game.NullableBool.NULL
+		# HACK: Disabling the collision so it doesn't interfere.
 		$CollisionShape3D.disabled = true
 		return
 	

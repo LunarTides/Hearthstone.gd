@@ -99,7 +99,7 @@ func _feedback(text: String, sender_peer_id: int) -> void:
 func _run_attack_packet(sender_peer_id: int, sender_player: Player, actor_player: Player, info: Array) -> bool:
 	# The info needs to be correct.
 	if not _info_check(info, [TYPE_INT, TYPE_INT, TYPE_INT, TYPE_INT, TYPE_INT]):
-		_feedback("Invalid CREATE_CARD info.", sender_peer_id)
+		_feedback("Invalid ATTACK info.", sender_peer_id)
 		return false
 	
 	var attack_mode: Packet.AttackMode = info[0]
@@ -113,12 +113,15 @@ func _run_attack_packet(sender_peer_id: int, sender_player: Player, actor_player
 	var attacker_card: Card = Card.get_from_index(actor_player, attacker_location_or_player_id, attacker_index)
 	var target_card: Card = Card.get_from_index(actor_player.opponent, target_location_or_player_id, target_index)
 	
+	var attacker_player: Player = Player.get_from_id(attacker_location_or_player_id)
+	var target_player: Player = Player.get_from_id(target_location_or_player_id)
+	
 	# The player whose turn it is should be the same player as the one who sent the packet.
 	if _check(sender_player != Game.current_player, 2):
 		_feedback("It is not your turn.", sender_peer_id)
 		return false
 	
-	# The player who ends the turn should be the same player as the one who sent the packet.
+	# The player who attacks should be the same player as the one who sent the packet.
 	if _check(sender_player != actor_player, 2):
 		_feedback("You are not authorized to attack for your opponent.", sender_peer_id)
 		return false

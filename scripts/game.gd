@@ -381,8 +381,8 @@ func _attack_attacker_is_card_and_target_is_player(attacker: Card, target: Playe
 
 
 func _attack_attacker_is_card_and_target_is_card(attacker: Card, target: Card) -> void:
-	target.health -= 1
-	attacker.health -= 1
+	target.health -= attacker.attack
+	attacker.health -= target.attack
 	
 	attacker.has_attacked_this_turn = true
 #endregion

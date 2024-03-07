@@ -71,9 +71,6 @@ func _ready() -> void:
 	
 	if "setup" in self:
 		self["setup"].call()
-	
-	if Engine.get_main_loop().current_scene == self:
-		assert(false, "Playing blueprints scenes directly is not implemented yet. See https://github.com/LunarTides/Hearthstone.gd/issues/2")
 #endregion
 
 

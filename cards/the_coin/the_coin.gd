@@ -6,17 +6,6 @@ extends Blueprint
 
 # Called when the card is created
 func setup() -> void:
-	#name = "The Coin"
-	#text = "Gain 1 Mana Crystal this turn only."
-	#cost = 0
-	#texture = load("res://cards/the-coin/the-coin.png")
-	#types = Array[Card.Type.SPELL]
-	#classes = Array[Player.Class.NEUTRAL]
-	#rarities = Array[Card.Rarity.FREE]
-	#collectible = false
-	#id = 2
-	#
-	#spell_schools = Array[Card.SpellSchool.NONE]
 	cast_particles.emitting = false
 	
 	card.add_ability(Card.Ability.CAST, cast)
