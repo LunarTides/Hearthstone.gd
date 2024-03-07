@@ -7,11 +7,17 @@ extends Node
 ## Emits when the game starts.
 signal game_started
 
+## Emits whenever a card or player attacks another. Both [param attacker] and [param target] can be either a [Card] or a [Player].
+signal attacked(attacker: Variant, target: Variant, sender_peer_id: int)
+
 ## Emits whenever a card gets created for any player.
 signal card_created(card: Card, player: Player, sender_peer_id: int)
 
-## Emits whenever a card gets summoned for any player.
-signal card_summoned(card: Card, board_index: int, player: Player, sender_peer_id: int)
+## Emits whenever some amount of gets gets drawn by any player.
+signal cards_drawn(amount: int, player: Player, sender_peer_id: int)
+
+## Emits when the any player's turn ends.
+signal turn_ended(player: Player, sender_peer_id: int)
 
 ## Emits whenever a card gets played for any player.
 signal card_played(card: Card, board_index: int, player: Player, sender_peer_id: int)
@@ -19,14 +25,11 @@ signal card_played(card: Card, board_index: int, player: Player, sender_peer_id:
 ## Emits whenever a card gets revealed for any player.
 signal card_revealed(card: Card, player: Player, sender_peer_id: int)
 
+## Emits whenever a card gets summoned for any player.
+signal card_summoned(card: Card, board_index: int, player: Player, sender_peer_id: int)
+
 ## Emits whenever one of a card's abilities gets triggered for any player.
 signal card_ability_triggered(card: Card, ability: Card.Ability, player: Player, sender_peer_id: int)
-
-## Emits whenever some amount of gets gets drawn by any player.
-signal cards_drawn(amount: int, player: Player, sender_peer_id: int)
-
-## Emits when the any player's turn ends.
-signal turn_ended(player: Player, sender_peer_id: int)
 #endregion
 
 
@@ -361,4 +364,25 @@ func exit_to_lobby() -> void:
 ## Returns [code]array[index][/code] if it exists, otherwise it returns [code]null[/code].
 func get_or_null(array: Array, index: int) -> Variant:
 	return array[index] if array.size() > index else null
+#endregion
+
+
+#region Private Functions
+func _attack_attacker_is_player_and_target_is_player(attacker: Player, target: Player) -> void:
+	pass
+
+
+func _attack_attacker_is_player_and_target_is_card(attacker: Player, target: Card) -> void:
+	pass
+
+
+func _attack_attacker_is_card_and_target_is_player(attacker: Card, target: Player) -> void:
+	pass
+
+
+func _attack_attacker_is_card_and_target_is_card(attacker: Card, target: Card) -> void:
+	target.health -= 1
+	attacker.health -= 1
+	
+	attacker.has_attacked_this_turn = true
 #endregion

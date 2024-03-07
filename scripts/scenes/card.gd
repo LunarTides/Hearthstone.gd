@@ -265,6 +265,13 @@ var is_hidden: bool:
 			tribe_label.hide()
 			spell_school_label.hide()
 
+# Whether or not this card has attacked this turn. Gets set to true every [signal Game.turn_ended] emission.
+var has_attacked_this_turn: bool = false
+
+# If this is [code]false[/code], the card cannot attack. Gets set to [code]true[/code] when the card is played. Gets set to [code]false[/code] when the turn ends.[br]
+# You probably shouldn't set this.
+var exhausted: bool = false
+
 #region Blueprint Fields
 #region Common
 var card_name: String
@@ -329,6 +336,15 @@ var _should_layout: bool = true
 
 
 #region Internal Functions
+func _ready() -> void:
+	Game.turn_ended.connect(func(_player: Player, _sender_peer_id: int) -> void:
+		has_attacked_this_turn = false
+		
+		if location == Location.BOARD:
+			exhausted = false
+	)
+
+
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
 	if not card_name and blueprint:
@@ -399,6 +415,21 @@ func add_ability(ability_name: Ability, callback: Callable) -> void:
 	abilities[ability_name].append(callback)
 
 
+func attack_target(target: Variant, send_packet: bool = true) -> void:
+	if not target:
+		Game.feedback("That target is not valid.", Game.FeedbackType.ERROR)
+		return
+	
+	if target is Card:
+		if target.player != Game.opponent:
+			Game.feedback("You can't attack your own cards.", Game.FeedbackType.ERROR)
+			return
+		
+		Packet.send_if(send_packet, Packet.PacketType.ATTACK, player.id, [Packet.AttackMode.CARD_VS_CARD, location, index, target.location, target.index])
+	else:
+		Packet.send_if(send_packet, Packet.PacketType.ATTACK, player.id, [Packet.AttackMode.CARD_VS_PLAYER, location, index, target.id, 0])
+
+
 ## Sets up the card to do an effect (particles, animations, etc...) in [param callback].
 func do_effects(callback: Callable) -> void:
 	_should_layout = false
@@ -445,6 +476,9 @@ func layout(instant: bool = false) -> void:
 		
 		Card.Location.DECK:
 			result = _layout_deck()
+		
+		Card.Location.GRAVEYARD:
+			result = _layout_graveyard()
 		
 		Card.Location.NONE:
 			pass
@@ -530,33 +564,38 @@ static func get_from_index(player: Player, location: Card.Location, index: int) 
 
 # This is in a static function to work in editor scripts.
 static func _update_card(card: Card, blueprint: Blueprint) -> void:
-	card.texture_sprite.texture = blueprint.texture
-	card.name_label.text = blueprint.card_name
-	card.cost_label.text = str(blueprint.cost)
-	card.text_label.text = blueprint.text
-	card.attack_label.text = str(blueprint.attack)
-	card.health_label.text = str(blueprint.health)
+	var lookup: Variant = card
+	
+	if Engine.is_editor_hint():
+		lookup = blueprint
+	
+	card.texture_sprite.texture = lookup.texture
+	card.name_label.text = lookup.card_name
+	card.cost_label.text = str(lookup.cost)
+	card.text_label.text = lookup.text
+	card.attack_label.text = str(lookup.attack)
+	card.health_label.text = str(lookup.health)
 	
 	# Tribes
 	var tribe_keys: PackedStringArray = PackedStringArray(Card.Tribe.keys())
-	card.tribe_label.text = " / ".join(blueprint.tribes.map(func(tribe: Card.Tribe) -> String: return tribe_keys[tribe].capitalize()))
+	card.tribe_label.text = " / ".join(lookup.tribes.map(func(tribe: Card.Tribe) -> String: return tribe_keys[tribe].capitalize()))
 	
 	# Spell schools
 	var spell_school_keys: PackedStringArray = PackedStringArray(Card.SpellSchool.keys())
-	card.spell_school_label.text = " / ".join(blueprint.spell_schools.map(func(spell_school: Card.SpellSchool) -> String: return spell_school_keys[spell_school].capitalize()))
+	card.spell_school_label.text = " / ".join(lookup.spell_schools.map(func(spell_school: Card.SpellSchool) -> String: return spell_school_keys[spell_school].capitalize()))
 	
 	# Rarity Color
 	var rarity_node: MeshInstance3D = card.get_node("Mesh/Rarity")
 	
 	var rarity_material: StandardMaterial3D = StandardMaterial3D.new()
-	rarity_material.albedo_color = Card.RARITY_COLOR.get(blueprint.rarities[0])
+	rarity_material.albedo_color = Card.RARITY_COLOR.get(lookup.rarities[0])
 	rarity_material.cull_mode = BaseMaterial3D.CULL_DISABLED
 	rarity_node.set_surface_override_material(0, rarity_material)
 	
 	# Show non-essential labels
-	if blueprint.types.has(Card.Type.MINION):
+	if lookup.types.has(Card.Type.MINION):
 		card.tribe_label.show()
-	if blueprint.types.has(Card.Type.SPELL):
+	if lookup.types.has(Card.Type.SPELL):
 		card.spell_school_label.show()
 	
 	
@@ -590,6 +629,12 @@ func _update() -> void:
 	is_hidden = is_hidden
 	if is_hidden and location != Location.HAND and location != Location.BOARD:
 		hide()
+		return
+	
+	if health <= 0 and location == Location.BOARD:
+		add_to_location(Location.GRAVEYARD, player.graveyard.size())
+		override_is_hidden = Game.NullableBool.NULL
+		$CollisionShape3D.disabled = true
 		return
 	
 	show()
@@ -675,12 +720,20 @@ func _layout_deck() -> Dictionary:
 	}
 
 
+func _layout_graveyard() -> Dictionary:
+	return {
+		"position": position,
+		"rotation": rotation,
+		"scale": scale,
+	}
+
+
 func _on_input_event(_camera: Node, event: InputEvent, pos: Vector3, _normal: Vector3, _shape_idx: int) -> void:
 	# Don't drag if this is an opposing card
 	if Game.player != player or Multiplayer.is_server:
 		return
 	
-	if event is InputEventMouseButton:
+	if event is InputEventMouseButton and event.is_pressed():
 		_start_dragging()
 	elif event is InputEventMouseMotion:
 		_process_dragging(pos)
@@ -724,6 +777,10 @@ func _start_dragging() -> void:
 	if Game.player != player or Multiplayer.is_server:
 		return
 	
+	if location == Location.BOARD:
+		_start_attacking()
+		return
+	
 	is_dragging = true
 
 
@@ -747,6 +804,28 @@ func _process_dragging(pos: Vector3) -> void:
 	
 	global_position = Vector3(pos.x, global_position.y, pos.z)
 	_make_way()
+
+
+func _start_attacking() -> void:
+	if not Game.is_players_turn:
+		Game.feedback("You cannot attack on your opponent's turn.", Game.FeedbackType.ERROR)
+		return
+	
+	if exhausted:
+		Game.feedback("Wait one turn before attacking with this card.", Game.FeedbackType.ERROR)
+		return
+	
+	if has_attacked_this_turn:
+		Game.feedback("This card has already attacked this turn.", Game.FeedbackType.ERROR)
+		return
+	
+	var target: Variant = await Target.prompt(position, self, Target.CAN_SELECT_CARDS | Target.CAN_SELECT_HEROES | Target.CAN_SELECT_ENEMY_TARGETS)
+	
+	if target is Card:
+		if target.location != Location.BOARD:
+			return
+		
+		attack_target(target) 
 
 
 func _make_way(stop: bool = false) -> void:

@@ -24,10 +24,10 @@ func setup() -> void:
 
 func cast() -> void:
 	# Gain 1 Mana Crystal this turn only.
-	await card.do_effects(cast_effects)
-	
 	# We don't need to send a packet since this will get run on all clients and the server.
 	player.mana += 1
+	
+	await card.do_effects(cast_effects)
 
 
 func cast_effects() -> void:

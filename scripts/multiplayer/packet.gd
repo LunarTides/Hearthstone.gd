@@ -13,12 +13,13 @@ signal packet_received(sender_peer_id: int, packet_type: PacketType, player_id: 
 
 #region Enums
 enum PacketType {
+	ATTACK,
 	CREATE_CARD,
-	END_TURN,
-	SUMMON,
-	PLAY,
 	DRAW_CARDS,
+	END_TURN,
+	PLAY,
 	REVEAL,
+	SUMMON,
 	TRIGGER_ABILITY,
 }
 
@@ -27,6 +28,13 @@ enum PacketFailureType {
 	UNKNOWN,
 	IS_CLIENT,
 	ANTICHEAT,
+}
+
+enum AttackMode {
+	CARD_VS_CARD,
+	CARD_VS_PLAYER,
+	PLAYER_VS_CARD,
+	PLAYER_VS_PLAYER,
 }
 #endregion
 
@@ -154,46 +162,44 @@ func _accept(packet_type: PacketType, sender_peer_id: int, player_id: int, info:
 
 
 # Here are the functions that gets called on the clients + server when a packet gets sent. Handled in _accept_packet
-func _accept_summon_packet(player: Player, sender_peer_id: int, info: Array) -> void:
-	# TODO: Determine if cards should be found like this.
-	#		This is problematic if a card is in the NONE location.
-	var location: Card.Location = info[0]
-	var location_index: int = info[1]
-	var board_index: int = info[2]
+func _accept_attack_packet(player: Player, sender_peer_id: int, info: Array) -> void:
+	var attack_mode: AttackMode = info[0]
 	
-	var card: Card = Card.get_from_index(player, location, location_index)
-	card.add_to_location(Card.Location.BOARD, board_index)
+	var attacker_location_or_player_id: int = info[1]
+	var attacker_index: int = info[2]
 	
-	Game.card_summoned.emit(card, board_index, player, sender_peer_id)
-
-
-func _accept_play_packet(player: Player, sender_peer_id: int, info: Array) -> void:
-	var location: Card.Location = info[0]
-	var location_index: int = info[1]
-	var board_index: int = info[2]
-	var position: Vector3 = info[3]
+	var target_location_or_player_id: int = info[3]
+	var target_index: int = info[4]
 	
-	var card: Card = Card.get_from_index(player, location, location_index)
-	card.override_is_hidden = Game.NullableBool.FALSE
+	var attacker_card: Card = Card.get_from_index(player, attacker_location_or_player_id, attacker_index)
+	var target_card: Card = Card.get_from_index(player.opponent, target_location_or_player_id, target_index)
 	
-	await card.tween_to(0.3, position, Vector3.ZERO, Vector3.ONE)
-	card._should_layout = true
+	var attacker_player: Player = Player.get_from_id(attacker_location_or_player_id)
+	var target_player: Player = Player.get_from_id(target_location_or_player_id)
 	
-	player.mana -= card.cost
-	
-	if card.types.has(Card.Type.MINION):
-		player.summon_card(card, board_index, false, true)
+	# Attacker is player and target is player
+	if attack_mode == AttackMode.PLAYER_VS_PLAYER:
+		Game._attack_attacker_is_player_and_target_is_player(attacker_player, target_player)
 		
-		card.trigger_ability(Card.Ability.BATTLECRY, false)
-		await card._wait_for_ability(Card.Ability.BATTLECRY)
+		Game.attacked.emit(attacker_player, target_player, sender_peer_id)
 	
-	if card.types.has(Card.Type.SPELL):
-		card.trigger_ability(Card.Ability.CAST, false)
-		await card._wait_for_ability(Card.Ability.CAST)
+	# Attacker is player and target is card
+	elif attack_mode == AttackMode.PLAYER_VS_CARD:
+		Game._attack_attacker_is_player_and_target_is_card(attacker_player, target_card)
 		
-		card.location = Card.Location.NONE
+		Game.attacked.emit(attacker_player, target_card, sender_peer_id)
 	
-	Game.card_played.emit(card, board_index, player, sender_peer_id)
+	# Attacker is card and target is player
+	elif attack_mode == AttackMode.CARD_VS_PLAYER:
+		Game._attack_attacker_is_card_and_target_is_player(attacker_card, target_player)
+		
+		Game.attacked.emit(attacker_card, target_player, sender_peer_id)
+	
+	# Attacker is card and target is card
+	elif attack_mode == AttackMode.CARD_VS_CARD:
+		Game._attack_attacker_is_card_and_target_is_card(attacker_card, target_card)
+		
+		Game.attacked.emit(attacker_card, target_card, sender_peer_id)
 
 
 func _accept_create_card_packet(player: Player, sender_peer_id: int, info: Array) -> void:
@@ -242,6 +248,35 @@ func _accept_end_turn_packet(sender_player: Player, sender_peer_id: int, info: A
 	Game.turn_ended.emit(sender_player, sender_peer_id)
 
 
+func _accept_play_packet(player: Player, sender_peer_id: int, info: Array) -> void:
+	var location: Card.Location = info[0]
+	var location_index: int = info[1]
+	var board_index: int = info[2]
+	var position: Vector3 = info[3]
+	
+	var card: Card = Card.get_from_index(player, location, location_index)
+	card.override_is_hidden = Game.NullableBool.FALSE
+	
+	await card.tween_to(0.3, position, Vector3.ZERO, Vector3.ONE)
+	card._should_layout = true
+	
+	player.mana -= card.cost
+	
+	if card.types.has(Card.Type.MINION):
+		player.summon_card(card, board_index, false, true)
+		
+		card.trigger_ability(Card.Ability.BATTLECRY, false)
+		await card._wait_for_ability(Card.Ability.BATTLECRY)
+	
+	if card.types.has(Card.Type.SPELL):
+		card.trigger_ability(Card.Ability.CAST, false)
+		await card._wait_for_ability(Card.Ability.CAST)
+		
+		card.location = Card.Location.NONE
+	
+	Game.card_played.emit(card, board_index, player, sender_peer_id)
+
+
 func _accept_reveal_packet(player: Player, sender_peer_id: int, info: Array) -> void:
 	var location: Card.Location = info[0]
 	var location_index: int = info[1]
@@ -250,6 +285,21 @@ func _accept_reveal_packet(player: Player, sender_peer_id: int, info: Array) -> 
 	card.override_is_hidden = Game.NullableBool.FALSE
 	
 	Game.card_revealed.emit(card, player, sender_peer_id)
+
+
+func _accept_summon_packet(player: Player, sender_peer_id: int, info: Array) -> void:
+	# TODO: Determine if cards should be found like this.
+	#		This is problematic if a card is in the NONE location.
+	var location: Card.Location = info[0]
+	var location_index: int = info[1]
+	var board_index: int = info[2]
+	
+	var card: Card = Card.get_from_index(player, location, location_index)
+	card.add_to_location(Card.Location.BOARD, board_index)
+	
+	card.exhausted = true
+	
+	Game.card_summoned.emit(card, board_index, player, sender_peer_id)
 
 
 func _accept_trigger_ability_packet(player: Player, sender_peer_id: int, info: Array) -> void:
