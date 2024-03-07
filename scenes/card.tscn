@@ -53,7 +53,6 @@ transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, -1.278
 text = "You're not supposed to see this."
 horizontal_alignment = 0
 vertical_alignment = 0
-width = 1000.0
 
 [node name="AttackLabel" type="Label3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, -1.21766, 0.127012, 1.96137)

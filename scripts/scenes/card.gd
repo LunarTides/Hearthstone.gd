@@ -550,6 +550,7 @@ static func _update_card(card: Card, blueprint: Blueprint) -> void:
 	
 	var rarity_material: StandardMaterial3D = StandardMaterial3D.new()
 	rarity_material.albedo_color = Card.RARITY_COLOR.get(blueprint.rarities[0])
+	rarity_material.cull_mode = BaseMaterial3D.CULL_DISABLED
 	rarity_node.set_surface_override_material(0, rarity_material)
 	
 	# Show non-essential labels

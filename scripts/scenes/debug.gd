@@ -136,6 +136,7 @@ func _on_info_text_submitted(new_text: String) -> void:
 
 
 func _give_card(player: Player) -> void:
+	@warning_ignore("narrowing_conversion")
 	var blueprint: Blueprint = Blueprint.create_from_id(debug_buttons_card_id.value, player)
 	if not Multiplayer.is_server:
 		Game.feedback("Only the server can do this.", Game.FeedbackType.ERROR)
