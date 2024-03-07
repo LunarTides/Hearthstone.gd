@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://dr1v6run3aqn0"]
 
-[ext_resource type="Script" path="res://scripts/scenes/debug.gd" id="1_u7nor"]
+[ext_resource type="Script" path="res://scripts/ui/debug.gd" id="1_u7nor"]
 
 [node name="Debug" type="Control" node_paths=PackedStringArray("show_hide_disabled_text", "show_hide_enabled_text", "fps_disabled_label", "panel", "fps_label", "object_count_label", "node_count_label", "orphan_count_label", "resource_count_label", "process_time_label", "physics_process_time_label", "server_config_label", "peer_id_label", "player_id_label", "latest_packet_label", "debug_buttons_card_id", "send_packet_type", "send_packet_player", "send_packet_info")]
 layout_mode = 3

@@ -4,7 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://cveuxgw02yxqq" path="res://assets/models/card.blend" id="2_xxbfx"]
 [ext_resource type="Texture2D" uid="uid://d30626m6lrq4g" path="res://cards/texture_template.png" id="3_7120y"]
 [ext_resource type="Texture2D" uid="uid://c85sy5ncm0tn8" path="res://assets/card_cover.png" id="4_3o54t"]
-[ext_resource type="Script" path="res://scripts/blueprint_viewer.gd" id="5_7rqca"]
+[ext_resource type="Script" path="res://scripts/scenes/blueprint_viewer.gd" id="5_7rqca"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_vsdkf"]
 size = Vector3(3, 1, 5)
