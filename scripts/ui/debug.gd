@@ -84,12 +84,9 @@ func _input(event: InputEvent) -> void:
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
-	if not panel.visible:
-		return
-	
 	fps_disabled_label.text = "FPS: %d" % Performance.get_monitor(Performance.TIME_FPS)
 	
-	if not OS.is_debug_build():
+	if not OS.is_debug_build() or not panel.visible:
 		return
 	
 	fps_label.text = fps_disabled_label.text
