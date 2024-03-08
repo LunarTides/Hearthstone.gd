@@ -40,3 +40,7 @@ shape = SubResource("BoxShape3D_5s140")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Player2"]
 transform = Transform3D(80, 0, 0, 0, 0.5, 0, 0, 0, 8, 0, 0, 0)
 mesh = SubResource("BoxMesh_obhhl")
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 0.1
+autostart = true

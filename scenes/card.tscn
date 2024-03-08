@@ -29,7 +29,7 @@ albedo_color = Color(0.352941, 0.211765, 0, 1)
 material = SubResource("StandardMaterial3D_fxir4")
 size = Vector3(0.1, 0.1, 0.1)
 
-[node name="Card" type="Area3D" node_paths=PackedStringArray("texture_sprite", "cover", "name_label", "cost_label", "text_label", "attack_label", "health_label", "tribe_label", "spell_school_label", "attack_particles") groups=["Cards"]]
+[node name="Card" type="Area3D" node_paths=PackedStringArray("texture_sprite", "cover", "name_label", "cost_label", "text_label", "attack_label", "health_label", "tribe_label", "spell_school_label", "attack_particles", "update_timer") groups=["Cards"]]
 input_capture_on_drag = true
 script = ExtResource("1_unaoi")
 texture_sprite = NodePath("Texture")
@@ -42,6 +42,7 @@ health_label = NodePath("HealthLabel")
 tribe_label = NodePath("TribeLabel")
 spell_school_label = NodePath("SpellSchoolLabel")
 attack_particles = NodePath("AttackParticles")
+update_timer = NodePath("UpdateTimer")
 
 [node name="Mesh" parent="." instance=ExtResource("2_xxbfx")]
 
@@ -106,6 +107,10 @@ one_shot = true
 explosiveness = 1.0
 process_material = SubResource("ParticleProcessMaterial_hfjn2")
 draw_pass_1 = SubResource("BoxMesh_i3iba")
+
+[node name="UpdateTimer" type="Timer" parent="."]
+wait_time = 0.1
+autostart = true
 
 [node name="Viewer" type="Node" parent="."]
 script = ExtResource("5_7rqca")

@@ -17,6 +17,8 @@ var current_player: Area3D:
 #region Onready Variables
 @onready var player1: Area3D = $Player1
 @onready var player2: Area3D = $Player2
+
+@onready var timer: Timer = $Timer
 #endregion
 
 
@@ -31,15 +33,16 @@ func _ready() -> void:
 	if Game.is_player_2:
 		rotation.x += deg_to_rad(180)
 		position.z -= 8
-
-
-func _physics_process(delta: float) -> void:
-	for card: Card in Card.get_all().filter(func(card: Card) -> bool: return not _connected.has(card)):
-		card.released.connect(func(pos: Vector3) -> void:
-			if card.location == Card.Location.HAND and self["player%d" % (card.player.id + 1)].get_overlapping_areas().has(card):
-				_place_card(card.player, card, pos)
-		)
-		_connected.append(card)
+	
+	# Use a timer to improve performance.
+	timer.timeout.connect(func() -> void:
+		for card: Card in Card.get_all().filter(func(card: Card) -> bool: return not _connected.has(card)):
+			card.released.connect(func(pos: Vector3) -> void:
+				if card.location == Card.Location.HAND and self["player%d" % (card.player.id + 1)].get_overlapping_areas().has(card):
+					_place_card(card.player, card, pos)
+			)
+			_connected.append(card)
+	)
 #endregion
 
 

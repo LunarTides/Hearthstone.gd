@@ -173,6 +173,8 @@ enum Location {
 @export var spell_school_label: Label3D
 
 @export var attack_particles: GPUParticles3D
+
+@export var update_timer: Timer
 #endregion
 
 
@@ -343,14 +345,14 @@ func _ready() -> void:
 		if location == Location.BOARD:
 			exhausted = false
 	)
-
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(_delta: float) -> void:
-	if not card_name and blueprint:
-		update_blueprint()
 	
-	_update()
+	# Use a timer to improve performance.
+	update_timer.timeout.connect(func() -> void:
+		if not card_name and blueprint:
+			update_blueprint()
+		
+		_update()
+	)
 
 
 func _input(event: InputEvent) -> void:
@@ -725,7 +727,7 @@ func _layout_board() -> Dictionary:
 
 func _layout_deck() -> Dictionary:
 	return {
-		"position": Vector3(10, 0, -10),
+		"position": position,
 		"rotation": rotation,
 		"scale": scale,
 	}
@@ -733,7 +735,7 @@ func _layout_deck() -> Dictionary:
 
 func _layout_graveyard() -> Dictionary:
 	return {
-		"position": Vector3(get_window().size.x, 0, get_window().size.y),
+		"position": position,
 		"rotation": rotation,
 		"scale": scale,
 	}
