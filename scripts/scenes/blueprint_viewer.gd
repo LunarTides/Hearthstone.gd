@@ -1,4 +1,5 @@
 @tool
+@icon("res://assets/icons/blueprint_viewer_optimized.svg")
 extends Node
 ## Shows a preview of how the card looks in-game in the editor.
 
