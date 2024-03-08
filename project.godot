@@ -34,3 +34,21 @@ gdscript/warnings/shadowed_variable_base_class=0
 gdscript/warnings/untyped_declaration=2
 gdscript/warnings/inferred_declaration=2
 gdscript/warnings/confusable_local_declaration=0
+
+[file_customization]
+
+folder_colors={
+"res://assets/": "green",
+"res://assets/icons/": "blue",
+"res://assets/models/": "orange",
+"res://cards/": "pink",
+"res://scenes/": "red",
+"res://scenes/game/": "green",
+"res://script_templates/": "purple",
+"res://scripts/": "yellow",
+"res://scripts/functions/": "purple",
+"res://scripts/multiplayer/": "gray",
+"res://scripts/scenes/": "red",
+"res://scripts/scenes/game/": "green",
+"res://scripts/ui/": "teal"
+}

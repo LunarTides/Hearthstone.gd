@@ -1,5 +1,7 @@
+@icon("res://assets/icons/blueprint_optimized.svg")
 class_name Blueprint
 extends Node3D
+## A class that stores the default data for cards.
 ## @experimental
 
 

@@ -1,6 +1,7 @@
+@icon("res://assets/icons/card_optimized.svg")
 class_name Card
 extends Area3D
-## This is the physical represantation of a card.
+## The physical representation of a card.
 ## @experimental
 
 
