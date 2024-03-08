@@ -245,6 +245,9 @@ func _accept_end_turn_packet(sender_player: Player, sender_peer_id: int, info: A
 	
 	player.draw_cards(1, false)
 	
+	if Game.is_players_turn and not Multiplayer.is_server:
+		DisplayServer.window_request_attention()
+	
 	Game.turn_ended.emit(sender_player, sender_peer_id)
 
 
