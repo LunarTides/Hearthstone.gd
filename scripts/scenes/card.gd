@@ -343,8 +343,6 @@ func _ready() -> void:
 		if location == Location.BOARD:
 			exhausted = false
 	)
-	
-	attack_particles.visibility_parent = get_tree().root.get_path()
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -625,6 +623,8 @@ func _update() -> void:
 		queue_free()
 		return
 	
+	layout()
+	
 	is_hidden = is_hidden
 	if is_hidden and location != Location.HAND and location != Location.BOARD:
 		hide()
@@ -650,7 +650,6 @@ func _update() -> void:
 		return
 	
 	show()
-	layout()
 	
 	Card._update_card(self, blueprint)
 
@@ -726,7 +725,7 @@ func _layout_board() -> Dictionary:
 
 func _layout_deck() -> Dictionary:
 	return {
-		"position": position,
+		"position": Vector3(10, 0, -10),
 		"rotation": rotation,
 		"scale": scale,
 	}
@@ -734,7 +733,7 @@ func _layout_deck() -> Dictionary:
 
 func _layout_graveyard() -> Dictionary:
 	return {
-		"position": position,
+		"position": Vector3(get_window().size.x, 0, get_window().size.y),
 		"rotation": rotation,
 		"scale": scale,
 	}

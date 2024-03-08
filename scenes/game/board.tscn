@@ -40,8 +40,3 @@ shape = SubResource("BoxShape3D_5s140")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Player2"]
 transform = Transform3D(80, 0, 0, 0, 0.5, 0, 0, 0, 8, 0, 0, 0)
 mesh = SubResource("BoxMesh_obhhl")
-
-[connection signal="area_entered" from="Player1" to="." method="_on_player_1_area_entered"]
-[connection signal="area_exited" from="Player1" to="." method="_on_player_1_area_exited"]
-[connection signal="area_entered" from="Player2" to="." method="_on_player_2_area_entered"]
-[connection signal="area_exited" from="Player2" to="." method="_on_player_2_area_exited"]
