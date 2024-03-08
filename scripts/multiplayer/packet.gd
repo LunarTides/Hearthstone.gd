@@ -179,27 +179,27 @@ func _accept_attack_packet(player: Player, sender_peer_id: int, info: Array) -> 
 	
 	# Attacker is player and target is player
 	if attack_mode == AttackMode.PLAYER_VS_PLAYER:
+		Game.attacked.emit(false, attacker_player, target_player, sender_peer_id)
 		Game._attack_attacker_is_player_and_target_is_player(attacker_player, target_player)
-		
-		Game.attacked.emit(attacker_player, target_player, sender_peer_id)
+		Game.attacked.emit(true, attacker_player, target_player, sender_peer_id)
 	
 	# Attacker is player and target is card
 	elif attack_mode == AttackMode.PLAYER_VS_CARD:
+		Game.attacked.emit(false, attacker_player, target_card, sender_peer_id)
 		Game._attack_attacker_is_player_and_target_is_card(attacker_player, target_card)
-		
-		Game.attacked.emit(attacker_player, target_card, sender_peer_id)
+		Game.attacked.emit(true, attacker_player, target_card, sender_peer_id)
 	
 	# Attacker is card and target is player
 	elif attack_mode == AttackMode.CARD_VS_PLAYER:
+		Game.attacked.emit(false, attacker_card, target_player, sender_peer_id)
 		Game._attack_attacker_is_card_and_target_is_player(attacker_card, target_player)
-		
-		Game.attacked.emit(attacker_card, target_player, sender_peer_id)
+		Game.attacked.emit(true, attacker_card, target_player, sender_peer_id)
 	
 	# Attacker is card and target is card
 	elif attack_mode == AttackMode.CARD_VS_CARD:
+		Game.attacked.emit(false, attacker_card, target_card, sender_peer_id)
 		Game._attack_attacker_is_card_and_target_is_card(attacker_card, target_card)
-		
-		Game.attacked.emit(attacker_card, target_card, sender_peer_id)
+		Game.attacked.emit(true, attacker_card, target_card, sender_peer_id)
 
 
 func _accept_create_card_packet(player: Player, sender_peer_id: int, info: Array) -> void:
@@ -210,11 +210,13 @@ func _accept_create_card_packet(player: Player, sender_peer_id: int, info: Array
 	var card: Card = Blueprint.create_from_path(blueprint_path, player).card
 	card.add_to_location(location, location_index)
 	
-	Game.card_created.emit(card, player, sender_peer_id)
+	Game.card_created.emit(true, card, player, sender_peer_id)
 
 
 func _accept_draw_cards_packet(player: Player, sender_peer_id: int, info: Array) -> void:
 	var amount: int = info[0]
+	
+	Game.cards_drawn.emit(false, amount, player, sender_peer_id)
 	
 	for _i: int in amount:
 		var card: Card = player.deck.pop_back()
@@ -230,11 +232,13 @@ func _accept_draw_cards_packet(player: Player, sender_peer_id: int, info: Array)
 		# Create card node.
 		card.add_to_location(Card.Location.HAND, player.hand.size())
 	
-	Game.cards_drawn.emit(amount, player, sender_peer_id)
+	Game.cards_drawn.emit(true, amount, player, sender_peer_id)
 
 
 func _accept_end_turn_packet(sender_player: Player, sender_peer_id: int, info: Array) -> void:
 	var player: Player = sender_player.opponent
+	
+	Game.turn_ended.emit(false, sender_player, sender_peer_id)
 	
 	Game.current_player = player
 	Game.turn += 1
@@ -248,7 +252,7 @@ func _accept_end_turn_packet(sender_player: Player, sender_peer_id: int, info: A
 	if Game.is_players_turn and not Multiplayer.is_server:
 		DisplayServer.window_request_attention()
 	
-	Game.turn_ended.emit(sender_player, sender_peer_id)
+	Game.turn_ended.emit(true, sender_player, sender_peer_id)
 
 
 func _accept_play_packet(player: Player, sender_peer_id: int, info: Array) -> void:
@@ -258,6 +262,8 @@ func _accept_play_packet(player: Player, sender_peer_id: int, info: Array) -> vo
 	var position: Vector3 = info[3]
 	
 	var card: Card = Card.get_from_index(player, location, location_index)
+	Game.card_played.emit(false, card, board_index, player, sender_peer_id)
+	
 	card.override_is_hidden = Game.NullableBool.FALSE
 	
 	await card.tween_to(0.3, position, Vector3.ZERO, Vector3.ONE)
@@ -277,7 +283,7 @@ func _accept_play_packet(player: Player, sender_peer_id: int, info: Array) -> vo
 		
 		card.location = Card.Location.NONE
 	
-	Game.card_played.emit(card, board_index, player, sender_peer_id)
+	Game.card_played.emit(true, card, board_index, player, sender_peer_id)
 
 
 func _accept_reveal_packet(player: Player, sender_peer_id: int, info: Array) -> void:
@@ -285,9 +291,11 @@ func _accept_reveal_packet(player: Player, sender_peer_id: int, info: Array) -> 
 	var location_index: int = info[1]
 	
 	var card: Card = Card.get_from_index(player, location, location_index)
+	Game.card_revealed.emit(false, card, player, sender_peer_id)
+	
 	card.override_is_hidden = Game.NullableBool.FALSE
 	
-	Game.card_revealed.emit(card, player, sender_peer_id)
+	Game.card_revealed.emit(true, card, player, sender_peer_id)
 
 
 func _accept_summon_packet(player: Player, sender_peer_id: int, info: Array) -> void:
@@ -298,11 +306,12 @@ func _accept_summon_packet(player: Player, sender_peer_id: int, info: Array) -> 
 	var board_index: int = info[2]
 	
 	var card: Card = Card.get_from_index(player, location, location_index)
-	card.add_to_location(Card.Location.BOARD, board_index)
+	Game.card_summoned.emit(false, card, board_index, player, sender_peer_id)
 	
+	card.add_to_location(Card.Location.BOARD, board_index)
 	card.exhausted = true
 	
-	Game.card_summoned.emit(card, board_index, player, sender_peer_id)
+	Game.card_summoned.emit(true, card, board_index, player, sender_peer_id)
 
 
 func _accept_trigger_ability_packet(player: Player, sender_peer_id: int, info: Array) -> void:
@@ -312,9 +321,11 @@ func _accept_trigger_ability_packet(player: Player, sender_peer_id: int, info: A
 	
 	var card: Card = Card.get_from_index(player, location, location_index)
 	
+	Game.card_ability_triggered.emit(false, card, ability, player, sender_peer_id)
+	
 	for ability_callback: Callable in card.abilities[ability]:
 		await ability_callback.call()
 	
-	Game.card_ability_triggered.emit(card, ability, player, sender_peer_id)
+	Game.card_ability_triggered.emit(true, card, ability, player, sender_peer_id)
 #endregion
 #endregion

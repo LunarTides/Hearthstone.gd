@@ -10,7 +10,10 @@ extends Area3D
 func _ready() -> void:
 	rotation.x = deg_to_rad(180 if Game.player == Game.player2 else 0)
 	
-	Game.turn_ended.connect(func(player: Player, _sender_peer_id: int) -> void:
+	Game.turn_ended.connect(func(after: bool, player: Player, _sender_peer_id: int) -> void:
+		if not after:
+			return
+		
 		var degrees: float = 180 if player == Game.player else 0
 		
 		var tween: Tween = create_tween().set_trans(Tween.TRANS_BACK)

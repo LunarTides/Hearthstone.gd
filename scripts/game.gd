@@ -8,28 +8,31 @@ extends Node
 signal game_started
 
 ## Emits whenever a card or player attacks another. Both [param attacker] and [param target] can be either a [Card] or a [Player].
-signal attacked(attacker: Variant, target: Variant, sender_peer_id: int)
+signal attacked(after: bool, attacker: Variant, target: Variant, sender_peer_id: int)
 
 ## Emits whenever a card gets created for any player.
-signal card_created(card: Card, player: Player, sender_peer_id: int)
+signal card_created(after: bool, card: Card, player: Player, sender_peer_id: int)
 
 ## Emits whenever some amount of gets gets drawn by any player.
-signal cards_drawn(amount: int, player: Player, sender_peer_id: int)
+signal cards_drawn(after: bool, amount: int, player: Player, sender_peer_id: int)
 
 ## Emits when the any player's turn ends.
-signal turn_ended(player: Player, sender_peer_id: int)
+signal turn_ended(after: bool, player: Player, sender_peer_id: int)
+
+## Emits whenever a card gets killed.
+signal card_killed(after: bool, card: Card, player: Player, sender_peer_id: int)
 
 ## Emits whenever a card gets played for any player.
-signal card_played(card: Card, board_index: int, player: Player, sender_peer_id: int)
+signal card_played(after: bool, card: Card, board_index: int, player: Player, sender_peer_id: int)
 
 ## Emits whenever a card gets revealed for any player.
-signal card_revealed(card: Card, player: Player, sender_peer_id: int)
+signal card_revealed(after: bool, card: Card, player: Player, sender_peer_id: int)
 
 ## Emits whenever a card gets summoned for any player.
-signal card_summoned(card: Card, board_index: int, player: Player, sender_peer_id: int)
+signal card_summoned(after: bool, card: Card, board_index: int, player: Player, sender_peer_id: int)
 
 ## Emits whenever one of a card's abilities gets triggered for any player.
-signal card_ability_triggered(card: Card, ability: Card.Ability, player: Player, sender_peer_id: int)
+signal card_ability_triggered(after: bool, card: Card, ability: Card.Ability, player: Player, sender_peer_id: int)
 #endregion
 
 

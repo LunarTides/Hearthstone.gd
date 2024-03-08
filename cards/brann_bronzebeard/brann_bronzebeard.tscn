@@ -1,0 +1,23 @@
+[gd_scene load_steps=4 format=3 uid="uid://dpvynuv28s5sb"]
+
+[ext_resource type="Script" path="res://cards/brann_bronzebeard/brann_bronzebeard.gd" id="1_o78kn"]
+[ext_resource type="Texture2D" uid="uid://b6htnjcsqpj4k" path="res://cards/brann_bronzebeard/brann_bronzebeard.png" id="2_1w15u"]
+[ext_resource type="PackedScene" uid="uid://ccmb7s7hsvhju" path="res://scenes/card.tscn" id="2_3gdj7"]
+
+[node name="BrannBronzebeard" type="Node3D" node_paths=PackedStringArray("card")]
+script = ExtResource("1_o78kn")
+card_name = "Brann Bronzebeard"
+text = "Your Battlecries trigger twice."
+cost = 3
+texture = ExtResource("2_1w15u")
+types = Array[int]([1])
+classes = Array[int]([0])
+rarities = Array[int]([4])
+collectible = true
+id = 3
+tribes = Array[int]([0])
+attack = 2
+health = 4
+card = NodePath("Card")
+
+[node name="Card" parent="." instance=ExtResource("2_3gdj7")]

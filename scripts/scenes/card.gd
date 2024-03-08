@@ -270,12 +270,22 @@ var is_hidden: bool:
 			tribe_label.hide()
 			spell_school_label.hide()
 
-# Whether or not this card has attacked this turn. Gets set to true every [signal Game.turn_ended] emission.
+## Whether or not this card has attacked this turn. Gets set to true every [signal Game.turn_ended] emission.
 var has_attacked_this_turn: bool = false
 
-# If this is [code]false[/code], the card cannot attack. Gets set to [code]true[/code] when the card is played. Gets set to [code]false[/code] when the turn ends.[br]
-# You probably shouldn't set this.
+## If this is [code]false[/code], the card cannot attack. Gets set to [code]true[/code] when the card is played. Gets set to [code]false[/code] when the turn ends.[br]
+## You probably shouldn't set this.
 var exhausted: bool = false
+
+## Whether or not this card should do any effects in [method do_effects].
+## [codeblock]
+## # Trigger a card's battlecry.
+## # We don't want the card's battlecry effects to be triggered here.
+## card.should_do_effects = false
+## card.trigger_ability(Card.Ability.BATTLECRY, false)
+## card.should_do_effects = true
+## [/codeblock]
+var should_do_effects: bool = true
 
 #region Blueprint Fields
 #region Common
@@ -340,7 +350,10 @@ var _should_layout: bool = true
 
 #region Internal Functions
 func _ready() -> void:
-	Game.turn_ended.connect(func(_player: Player, _sender_peer_id: int) -> void:
+	Game.turn_ended.connect(func(after: bool, _player: Player, _sender_peer_id: int) -> void:
+		if not after:
+			return
+		
 		has_attacked_this_turn = false
 		
 		if location == Location.BOARD:
@@ -434,6 +447,9 @@ func attack_target(target: Variant, send_packet: bool = true) -> bool:
 
 ## Sets up the card to do an effect (particles, animations, etc...) in [param callback].
 func do_effects(callback: Callable) -> void:
+	if not should_do_effects:
+		return
+	
 	_should_layout = false
 	_should_hover = false
 	
@@ -623,10 +639,11 @@ func _wait_for_ability(target_ability: Ability) -> void:
 	while true:
 		var info: Array = await Game.card_ability_triggered
 		
-		var card: Card = info[0]
-		var ability: Ability = info[1]
+		var after: bool = info[0]
+		var card: Card = info[1]
+		var ability: Ability = info[2]
 		
-		if card == self and ability == target_ability:
+		if after and card == self and ability == target_ability:
 			break
 
 
@@ -645,6 +662,8 @@ func _update() -> void:
 	
 	# TODO: Should this be done here?
 	if health <= 0 and location == Location.BOARD:
+		Game.card_killed.emit(false, self, player, multiplayer.get_unique_id())
+		
 		var old_scale: Vector3 = scale
 		
 		var tween: Tween = create_tween()
@@ -660,6 +679,8 @@ func _update() -> void:
 		await get_tree().process_frame
 		
 		scale = old_scale
+		
+		Game.card_killed.emit(true, self, player, multiplayer.get_unique_id())
 		return
 	
 	show()
