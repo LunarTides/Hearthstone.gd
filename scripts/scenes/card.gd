@@ -606,6 +606,15 @@ static func _update_card(card: Card, blueprint: Blueprint) -> void:
 	card.get_node("Mesh/Health").visible = blueprint.health > 0
 	card.get_node("Mesh/HealthFrame").visible = blueprint.health > 0
 	card.health_label.visible = blueprint.health > 0
+	
+	var tribe_visible: bool = (
+		(blueprint.tribes.size() > 0 and blueprint.tribes[0] != Tribe.NONE) or
+		(blueprint.spell_schools.size() > 0 and blueprint.spell_schools[0] != SpellSchool.NONE) 
+	)
+	
+	card.get_node("Mesh/TribeOrSpellSchool").visible = tribe_visible
+	card.tribe_label.visible = tribe_visible
+	card.spell_school_label.visible = tribe_visible
 #endregion
 
 
