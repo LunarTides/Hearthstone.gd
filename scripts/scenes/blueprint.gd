@@ -8,7 +8,7 @@ extends Node3D
 #region Exported Variables
 #region Common
 # TODO: Remove in Godot 4.3 or maybe 4.2.2
-## This variable is to work around a bug. Please ignore.[br]See https://github.com/godotengine/godot/pull/88318
+## This variable is to work around a bug. Please ignore.[br]See [url]https://github.com/godotengine/godot/pull/88318[/url]
 @export var ignore: int
 
 @export_category("Common")
@@ -108,14 +108,48 @@ func setup_blueprint(player: Player) -> void:
 
 
 #region Static Functions
+## Returns all filenames from the specified [param path].
+static func get_all_filenames_from_path(path: String) -> Array[String]:
+	var file_paths: Array[String] = []  
+	var dir: DirAccess = DirAccess.open(path)  
+	
+	dir.list_dir_begin()  
+	var file_name: String = dir.get_next()  
+
+	while file_name != "":  
+		var file_path: String = path + "/" + file_name  
+		if dir.current_is_dir():  
+			file_paths += Blueprint.get_all_filenames_from_path(file_path)  
+		else:
+			if file_path.ends_with(".tscn.remap"):
+				file_path = file_path.replace(".remap", "")
+			file_paths.append(file_path)  
+		
+		file_name = dir.get_next()  
+	
+	return file_paths
+
+
+static func get_all_filenames() -> Array[String]:
+	return Blueprint.get_all_filenames_from_path("res://cards").filter(func(file_path: String) -> bool:
+		return file_path.contains(".tscn")
+	)
+
+
+## Gets all [Blueprint]s registered in the game. This function is very slow, so don't use it often.
+static func get_all() -> Array:
+	var files: Array[String] = Blueprint.get_all_filenames()
+	
+	var blueprints: Array = files.map(func(file_path: String) -> Blueprint: return load(file_path).instantiate())
+	return blueprints
+
+
 ## Creates a [Blueprint] from the specified [param id]. Returns [code]null[/code] if no such blueprint exists.
 static func create_from_id(id: int, player: Player) -> Blueprint:
-	var files: Array[String] = Game.get_all_files_from_path("res://cards")
+	# Don't use `get_all` since we can optimize it by returning when the blueprint has been found.
+	var files: Array[String] = Blueprint.get_all_filenames()
 	
 	for file_path: String in files:
-		if not file_path.contains(".tscn"):
-			continue
-		
 		var blueprint: Blueprint = load(file_path).instantiate()
 		
 		if blueprint.id == id:

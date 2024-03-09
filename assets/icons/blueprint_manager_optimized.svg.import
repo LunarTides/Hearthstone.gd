@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cqotndyac2sbi"
-path="res://.godot/imported/blueprint_viewer_optimized.svg-c878e968bbc4f173c0b575f76c89cd7e.ctex"
+path="res://.godot/imported/blueprint_manager_optimized.svg-57d1d183b4a4e7cbc2f4363be4d840d0.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/icons/blueprint_viewer_optimized.svg"
-dest_files=["res://.godot/imported/blueprint_viewer_optimized.svg-c878e968bbc4f173c0b575f76c89cd7e.ctex"]
+source_file="res://assets/icons/blueprint_manager_optimized.svg"
+dest_files=["res://.godot/imported/blueprint_manager_optimized.svg-57d1d183b4a4e7cbc2f4363be4d840d0.ctex"]
 
 [params]
 

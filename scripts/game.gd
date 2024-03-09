@@ -325,28 +325,6 @@ func feedback(text: String, type: FeedbackType) -> void:
 	tween.tween_property(error_label, "modulate:a", 0, 1)
 
 
-## Returns all filenames from the specified [param path].
-func get_all_files_from_path(path: String) -> Array[String]:  
-	var file_paths: Array[String] = []  
-	var dir: DirAccess = DirAccess.open(path)  
-	
-	dir.list_dir_begin()  
-	var file_name: String = dir.get_next()  
-
-	while file_name != "":  
-		var file_path: String = path + "/" + file_name  
-		if dir.current_is_dir():  
-			file_paths += get_all_files_from_path(file_path)  
-		else:
-			if file_path.ends_with(".tscn.remap"):
-				file_path = file_path.replace(".remap", "")
-			file_paths.append(file_path)  
-		
-		file_name = dir.get_next()  
-	
-	return file_paths
-
-
 ## Waits for a node at the specified [param node_path] to exist before returning it.[br]
 ## Use [code]await[/code] on this.
 func wait_for_node(node_path: NodePath) -> Node:
