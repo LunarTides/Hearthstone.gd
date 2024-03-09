@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/ui/settings_menu.gd" id="1_wqkmw"]
 
-[node name="SettingsMenu" type="Panel" node_paths=PackedStringArray("vsync", "fullscreen", "resolution", "debug", "cbx", "cby", "cbz", "crym", "cdx")]
+[node name="SettingsMenu" type="PanelContainer" node_paths=PackedStringArray("vsync", "fullscreen", "resolution", "debug", "cbx", "cby", "cbz", "crym", "cdx")]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -26,46 +26,30 @@ crym = NodePath("TabContainer/Debug/CRYM")
 cdx = NodePath("TabContainer/Debug/CDX")
 
 [node name="TabContainer" type="TabContainer" parent="."]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = 31.0
-grow_horizontal = 2
-grow_vertical = 2
+layout_mode = 2
 current_tab = 1
 
-[node name="Video" type="Control" parent="TabContainer"]
+[node name="Video" type="VBoxContainer" parent="TabContainer"]
 visible = false
 layout_mode = 2
 
-[node name="Vsync" type="CheckBox" parent="TabContainer/Video"]
-layout_mode = 0
-offset_right = 24.0
-offset_bottom = 24.0
-text = "V-Sync"
-
 [node name="Fullscreen" type="OptionButton" parent="TabContainer/Video"]
-layout_mode = 0
-offset_left = 8.0
-offset_top = 53.0
-offset_right = 53.0
-offset_bottom = 73.0
+layout_mode = 2
+size_flags_horizontal = 0
 
 [node name="Resolution" type="OptionButton" parent="TabContainer/Video"]
-layout_mode = 0
-offset_left = 8.0
-offset_top = 107.0
-offset_right = 53.0
-offset_bottom = 127.0
+layout_mode = 2
+size_flags_horizontal = 0
 
-[node name="Debug" type="Control" parent="TabContainer"]
+[node name="Vsync" type="CheckBox" parent="TabContainer/Video"]
+layout_mode = 2
+text = "V-Sync"
+
+[node name="Debug" type="VBoxContainer" parent="TabContainer"]
 layout_mode = 2
 
 [node name="CBX" type="SpinBox" parent="TabContainer/Debug"]
-layout_mode = 0
-offset_right = 83.0625
-offset_bottom = 31.0
+layout_mode = 2
 step = 0.1
 allow_greater = true
 allow_lesser = true
@@ -73,10 +57,7 @@ update_on_text_changed = true
 prefix = "CBX"
 
 [node name="CBY" type="SpinBox" parent="TabContainer/Debug"]
-layout_mode = 0
-offset_top = 31.0
-offset_right = 83.0625
-offset_bottom = 62.0
+layout_mode = 2
 step = 0.1
 allow_greater = true
 allow_lesser = true
@@ -84,10 +65,7 @@ update_on_text_changed = true
 prefix = "CBY"
 
 [node name="CBZ" type="SpinBox" parent="TabContainer/Debug"]
-layout_mode = 0
-offset_top = 62.0
-offset_right = 83.0625
-offset_bottom = 93.0
+layout_mode = 2
 step = 0.1
 allow_greater = true
 allow_lesser = true
@@ -95,10 +73,7 @@ update_on_text_changed = true
 prefix = "CBZ"
 
 [node name="CRYM" type="SpinBox" parent="TabContainer/Debug"]
-layout_mode = 0
-offset_top = 93.0
-offset_right = 83.0625
-offset_bottom = 124.0
+layout_mode = 2
 step = 0.1
 allow_greater = true
 allow_lesser = true
@@ -106,10 +81,7 @@ update_on_text_changed = true
 prefix = "CRYM"
 
 [node name="CDX" type="SpinBox" parent="TabContainer/Debug"]
-layout_mode = 0
-offset_top = 127.0
-offset_right = 83.0625
-offset_bottom = 158.0
+layout_mode = 2
 step = 0.1
 allow_greater = true
 allow_lesser = true
@@ -117,21 +89,16 @@ update_on_text_changed = true
 prefix = "CDX"
 
 [node name="BackButton" type="Button" parent="."]
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -46.0
-offset_top = 62.0
-offset_bottom = 115.0
-grow_horizontal = 0
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 0
 mouse_filter = 1
 theme_override_font_sizes/font_size = 31
 text = "X"
 
-[connection signal="toggled" from="TabContainer/Video/Vsync" to="." method="_on_vsync_toggled"]
 [connection signal="item_selected" from="TabContainer/Video/Fullscreen" to="." method="_on_fullscreen_item_selected"]
 [connection signal="item_selected" from="TabContainer/Video/Resolution" to="." method="_on_resolution_item_selected"]
+[connection signal="toggled" from="TabContainer/Video/Vsync" to="." method="_on_vsync_toggled"]
 [connection signal="value_changed" from="TabContainer/Debug/CBX" to="." method="_on_cbx_value_changed"]
 [connection signal="value_changed" from="TabContainer/Debug/CBY" to="." method="_on_cby_value_changed"]
 [connection signal="value_changed" from="TabContainer/Debug/CBZ" to="." method="_on_cbz_value_changed"]

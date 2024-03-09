@@ -6,7 +6,7 @@ extends Control
 @export var show_hide_enabled_text: RichTextLabel
 @export var fps_disabled_label: RichTextLabel
 
-@export var panel: TabContainer
+@export var panel: PanelContainer
 
 #region Info
 @export_category("Info")

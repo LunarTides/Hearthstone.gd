@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scripts/ui/pause_menu.gd" id="1_fco4o"]
 [ext_resource type="PackedScene" uid="uid://dxp0opjgunx6p" path="res://scenes/settings_menu.tscn" id="2_t12mj"]
 
-[node name="PauseMenu" type="Panel" node_paths=PackedStringArray("settings_menu")]
+[node name="PauseMenu" type="PanelContainer" node_paths=PackedStringArray("settings_menu")]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -18,66 +18,36 @@ grow_vertical = 2
 script = ExtResource("1_fco4o")
 settings_menu = NodePath("SettingsMenu")
 
-[node name="ResumeButton" type="Button" parent="."]
-layout_mode = 1
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -81.0
-offset_top = 50.0
-offset_right = 81.0
-offset_bottom = 94.0
-grow_horizontal = 2
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+
+[node name="ResumeButton" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 0
 theme_override_font_sizes/font_size = 26
 text = "Resume"
 
-[node name="SettingsButton" type="Button" parent="."]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -81.0
-offset_top = -22.0
-offset_right = 81.0
-offset_bottom = 22.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="SettingsButton" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
 theme_override_font_sizes/font_size = 26
 text = "Settings"
 
-[node name="ExitButton" type="Button" parent="."]
-layout_mode = 1
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -81.0
-offset_top = -94.0
-offset_right = 81.0
-offset_bottom = -50.0
-grow_horizontal = 2
-grow_vertical = 0
+[node name="ExitButton" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 8
 theme_override_font_sizes/font_size = 26
 text = "Exit"
 
 [node name="SettingsMenu" parent="." instance=ExtResource("2_t12mj")]
 visible = false
-layout_mode = 0
-anchors_preset = 0
-anchor_left = 0.0
-anchor_top = 0.0
-anchor_right = 0.0
-anchor_bottom = 0.0
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 546.0
-offset_bottom = 546.0
-grow_horizontal = 1
-grow_vertical = 1
+layout_mode = 2
 
-[connection signal="pressed" from="ResumeButton" to="." method="_on_resume_pressed"]
-[connection signal="pressed" from="SettingsButton" to="." method="_on_settings_button_pressed"]
-[connection signal="pressed" from="ExitButton" to="." method="_on_exit_pressed"]
+[connection signal="pressed" from="VBoxContainer/ResumeButton" to="." method="_on_resume_pressed"]
+[connection signal="pressed" from="VBoxContainer/SettingsButton" to="." method="_on_settings_button_pressed"]
+[connection signal="pressed" from="VBoxContainer/ExitButton" to="." method="_on_exit_pressed"]

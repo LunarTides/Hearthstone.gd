@@ -13,6 +13,32 @@ corner_radius_bottom_left = 60
 shadow_size = 270
 anti_aliasing = false
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1rojc"]
+bg_color = Color(0.117647, 0.101961, 0.0627451, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+corner_radius_top_left = 60
+corner_radius_top_right = 60
+corner_radius_bottom_right = 60
+corner_radius_bottom_left = 60
+expand_margin_left = 10.0
+expand_margin_right = 10.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fjp6v"]
+bg_color = Color(0.117647, 0.101961, 0.0627451, 1)
+corner_radius_top_left = 60
+corner_radius_top_right = 60
+corner_radius_bottom_right = 60
+corner_radius_bottom_left = 60
+expand_margin_left = 10.0
+expand_margin_right = 10.0
+
+[sub_resource type="Theme" id="Theme_l2osu"]
+LineEdit/styles/focus = SubResource("StyleBoxFlat_1rojc")
+LineEdit/styles/normal = SubResource("StyleBoxFlat_fjp6v")
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_goeq1"]
 bg_color = Color(0, 0.509804, 0.701961, 1)
 corner_radius_top_left = 20
@@ -77,32 +103,6 @@ corner_radius_top_right = 20
 corner_radius_bottom_right = 20
 corner_radius_bottom_left = 20
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1rojc"]
-bg_color = Color(0.117647, 0.101961, 0.0627451, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-corner_radius_top_left = 60
-corner_radius_top_right = 60
-corner_radius_bottom_right = 60
-corner_radius_bottom_left = 60
-expand_margin_left = 10.0
-expand_margin_right = 10.0
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fjp6v"]
-bg_color = Color(0.117647, 0.101961, 0.0627451, 1)
-corner_radius_top_left = 60
-corner_radius_top_right = 60
-corner_radius_bottom_right = 60
-corner_radius_bottom_left = 60
-expand_margin_left = 10.0
-expand_margin_right = 10.0
-
-[sub_resource type="Theme" id="Theme_l2osu"]
-LineEdit/styles/focus = SubResource("StyleBoxFlat_1rojc")
-LineEdit/styles/normal = SubResource("StyleBoxFlat_fjp6v")
-
 [node name="Lobby" type="Control" node_paths=PackedStringArray("join_button", "host_button", "ip_address", "port", "deckcode", "info_label")]
 layout_mode = 3
 anchors_preset = 15
@@ -111,12 +111,12 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_u14ym")
-join_button = NodePath("Panel/JoinButton")
-host_button = NodePath("Panel/HostButton")
-ip_address = NodePath("Panel/IPAddress")
-port = NodePath("Panel/Port")
-deckcode = NodePath("Panel/Deckcode")
-info_label = NodePath("Panel/InfoLabel")
+join_button = NodePath("PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/JoinButton")
+host_button = NodePath("PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/HostButton")
+ip_address = NodePath("PanelContainer/MarginContainer/VBoxContainer/MarginContainer/VBoxContainer/IPAddress")
+port = NodePath("PanelContainer/MarginContainer/VBoxContainer/MarginContainer/VBoxContainer/Port")
+deckcode = NodePath("PanelContainer/MarginContainer/VBoxContainer/MarginContainer/VBoxContainer/Deckcode")
+info_label = NodePath("PanelContainer/InfoLabel")
 
 [node name="Background" type="ColorRect" parent="."]
 layout_mode = 1
@@ -127,7 +127,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0.278431, 0.482353, 1)
 
-[node name="Panel" type="Panel" parent="."]
+[node name="PanelContainer" type="PanelContainer" parent="."]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -142,52 +142,28 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_bt1qw")
 
-[node name="JoinButton" type="Button" parent="Panel"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -175.0
-offset_top = 72.0
-offset_right = -87.0
-offset_bottom = 127.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_font_sizes/font_size = 26
-theme_override_styles/normal = SubResource("StyleBoxFlat_goeq1")
-theme_override_styles/hover = SubResource("StyleBoxFlat_8qtr6")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_aa1jc")
-theme_override_styles/focus = SubResource("StyleBoxFlat_x62w4")
-text = "Join"
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 60
+theme_override_constants/margin_top = 60
+theme_override_constants/margin_right = 60
+theme_override_constants/margin_bottom = 60
 
-[node name="HostButton" type="Button" parent="Panel"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = 93.0
-offset_top = 72.0
-offset_right = 181.0
-offset_bottom = 127.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_font_sizes/font_size = 26
-theme_override_styles/normal = SubResource("StyleBoxFlat_v6lv5")
-theme_override_styles/hover = SubResource("StyleBoxFlat_wx4wt")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_g21qg")
-theme_override_styles/focus = SubResource("StyleBoxFlat_vhpof")
-text = "Host"
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer"]
+layout_mode = 2
 
-[node name="IPAddress" type="LineEdit" parent="Panel"]
-layout_mode = 0
-offset_left = 146.0
-offset_top = 101.0
-offset_right = 297.0
-offset_bottom = 136.0
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/margin_bottom = 30
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/MarginContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="IPAddress" type="LineEdit" parent="PanelContainer/MarginContainer/VBoxContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
 theme = SubResource("Theme_l2osu")
 placeholder_text = "IP Address"
 max_length = 45
@@ -195,12 +171,9 @@ expand_to_text_length = true
 virtual_keyboard_type = 3
 clear_button_enabled = true
 
-[node name="Port" type="LineEdit" parent="Panel"]
-layout_mode = 0
-offset_left = 146.0
-offset_top = 144.0
-offset_right = 297.0
-offset_bottom = 179.0
+[node name="Port" type="LineEdit" parent="PanelContainer/MarginContainer/VBoxContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
 theme = SubResource("Theme_l2osu")
 text = "4545"
 placeholder_text = "Port"
@@ -209,12 +182,9 @@ expand_to_text_length = true
 virtual_keyboard_type = 3
 clear_button_enabled = true
 
-[node name="Deckcode" type="LineEdit" parent="Panel"]
-layout_mode = 0
-offset_left = 146.0
-offset_top = 187.0
-offset_right = 297.0
-offset_bottom = 222.0
+[node name="Deckcode" type="LineEdit" parent="PanelContainer/MarginContainer/VBoxContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
 theme = SubResource("Theme_l2osu")
 text = "1/1:30/1"
 placeholder_text = "Deckcode"
@@ -222,33 +192,51 @@ expand_to_text_length = true
 virtual_keyboard_type = 3
 clear_button_enabled = true
 
-[node name="InfoLabel" type="Label" parent="Panel"]
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.35
+theme_override_constants/separation = 30
+
+[node name="JoinButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 26
+theme_override_styles/normal = SubResource("StyleBoxFlat_goeq1")
+theme_override_styles/hover = SubResource("StyleBoxFlat_8qtr6")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_aa1jc")
+theme_override_styles/focus = SubResource("StyleBoxFlat_x62w4")
+text = "Join"
+
+[node name="HostButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 26
+theme_override_styles/normal = SubResource("StyleBoxFlat_v6lv5")
+theme_override_styles/hover = SubResource("StyleBoxFlat_wx4wt")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_g21qg")
+theme_override_styles/focus = SubResource("StyleBoxFlat_vhpof")
+text = "Host"
+
+[node name="InfoLabel" type="Label" parent="PanelContainer"]
 visible = false
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -130.0
-offset_top = -11.5
-offset_right = 130.0
-offset_bottom = 11.5
-grow_horizontal = 2
-grow_vertical = 2
+layout_mode = 2
+size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 26
 text = "Please wait for a client to connect..."
 horizontal_alignment = 1
 
 [node name="Debug" parent="." instance=ExtResource("2_o23aw")]
+visible = false
 layout_mode = 1
 metadata/_edit_lock_ = true
 
 [node name="PauseMenu" parent="." instance=ExtResource("3_il4p6")]
+visible = false
 layout_mode = 1
 
-[connection signal="pressed" from="Panel/JoinButton" to="." method="_on_join_button_pressed"]
-[connection signal="pressed" from="Panel/HostButton" to="." method="_on_host_button_pressed"]
-[connection signal="text_submitted" from="Panel/IPAddress" to="." method="_on_ip_address_text_submitted"]
-[connection signal="text_submitted" from="Panel/Port" to="." method="_on_ip_address_text_submitted"]
-[connection signal="text_submitted" from="Panel/Deckcode" to="." method="_on_ip_address_text_submitted"]
+[connection signal="text_submitted" from="PanelContainer/MarginContainer/VBoxContainer/MarginContainer/VBoxContainer/IPAddress" to="." method="_on_ip_address_text_submitted"]
+[connection signal="text_submitted" from="PanelContainer/MarginContainer/VBoxContainer/MarginContainer/VBoxContainer/Port" to="." method="_on_ip_address_text_submitted"]
+[connection signal="text_submitted" from="PanelContainer/MarginContainer/VBoxContainer/MarginContainer/VBoxContainer/Deckcode" to="." method="_on_ip_address_text_submitted"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/JoinButton" to="." method="_on_join_button_pressed"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/HostButton" to="." method="_on_host_button_pressed"]

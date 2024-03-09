@@ -1,8 +1,8 @@
-extends Panel
+extends PanelContainer
 
 
 #region Exported Variables
-@export var settings_menu: Panel
+@export var settings_menu: PanelContainer
 #endregion
 
 

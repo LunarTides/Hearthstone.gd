@@ -1,19 +1,8 @@
 [gd_scene load_steps=2 format=3 uid="uid://f1ytyj41tkfo"]
 
-[ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1_2ikab"]
+[ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1_iumpk"]
 
-[node name="MainMenu" type="Control" node_paths=PackedStringArray("panel")]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-script = ExtResource("1_2ikab")
-panel = NodePath("Panel")
-
-[node name="Panel" type="Panel" parent="."]
-layout_mode = 1
+[node name="MainMenu" type="PanelContainer"]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -25,21 +14,11 @@ offset_right = 272.0
 offset_bottom = 272.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_iumpk")
 
-[node name="JoinButton" type="Button" parent="Panel"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -104.0
-offset_top = -39.0
-offset_right = 104.0
-offset_bottom = 39.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="JoinButton" type="Button" parent="."]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
 theme_override_font_sizes/font_size = 51
 text = "Play"
-
-[connection signal="pressed" from="Panel/JoinButton" to="." method="_on_join_button_pressed"]

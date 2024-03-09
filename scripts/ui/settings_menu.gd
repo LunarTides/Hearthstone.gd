@@ -1,4 +1,4 @@
-extends Panel
+extends PanelContainer
 
 
 #region Constant Variables
