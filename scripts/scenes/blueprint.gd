@@ -7,15 +7,37 @@ extends Node3D
 
 #region Exported Variables
 #region Common
+# TODO: Remove in Godot 4.3 or maybe 4.2.2
+## This variable is to work around a bug. Please ignore.[br]See https://github.com/godotengine/godot/pull/88318
+@export var ignore: int
+
 @export_category("Common")
+
+## The card's name. This can be anything and doesn't have to be unique.
 @export var card_name: String
+
+## The card's description. This will appear in the middle of the card and should describe what the card does.[br]
+## Avoid going into too much detail. Use proper grammar, spelling, and punctuation.
+## [codeblock]
+## # Bad
+## "every time someone play a minion triger it's battlecry abilty 2 times (actually only 1 additional time since the battlecry alredy happens when palying the card first) the exact interacions / combos with other cards are ..."
+## 
+## # Good
+## "Your Battlecries trigger twice."
+## [/codeblock]
 @export_multiline var text: String
+
+## How much the card should cost, usually in [code]mana[/code].
 @export var cost: int
+
+# TODO: Continue documenting
 @export var texture: Texture2D
 @export var types: Array[Card.Type]
 @export var classes: Array[Player.Class]
 @export var rarities: Array[Card.Rarity]
 @export var collectible: bool
+
+## This HAS to be unique per blueprint.
 @export var id: int
 #endregion
 
