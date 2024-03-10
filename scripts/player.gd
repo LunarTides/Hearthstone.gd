@@ -129,7 +129,7 @@ func add_to_hand(card: Card, hand_index: int, send_packet: bool = true) -> bool:
 		return false
 	
 	Packet.send_if(send_packet, Packet.PacketType.CREATE_CARD, id, [
-		card.blueprint.get_script().resource_path.replace(".gd", ".tscn"),
+		card.id,
 		Card.Location.HAND,
 		hand_index,
 	], true)
@@ -139,7 +139,7 @@ func add_to_hand(card: Card, hand_index: int, send_packet: bool = true) -> bool:
 ## Sends a packet to add a card to the player's deck. Returns if a packet was sent / success.
 func add_to_deck(card: Card, deck_index: int, send_packet: bool = true) -> bool:
 	Packet.send_if(send_packet, Packet.PacketType.CREATE_CARD, id, [
-		card.blueprint.resource_path,
+		card.id,
 		Card.Location.DECK,
 		deck_index,
 	], true)

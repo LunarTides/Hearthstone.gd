@@ -170,17 +170,17 @@ func _run_attack_packet(sender_peer_id: int, sender_player: Player, actor_player
 # Create Card
 func _run_create_card_packet(sender_peer_id: int, sender_player: Player, actor_player: Player, info: Array) -> bool:
 	# The info needs to be correct.
-	if not _info_check(info, [TYPE_STRING, TYPE_INT, TYPE_INT]):
+	if not _info_check(info, [TYPE_INT, TYPE_INT, TYPE_INT]):
 		_feedback("Invalid CREATE_CARD info.", sender_peer_id)
 		return false
 	
-	var blueprint_path: String = info[0]
+	var id: int = info[0]
 	var location: Card.Location = info[1]
 	var location_index: int = info[2]
 	
-	# Blueprint path needs to be valid.
-	if _check(load(blueprint_path) == null, 1):
-		_feedback("Invalid blueprint path.", sender_peer_id)
+	# Id needs to be valid.
+	if _check(Blueprint.create_from_id(id, Game.player) == null, 1):
+		_feedback("Invalid id.", sender_peer_id)
 		return false
 	
 	# Only the server can do this.

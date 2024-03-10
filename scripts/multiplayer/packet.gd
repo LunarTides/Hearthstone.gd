@@ -203,11 +203,11 @@ func _accept_attack_packet(player: Player, sender_peer_id: int, info: Array) -> 
 
 
 func _accept_create_card_packet(player: Player, sender_peer_id: int, info: Array) -> void:
-	var blueprint_path: String = info[0]
+	var id: int = info[0]
 	var location: Card.Location = info[1]
 	var location_index: int = info[2]
 	
-	var card: Card = Blueprint.create_from_path(blueprint_path, player).card
+	var card: Card = Blueprint.create_from_id(id, player).card
 	card.add_to_location(location, location_index)
 	
 	Game.card_created.emit(true, card, player, sender_peer_id)
