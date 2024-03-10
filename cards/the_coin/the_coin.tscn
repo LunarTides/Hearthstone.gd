@@ -18,7 +18,8 @@ scale_max = 0.5
 script = ExtResource("1_bcjpn")
 cast_particles = NodePath("CastParticles")
 card_name = "The Coin"
-text = "Gain 1 Mana Crystal this turn only."
+text = "Gain 1 Mana Crystal
+this turn only."
 texture = ExtResource("2_rv7d8")
 types = Array[int]([2])
 classes = Array[int]([0])

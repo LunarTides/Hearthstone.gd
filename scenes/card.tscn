@@ -64,10 +64,10 @@ text = "0"
 font_size = 117
 
 [node name="TextLabel" type="Label3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, -1.27893, 0.124062, 0.527602)
-text = "You're not supposed to see this."
-horizontal_alignment = 0
-vertical_alignment = 0
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0.124, 1.09203)
+text = "You're not supposed
+to see this."
+font_size = 52
 
 [node name="AttackLabel" type="Label3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, -1.21766, 0.127012, 1.96137)
