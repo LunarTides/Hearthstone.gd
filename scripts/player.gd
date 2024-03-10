@@ -109,7 +109,7 @@ func play_card(card: Card, board_index: int, send_packet: bool = true) -> bool:
 		Game.feedback("You don't have enough mana.", Game.FeedbackType.ERROR)
 		return false
 	
-	Packet.send_if(send_packet, Packet.PacketType.PLAY, id, [card.location, card.index, board_index, card.position], true)
+	Packet.send_if(send_packet, Packet.PacketType.PLAY, id, [card.location, card.index, board_index, Vector3i(card.position.round())], true)
 	return true
 
 

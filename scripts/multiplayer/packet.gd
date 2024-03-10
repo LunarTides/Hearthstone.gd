@@ -259,7 +259,7 @@ func _accept_play_packet(player: Player, sender_peer_id: int, info: Array) -> vo
 	var location: Card.Location = info[0]
 	var location_index: int = info[1]
 	var board_index: int = info[2]
-	var position: Vector3 = info[3]
+	var position: Vector3i = info[3]
 	
 	var card: Card = Card.get_from_index(player, location, location_index)
 	Game.card_played.emit(false, card, board_index, player, sender_peer_id)
