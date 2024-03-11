@@ -173,6 +173,9 @@ enum Location {
 ## The spell school label of the card.
 @export var spell_school_label: Label3D
 
+## The armor label of the card.
+@export var armor_label: Label3D
+
 @export var attack_particles: GPUParticles3D
 
 @export var update_timer: Timer
@@ -269,6 +272,7 @@ var is_hidden: bool:
 			health_label.hide()
 			tribe_label.hide()
 			spell_school_label.hide()
+			armor_label.hide()
 
 ## Whether or not this card has attacked this turn. Gets set to true every [signal Game.turn_ended] emission.
 var has_attacked_this_turn: bool = false
@@ -331,6 +335,7 @@ var heropower_id: int
 
 
 #region Location
+## TODO: Add mesh for the durability: https://hearthstone.wiki.gg/wiki/Location
 var durability: int
 var cooldown: int
 #endregion
@@ -626,6 +631,7 @@ static func _update_card(card: Card, blueprint: Blueprint) -> void:
 	card.text_label.text = lookup.text
 	card.attack_label.text = str(lookup.attack)
 	card.health_label.text = str(lookup.health)
+	card.armor_label.text = str(lookup.armor)
 	
 	# Tribes
 	var tribe_keys: PackedStringArray = PackedStringArray(Card.Tribe.keys())
@@ -657,6 +663,9 @@ static func _update_card(card: Card, blueprint: Blueprint) -> void:
 	card.get_node("Mesh/Health").visible = blueprint.health > 0
 	card.get_node("Mesh/HealthFrame").visible = blueprint.health > 0
 	card.health_label.visible = blueprint.health > 0
+	
+	card.get_node("Mesh/Armor").visible = blueprint.armor > 0
+	card.armor_label.visible = blueprint.armor > 0
 	
 	var tribe_visible: bool = (
 		(blueprint.tribes.size() > 0 and blueprint.tribes[0] != Tribe.NONE) or

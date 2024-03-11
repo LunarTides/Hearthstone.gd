@@ -29,7 +29,7 @@ albedo_color = Color(0.352941, 0.211765, 0, 1)
 material = SubResource("StandardMaterial3D_fxir4")
 size = Vector3(0.1, 0.1, 0.1)
 
-[node name="Card" type="Area3D" node_paths=PackedStringArray("texture_sprite", "cover", "name_label", "cost_label", "text_label", "attack_label", "health_label", "tribe_label", "spell_school_label", "attack_particles", "update_timer") groups=["Cards"]]
+[node name="Card" type="Area3D" node_paths=PackedStringArray("texture_sprite", "cover", "name_label", "cost_label", "text_label", "attack_label", "health_label", "tribe_label", "spell_school_label", "armor_label", "attack_particles", "update_timer") groups=["Cards"]]
 input_capture_on_drag = true
 script = ExtResource("1_unaoi")
 texture_sprite = NodePath("Texture")
@@ -41,6 +41,7 @@ attack_label = NodePath("AttackLabel")
 health_label = NodePath("HealthLabel")
 tribe_label = NodePath("TribeLabel")
 spell_school_label = NodePath("SpellSchoolLabel")
+armor_label = NodePath("ArmorLabel")
 attack_particles = NodePath("AttackParticles")
 update_timer = NodePath("UpdateTimer")
 
@@ -79,7 +80,13 @@ font_size = 92
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 1.407, 0.351036, 1.87182)
 visible = false
 text = "0"
-font_size = 93
+font_size = 113
+
+[node name="ArmorLabel" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 1.32494, 0.136347, 2.01144)
+visible = false
+text = "0"
+font_size = 112
 
 [node name="TribeLabel" type="Label3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0.198024, 1.84092)
