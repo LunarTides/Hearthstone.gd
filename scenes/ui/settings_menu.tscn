@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://dxp0opjgunx6p"]
 
-[ext_resource type="Script" path="res://scripts/ui/settings_menu.gd" id="1_wqkmw"]
+[ext_resource type="Script" path="res://scenes/ui/settings_menu.gd" id="1_wqkmw"]
 
 [node name="SettingsMenu" type="PanelContainer" node_paths=PackedStringArray("vsync", "fullscreen", "resolution", "animations", "debug", "cbx", "cby", "cbz", "crym", "cdx")]
 anchors_preset = 8

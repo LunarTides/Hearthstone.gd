@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://f1ytyj41tkfo"]
 
-[ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1_iumpk"]
+[ext_resource type="Script" path="res://scenes/ui/main_menu.gd" id="1_iumpk"]
 
 [node name="MainMenu" type="PanelContainer"]
 anchors_preset = 8

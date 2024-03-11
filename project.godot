@@ -45,11 +45,9 @@ folder_colors={
 "res://cards/": "pink",
 "res://scenes/": "red",
 "res://scenes/game/": "green",
+"res://scenes/ui/": "teal",
 "res://script_templates/": "purple",
 "res://scripts/": "yellow",
 "res://scripts/functions/": "purple",
 "res://scripts/multiplayer/": "gray",
-"res://scripts/scenes/": "red",
-"res://scripts/scenes/game/": "green",
-"res://scripts/ui/": "teal"
 }
