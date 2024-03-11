@@ -72,14 +72,6 @@ func _input(event: InputEvent) -> void:
 		show_hide_enabled_text.visible = not panel.visible
 		panel.visible = not panel.visible
 		show_hide_disabled_text.visible = not panel.visible
-	# Set 10 mana
-	elif key == "F2":
-		if not Multiplayer.is_server:
-			Game.feedback("REMEMBER TO DO THIS ON THE SERVER TOO", Game.FeedbackType.WARNING)
-		else:
-			Game.feedback("Set the current player's mana to 10", Game.FeedbackType.INFO)
-		
-		Game.current_player.mana = 10
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -164,4 +156,13 @@ func _on_end_turn_button_pressed() -> void:
 		return
 	
 	Packet.send(Packet.PacketType.END_TURN, Game.current_player.id, [], true)
+
+
+func _on_mana_button_pressed() -> void:
+	if not Multiplayer.is_server:
+		Game.feedback("REMEMBER TO DO THIS ON THE SERVER TOO", Game.FeedbackType.WARNING)
+	else:
+		Game.feedback("Set the current player's mana to 10", Game.FeedbackType.INFO)
+	
+	Game.current_player.mana = 10
 #endregion
