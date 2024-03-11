@@ -335,7 +335,7 @@ func _attack_attacker_is_card_and_target_is_player(attacker: Card, target: Playe
 	attacker.has_attacked_this_turn = true
 	
 	var do_damage: Callable = func() -> void:
-		target.health -= attacker.attack
+		target.damage(attacker.attack)
 	
 	# Animation
 	if not Settings.client.animations:

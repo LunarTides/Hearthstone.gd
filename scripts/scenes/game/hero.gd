@@ -26,5 +26,5 @@ func _process(delta: float) -> void:
 	if not player:
 		return
 	
-	health_label.text = "Health: %d/%d" % [player.health, player.max_health]
+	health_label.text = "Health: %d/%d (%d)" % [player.health, player.max_health, player.armor]
 #endregion

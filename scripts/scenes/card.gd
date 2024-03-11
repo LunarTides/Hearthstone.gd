@@ -152,6 +152,13 @@ enum Location {
 ## The cover of the card.
 @export var cover: MeshInstance3D
 
+## Particles to emit when the card gets attacked.
+@export var attack_particles: GPUParticles3D
+
+## A timer used to update the card every 0.1 seconds.
+@export var update_timer: Timer
+
+@export_category("Common")
 ## The name label of the card.
 @export var name_label: Label3D
 
@@ -161,24 +168,28 @@ enum Location {
 ## The text label of the card.
 @export var text_label: Label3D
 
+@export_category("Minion / Weapon")
+
 ## The attack label of the card.
 @export var attack_label: Label3D
 
 ## The health label of the card.
 @export var health_label: Label3D
 
+@export_category("Minion")
+
 ## The tribe label of the card.
 @export var tribe_label: Label3D
+
+@export_category("Spell")
 
 ## The spell school label of the card.
 @export var spell_school_label: Label3D
 
+@export_category("Hero")
+
 ## The armor label of the card.
 @export var armor_label: Label3D
-
-@export var attack_particles: GPUParticles3D
-
-@export var update_timer: Timer
 #endregion
 
 

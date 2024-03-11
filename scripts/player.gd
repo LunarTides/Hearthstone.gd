@@ -33,18 +33,8 @@ var id: int
 ## The player's class.
 var hero_class: Class
 
-## How much health the player has.
-var health: int = 30:
-	set(new_health):
-		health = new_health
-		
-		if health <= 0 and should_die:
-			# TODO: Have an animation or something.
-			print("Player %d won!" % (opponent.id + 1))
-			
-			# TODO: Wait until the animation is finished instead of 1 second.
-			await Game.get_tree().create_timer(1.0).timeout
-			Multiplayer.quit()
+## How much health the player has. DON'T SET MANUALLY.
+var health: int = 30
 
 ## The maximum number that [member health] can go to.
 var max_health: int = 30
@@ -180,5 +170,29 @@ func add_to_deck(card: Card, deck_index: int, send_packet: bool = true) -> bool:
 ## Sends a packet for the player to draw a card. Returns if a packet was sent / success.
 func draw_cards(amount: int, send_packet: bool = true) -> bool:
 	Packet.send_if(send_packet, Packet.PacketType.DRAW_CARDS, id, [amount], true)
+	return true
+
+
+func damage(amount: int) -> bool:
+	# Armor logic
+	var remaining_armor: int = armor - amount
+	armor = maxi(remaining_armor, 0)
+	
+	# Armor blocks all damage.
+	if remaining_armor > 0:
+		return true
+	
+	# The amount of damage to take is however much damage penetrated the armor.
+	amount = absi(remaining_armor)
+	health -= amount
+	
+	if health <= 0 and should_die:
+		# TODO: Have an animation or something.
+		print("Player %d won!" % (opponent.id + 1))
+		
+		# TODO: Wait until the animation is finished instead of 1 second.
+		await Game.get_tree().create_timer(1.0).timeout
+		Multiplayer.quit()
+	
 	return true
 #endregion

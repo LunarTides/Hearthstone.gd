@@ -38,8 +38,8 @@ shape = SubResource("BoxShape3D_lhl38")
 
 [node name="HealthLabel" type="Label3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
-text = "Health: 30/30"
-font_size = 152
+text = "Health: 30/30 (0)"
+font_size = 127
 
 [node name="AttackParticles" type="GPUParticles3D" parent="."]
 emitting = false
