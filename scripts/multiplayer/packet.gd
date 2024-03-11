@@ -270,6 +270,7 @@ func _accept_play_packet(player: Player, sender_peer_id: int, info: Array) -> vo
 	card._should_layout = true
 	
 	player.mana -= card.cost
+	player.armor += card.armor
 	
 	if card.types.has(Card.Type.MINION):
 		player.summon_card(card, board_index, false, true)

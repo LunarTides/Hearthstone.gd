@@ -49,6 +49,9 @@ var health: int = 30:
 ## The maximum number that [member health] can go to.
 var max_health: int = 30
 
+## The amount of armor that the player currently has.
+var armor: int = 0
+
 ## How much mana the player currently has.
 var mana: int = 0
 
