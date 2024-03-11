@@ -313,7 +313,7 @@ func wait_for_node(node_path: NodePath) -> Node:
 
 ## Exits to the main menu. You might want to use [code]Multiplayer.quit[/code] instead.
 func exit_to_lobby() -> void:
-	get_tree().change_scene_to_file.call_deferred("res://scenes/lobby.tscn")
+	get_tree().change_scene_to_file.call_deferred("res://scenes/ui/lobby.tscn")
 
 
 ## Returns [code]array[index][/code] if it exists, otherwise it returns [code]null[/code].
