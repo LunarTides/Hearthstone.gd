@@ -358,32 +358,55 @@ func _attack_attacker_is_player_and_target_is_card(attacker: Player, target: Car
 
 
 func _attack_attacker_is_card_and_target_is_player(attacker: Card, target: Player) -> void:
-	# TODO: Add effects
-	target.health -= attacker.attack
-	
 	attacker.has_attacked_this_turn = true
+	
+	# Animation
+	target.should_die = false
+	
+	await attacker.do_effects(func() -> void:
+		var _old_position: Vector3 = attacker.global_position
+		
+		var tween: Tween = attacker.create_tween()
+		tween.tween_property(attacker, "global_position", target.hero.global_position, 0.5).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_QUINT)
+		tween.tween_callback(func() -> void:
+			target.health -= attacker.attack
+			target.hero.attack_particles.restart()
+		)
+		tween.tween_property(attacker, "global_position", _old_position, 0.5).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUINT)
+		
+		await tween.finished
+		await target.hero.attack_particles.finished
+	, true)
+	
+	target.should_die = true
 
 
 func _attack_attacker_is_card_and_target_is_card(attacker: Card, target: Card) -> void:
 	attacker.has_attacked_this_turn = true
 	
 	# Animation
-	target.layout(true)
+	attacker.should_die = false
+	target.should_die = false
 	
-	await attacker.do_effects(func() -> void:
-		var _old_position: Vector3 = attacker.global_position
-		
-		var tween: Tween = attacker.create_tween()
-		tween.tween_property(attacker, "global_position", target.global_position, 0.5).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_QUINT)
-		tween.tween_callback(func() -> void:
-			target.attack_particles.restart()
-		)
-		tween.tween_property(attacker, "global_position", _old_position, 0.5).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUINT)
-		
-		await tween.finished
-		await target.attack_particles.finished
-	)
+	await target.stabilize_layout_while(func() -> void:
+		await attacker.do_effects(func() -> void:
+			var _old_position: Vector3 = attacker.global_position
+			
+			var tween: Tween = attacker.create_tween()
+			tween.tween_property(attacker, "global_position", target.global_position, 0.5).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_QUINT)
+			tween.tween_callback(func() -> void:
+				target.health -= attacker.attack
+				attacker.health -= target.attack
+				
+				target.attack_particles.restart()
+			)
+			tween.tween_property(attacker, "global_position", _old_position, 0.5).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUINT)
+			
+			await tween.finished
+			await target.attack_particles.finished
+		, true)
+	, true)
 	
-	target.health -= attacker.attack
-	attacker.health -= target.attack
+	attacker.should_die = true
+	target.should_die = true
 #endregion

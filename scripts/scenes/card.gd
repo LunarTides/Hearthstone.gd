@@ -287,6 +287,13 @@ var exhausted: bool = false
 ## [/codeblock]
 var should_do_effects: bool = true
 
+## Whether or not this card is currently being killed (In the process of being moved to the graveyard).[br]
+## Set this to [code]false[/code] in [signal Game.card_killed] to prevent the card from being killed.
+var is_dying: bool = false
+
+## Whether or not this card should die. Used for animations.
+var should_die: bool = true
+
 #region Blueprint Fields
 #region Common
 var card_name: String
@@ -446,16 +453,31 @@ func attack_target(target: Variant, send_packet: bool = true) -> bool:
 
 
 ## Sets up the card to do an effect (particles, animations, etc...) in [param callback].
-func do_effects(callback: Callable) -> void:
+func do_effects(callback: Callable, should_layout: bool = false) -> void:
 	if not should_do_effects:
 		return
 	
+	await stabilize_layout_while(func() -> void:
+		var tween: Tween = create_tween().set_ease(Tween.EASE_OUT)
+		tween.tween_property(self, "scale", Vector3.ONE, 0.1)
+		await tween.finished
+		
+		await callback.call()
+	, should_layout)
+
+
+## Stabilize this card's layout. This will freeze it's position, rotation, and scale in it's correct place while [param callback] is being called.
+func stabilize_layout_while(callback: Callable, should_layout: bool = false) -> void:
+	if _hover_tween:
+		_hover_tween.kill()
+	
+	is_hovering = false
+	
+	if should_layout:
+		layout(true)
+	
 	_should_layout = false
 	_should_hover = false
-	
-	var tween: Tween = create_tween().set_ease(Tween.EASE_OUT)
-	tween.tween_property(self, "scale", Vector3.ONE, 0.1)
-	await tween.finished
 	
 	await callback.call()
 	
@@ -660,14 +682,26 @@ func _update() -> void:
 		hide()
 		return
 	
+	show()
+	
+	Card._update_card(self, blueprint)
+	
 	# TODO: Should this be done here?
-	if health <= 0 and location == Location.BOARD:
+	if health <= 0 and location == Location.BOARD and not is_dying and should_die:
+		is_dying = true
 		Game.card_killed.emit(false, self, player, multiplayer.get_unique_id())
+		
+		# Do this to allow preventing death by `Game.card_killed` setting `is_killed` to true.
+		if not is_dying:
+			return
 		
 		var old_scale: Vector3 = scale
 		
+		_should_layout = false
 		var tween: Tween = create_tween()
-		tween.tween_property(self, "scale", Vector3.ZERO, 0.5).set_ease(Tween.EASE_OUT)
+		
+		# HACK: Don't set the scale to 0 to prevent https://github.com/godotengine/godot/issues/63012
+		tween.tween_property(self, "scale", Vector3(0.01, 0.01, 0.01), 0.5).set_ease(Tween.EASE_OUT)
 		
 		await tween.finished
 		
@@ -676,16 +710,16 @@ func _update() -> void:
 		# HACK: Disabling the collision so it doesn't interfere.
 		$CollisionShape3D.disabled = true
 		
+		# Update to hide the card.
+		_update()
+		
 		await get_tree().process_frame
 		
 		scale = old_scale
+		_should_layout = true
 		
 		Game.card_killed.emit(true, self, player, multiplayer.get_unique_id())
 		return
-	
-	show()
-	
-	Card._update_card(self, blueprint)
 
 
 func _layout_hand() -> Dictionary:

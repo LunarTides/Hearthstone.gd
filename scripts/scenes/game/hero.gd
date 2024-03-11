@@ -5,6 +5,8 @@ extends Area3D
 #region Exported Variables
 # TODO: Implement a better system. Use an actual hero card.
 @export var health_label: Label3D
+
+@export var attack_particles: GPUParticles3D
 #endregion
 
 

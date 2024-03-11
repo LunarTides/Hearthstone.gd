@@ -70,6 +70,24 @@ var deckcode: String
 
 ## The player's peer id.
 var peer_id: int
+
+## The player's [HeroNode].
+var hero: HeroNode:
+	get:
+		var main: Node3D = await Game.wait_for_node("/root/Main")
+		
+		if self == Game.player:
+			return main.player_hero_node
+		else:
+			return main.opponent_hero_node
+
+## Whether or not this player should die. Used for animations.
+var should_die: bool = true:
+	set(new_should_die):
+		should_die = new_should_die
+		
+		# HACK: Trigger the setter function.
+		health = health
 #endregion
 
 
