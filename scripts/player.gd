@@ -85,12 +85,7 @@ var hero: HeroNode:
 			return main.opponent_hero_node
 
 ## Whether or not this player should die. Used for animations.
-var should_die: bool = true:
-	set(new_should_die):
-		should_die = new_should_die
-		
-		# HACK: Trigger the setter function.
-		health = health
+var should_die: bool = true
 #endregion
 
 
@@ -173,17 +168,20 @@ func draw_cards(amount: int, send_packet: bool = true) -> bool:
 	return true
 
 
+## Deals [param amount] damage to this player. Does not send a packet.
 func damage(amount: int) -> bool:
 	# Armor logic
-	var remaining_armor: int = armor - amount
-	armor = maxi(remaining_armor, 0)
+	if armor > 0:
+		var remaining_armor: int = armor - amount
+		armor = maxi(remaining_armor, 0)
+		
+		# Armor blocks all damage.
+		if remaining_armor >= 0:
+			return true
+		
+		# The amount of damage to take is however much damage penetrated the armor.
+		amount = absi(remaining_armor)
 	
-	# Armor blocks all damage.
-	if remaining_armor > 0:
-		return true
-	
-	# The amount of damage to take is however much damage penetrated the armor.
-	amount = absi(remaining_armor)
 	health -= amount
 	
 	if health <= 0 and should_die:
