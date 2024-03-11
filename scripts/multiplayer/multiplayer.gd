@@ -15,28 +15,6 @@ const CONFIG_FILE_PATH: String = "./server.cfg"
 
 
 #region Public Variables
-## The port of the multiplayer server.
-var port: int = 4545
-
-## The max amount of clients. The game only supports 2.
-var max_clients: int = 2
-
-## How aggressive the anticheat should be. Only affects the server.[br]
-## [code]0: Disabled.
-## 1: Only validation.
-## 2: Basic cheat detection.
-## 3-inf: More-and-more aggressive anticheat.
-## -1: Max anticheat.[/code]
-var anticheat_level: int = -1:
-	get:
-		if anticheat_level < 0:
-			return 10000
-		
-		return anticheat_level
-
-## The action that should bw taken if the anticheat gets triggered.
-var anticheat_conseqence: Anticheat.Consequence = Anticheat.Consequence.DROP_PACKET
-
 ## The players of the game.[br][br]
 ## Looks like this:
 ## [code]{2732163217: Player, 432769823: Player}[/code]
@@ -44,9 +22,6 @@ var players: Dictionary = {}
 
 ## An [ENetMultiplayerPeer]. Gets used to get ips from peer ids.
 var peer: ENetMultiplayerPeer = ENetMultiplayerPeer.new()
-
-## A list of banned ips. Gets populated by [method load_config]
-var ban_list: Array[String] = []
 
 ## Whether or not this is a server.
 var is_server: bool:
@@ -78,7 +53,7 @@ func _ready() -> void:
 		
 		var ip_address: String = get_ip_address(id)
 		
-		if ip_address in ban_list:
+		if ip_address in Settings.server.ban_list:
 			# Kick
 			print("Banned player (%s) is trying to join. Kicking..." % ip_address)
 			server_response.rpc_id(id, false, "You are banned.")
@@ -87,8 +62,8 @@ func _ready() -> void:
 		
 		var clients: int = multiplayer.get_peers().size()
 		
-		if clients < max_clients:
-			print("Client connected, waiting for %d more..." % (Game.max_players - clients))
+		if clients < Settings.server.max_players:
+			print("Client connected, waiting for %d more..." % (Settings.server.max_players - clients))
 			return
 		
 		# Wait until the player sends their deckcode.
@@ -117,15 +92,15 @@ func load_config() -> void:
 	
 	config.load(CONFIG_FILE_PATH)
 	
-	port = config.get_value("Server", "port", port)
-	anticheat_level = config.get_value("Server", "anticheat_level", anticheat_level)
-	anticheat_conseqence = config.get_value("Server", "anticheat_consequence", anticheat_conseqence)
-	ban_list = config.get_value("Server", "ban_list", ban_list)
+	Settings.server.port = config.get_value("Server", "port", Settings.server.port)
+	Settings.server.anticheat_level = config.get_value("Server", "anticheat_level", Settings.server.anticheat_level)
+	Settings.server.anticheat_consequence = config.get_value("Server", "anticheat_consequence", Settings.server.anticheat_consequence)
+	Settings.server.ban_list = config.get_value("Server", "ban_list", Settings.server.ban_list)
 	
-	Game.max_board_space = config.get_value("Game", "max_board_space", Game.max_board_space)
-	Game.max_hand_size = config.get_value("Game", "max_hand_size", Game.max_hand_size)
-	Game.max_deck_size = config.get_value("Game", "max_deck_size", Game.max_deck_size)
-	Game.min_deck_size = config.get_value("Game", "min_deck_size", Game.min_deck_size)
+	Settings.server.max_board_space = config.get_value("Game", "max_board_space", Settings.server.max_board_space)
+	Settings.server.max_hand_size = config.get_value("Game", "max_hand_size", Settings.server.max_hand_size)
+	Settings.server.max_deck_size = config.get_value("Game", "max_deck_size", Settings.server.max_deck_size)
+	Settings.server.min_deck_size = config.get_value("Game", "min_deck_size", Settings.server.min_deck_size)
 	
 	print("Config loaded:\n'''\n%s'''\n" % config.encode_to_text())
 
@@ -139,15 +114,15 @@ func save_config() -> void:
 		return
 	
 	var config: ConfigFile = ConfigFile.new()
-	config.set_value("Server", "port", port)
-	config.set_value("Server", "anticheat_level", -1 if anticheat_level >= 10000 else anticheat_level)
-	config.set_value("Server", "anticheat_consequence", anticheat_conseqence)
-	config.set_value("Server", "ban_list", ban_list)
+	config.set_value("Server", "port", Settings.server.port)
+	config.set_value("Server", "anticheat_level", Settings.server.anticheat_level)
+	config.set_value("Server", "anticheat_consequence", Settings.server.anticheat_conseqence)
+	config.set_value("Server", "ban_list", Settings.server.ban_list)
 	
-	config.set_value("Game", "max_board_space", Game.max_board_space)
-	config.set_value("Game", "max_hand_size", Game.max_hand_size)
-	config.set_value("Game", "max_deck_size", Game.max_deck_size)
-	config.set_value("Game", "min_deck_size", Game.min_deck_size)
+	config.set_value("Game", "max_board_space", Settings.server.max_board_space)
+	config.set_value("Game", "max_hand_size", Settings.server.max_hand_size)
+	config.set_value("Game", "max_deck_size", Settings.server.max_deck_size)
+	config.set_value("Game", "min_deck_size", Settings.server.min_deck_size)
 	
 	config.save(CONFIG_FILE_PATH)
 
@@ -178,7 +153,7 @@ func host() -> void:
 	# Will not really work with a dedicated server but there it nothing i can do.
 	OS.set_restart_on_exit(true, ["--server"])
 	
-	peer.create_server(port, max_clients)
+	peer.create_server(Settings.server.port, Settings.server.max_players)
 	multiplayer.multiplayer_peer = peer
 	
 	load_config()
@@ -186,13 +161,13 @@ func host() -> void:
 	# UPnP
 	if not UPnP.has_tried_upnp:
 		print("Attempting to use UPnP. Please wait...")
-		UPnP.setup(port)
+		UPnP.setup(Settings.server.port)
 		
 		UPnP.upnp_completed.connect(func(err: int) -> void:
 			if err == OK:
 				print("UPnP setup completed successfully. You do not need to port forward.")
 			else:
-				print("UPnP setup failed, you will need to port-forward port %s (TCP/UDP) manually." % port)
+				print("UPnP setup failed, you will need to port-forward port %s (TCP/UDP) manually." % Settings.server.port)
 		)
 	
 	print("Waiting for a client to connect...")
@@ -257,10 +232,10 @@ func send_config(max_board_space: int, max_hand_size: int, max_deck_size: int, m
 	if is_server:
 		return
 	
-	Game.max_board_space = max_board_space
-	Game.max_hand_size = max_hand_size
-	Game.max_deck_size = max_deck_size
-	Game.min_deck_size = min_deck_size
+	Settings.server.max_board_space = max_board_space
+	Settings.server.max_hand_size = max_hand_size
+	Settings.server.max_deck_size = max_deck_size
+	Settings.server.min_deck_size = min_deck_size
 	
 	print("Config loaded:\n'''\nmax_board_space=%d\nmax_hand_size=%d\nmax_deck_size=%d\nmin_deck_size=%d\n'''\n" % [
 		max_board_space,

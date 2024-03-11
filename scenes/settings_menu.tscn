@@ -27,10 +27,8 @@ cdx = NodePath("TabContainer/Debug/CDX")
 
 [node name="TabContainer" type="TabContainer" parent="."]
 layout_mode = 2
-current_tab = 1
 
 [node name="Video" type="VBoxContainer" parent="TabContainer"]
-visible = false
 layout_mode = 2
 
 [node name="Fullscreen" type="OptionButton" parent="TabContainer/Video"]
@@ -46,6 +44,7 @@ layout_mode = 2
 text = "V-Sync"
 
 [node name="Debug" type="VBoxContainer" parent="TabContainer"]
+visible = false
 layout_mode = 2
 
 [node name="CBX" type="SpinBox" parent="TabContainer/Debug"]

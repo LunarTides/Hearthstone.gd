@@ -110,7 +110,7 @@ func __send(packet_type: PacketType, player_id: int, info: Array) -> PacketFailu
 	if not Anticheat.run(packet_type, sender_peer_id, actor_player, info):
 		var consequence_text: String
 		
-		match Multiplayer.anticheat_conseqence:
+		match Settings.server.anticheat_conseqence:
 			Anticheat.Consequence.DROP_PACKET:
 				consequence_text = "PACKET DROPPED"
 			
@@ -121,7 +121,7 @@ func __send(packet_type: PacketType, player_id: int, info: Array) -> PacketFailu
 			Anticheat.Consequence.BAN:
 				consequence_text = "PLAYER BANNED"
 				var ip_address: String = Multiplayer.get_ip_address(sender_peer_id)
-				Multiplayer.ban_list.append(ip_address)
+				Settings.server.ban_list.append(ip_address)
 				Multiplayer.kick(sender_peer_id)
 		
 		push_error("!!! ANTICHEAT TRIGGERED IN PREVIOUS PACKET. %s. !!!" % consequence_text)
@@ -221,7 +221,7 @@ func _accept_draw_cards_packet(player: Player, sender_peer_id: int, info: Array)
 	for _i: int in amount:
 		var card: Card = player.deck.pop_back()
 		
-		if player.hand.size() >= Game.max_hand_size:
+		if player.hand.size() >= Settings.server.max_hand_size:
 			# TODO: Burn the card.
 			return
 		

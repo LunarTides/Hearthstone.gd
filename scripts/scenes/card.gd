@@ -734,15 +734,15 @@ func _layout_hand() -> Dictionary:
 	@warning_ignore("integer_division")
 	var half_hand_size: int = player.hand.size() / 2
 	
-	new_position.x = -(half_hand_size * 2) + Game.card_bounds_x + (index * Game.card_distance_x)
-	new_position.y = Game.card_bounds_y * abs(half_hand_size - index)
-	new_position.z = Game.card_bounds_z * player_weight
+	new_position.x = -(half_hand_size * 2) + Settings.client.card_bounds_x + (index * Settings.client.card_distance_x)
+	new_position.y = Settings.client.card_bounds_y * abs(half_hand_size - index)
+	new_position.z = Settings.client.card_bounds_z * player_weight
 	
 	new_rotation = Vector3.ZERO
 	
 	if index != half_hand_size:
 		# Tilt it to the left/right.
-		new_rotation.y = deg_to_rad(Game.card_rotation_y_multiplier * player_weight * (half_hand_size - index))
+		new_rotation.y = deg_to_rad(Settings.client.card_rotation_y_multiplier * player_weight * (half_hand_size - index))
 	
 	# Position it futher away the more rotated it is.
 	# This makes it easier to select the right card.
@@ -770,7 +770,7 @@ func _layout_board() -> Dictionary:
 	
 	new_rotation = Vector3.ZERO
 	
-	new_position.x = (index - 4) * 3.5 + Game.card_distance_x
+	new_position.x = (index - 4) * 3.5 + Settings.client.card_distance_x
 	new_position.y = 0
 	new_position.z = Game.board_node.player.position.z + player_weight * (
 		# I love hardcoded values

@@ -17,7 +17,7 @@ enum Consequence {
 #region Public Functions
 ## Runs the anticheat on a packet.
 func run(packet_type: Packet.PacketType, sender_peer_id: int, actor_player: Player, info: Array) -> bool:
-	if Multiplayer.anticheat_level == 0:
+	if Settings.server.anticheat_level == 0:
 		return true
 	
 	var packet_name: String = Packet.PacketType.keys()[packet_type]
@@ -40,7 +40,7 @@ func run(packet_type: Packet.PacketType, sender_peer_id: int, actor_player: Play
 #region Helper Functions
 ## Returns if [param condition] is true and [member anticheat_level] is more or equal to [param min_level].
 func _check(condition: bool, min_level: int) -> bool:
-	return condition and Multiplayer.anticheat_level >= min_level
+	return condition and (Settings.server.anticheat_level >= min_level or Settings.server.anticheat_level < 0)
 
 
 ## Returns if [param info]'s size is equal to [param types]'s size and the elements in [param info] matches the types in [param types].
@@ -190,12 +190,12 @@ func _run_create_card_packet(sender_peer_id: int, sender_player: Player, actor_p
 	
 	if location == Card.Location.HAND:
 		# The player needs to have enough space in their hand.
-		if _check(actor_player.hand.size() >= Game.max_hand_size, 1):
+		if _check(actor_player.hand.size() >= Settings.server.max_hand_size, 1):
 			_feedback("You do not have enough space in your hand.", sender_peer_id)
 			return false
 	elif location == Card.Location.BOARD:
 		# The player needs to have enough space on their board.
-		if _check(actor_player.board.size() >= Game.max_board_space, 1):
+		if _check(actor_player.board.size() >= Settings.server.max_board_space, 1):
 			_feedback("You do not have enough space on your board.", sender_peer_id)
 			return false
 	
@@ -285,7 +285,7 @@ func _run_play_packet(sender_peer_id: int, sender_player: Player, actor_player: 
 	# Minion
 	if card.types.has(Card.Type.MINION):
 		# The player should have enough space on their board.
-		if _check(actor_player.board.size() >= Game.max_board_space, 1):
+		if _check(actor_player.board.size() >= Settings.server.max_board_space, 1):
 			_feedback("You do not have enough space on the board.", sender_peer_id)
 			return false
 	
@@ -333,7 +333,7 @@ func _run_summon_packet(sender_peer_id: int, sender_player: Player, actor_player
 		return false
 		
 	# The player should have enough space on their board.
-	if _check(actor_player.board.size() >= Game.max_board_space, 1):
+	if _check(actor_player.board.size() >= Settings.server.max_board_space, 1):
 		_feedback("You do not have enough space on your board.", sender_peer_id)
 		return false
 		

@@ -60,14 +60,14 @@ func _ready() -> void:
 	
 	#region Video
 	# Vsync
-	vsync.button_pressed = DisplayServer.window_get_vsync_mode() != DisplayServer.VSYNC_DISABLED
+	vsync.button_pressed = Settings.client.vsync
 	
 	# Fullscreen
 	for key: String in FULLSCREEN_MODES.keys():
 		var value: DisplayServer.WindowMode = FULLSCREEN_MODES[key]
 		fullscreen.add_item(key)
 	
-	var fullscreen_mode: DisplayServer.WindowMode = DisplayServer.window_get_mode()
+	var fullscreen_mode: DisplayServer.WindowMode = Settings.client.fullscreen_mode
 	fullscreen.select(FULLSCREEN_MODES.values().find(fullscreen_mode))
 	
 	# Resolution
@@ -75,7 +75,7 @@ func _ready() -> void:
 		var readable: String = "%dx%d" % [pixels.x, pixels.y]
 		resolution.add_item(readable)
 	
-	var pixels: Vector2i = get_window().size
+	var pixels: Vector2i = Settings.client.resolution
 	resolution.select(RESOLUTIONS.find(pixels))
 	#endregion
 	
@@ -84,11 +84,11 @@ func _ready() -> void:
 	if not OS.is_debug_build():
 		debug.queue_free()
 	
-	cbx.value = Game.card_bounds_x
-	cby.value = Game.card_bounds_y
-	cbz.value = Game.card_bounds_z
-	crym.value = Game.card_rotation_y_multiplier
-	cdx.value = Game.card_distance_x
+	cbx.value = Settings.client.card_bounds_x
+	cby.value = Settings.client.card_bounds_y
+	cbz.value = Settings.client.card_bounds_z
+	crym.value = Settings.client.card_rotation_y_multiplier
+	cdx.value = Settings.client.card_distance_x
 	#endregion
 
 
@@ -109,38 +109,43 @@ func _on_back_button_pressed() -> void:
 
 func _on_vsync_toggled(toggled_on: bool) -> void:
 	if toggled_on:
+		Settings.client.vsync = true
 		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED)
 	else:
+		Settings.client.vsync = false
 		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 
 
 func _on_fullscreen_item_selected(index: int) -> void:
-	DisplayServer.window_set_mode(FULLSCREEN_MODES.values()[index])
+	Settings.client.fullscreen_mode = FULLSCREEN_MODES.values()[index]
+	DisplayServer.window_set_mode(Settings.client.fullscreen_mode)
 
 
 func _on_resolution_item_selected(index: int) -> void:
 	var pixels: Vector2i = RESOLUTIONS[index]
-	get_window().size = Vector2i(pixels.x, pixels.y)
+	
+	Settings.client.resolution = Vector2i(pixels.x, pixels.y)
+	get_window().size = Settings.client.resolution
 #endregion
 
 
 #region Debug
 func _on_cbx_value_changed(value: float) -> void:
-	Game.card_bounds_x = value
+	Settings.client.card_bounds_x = value
 
 func _on_cby_value_changed(value: float) -> void:
-	Game.card_bounds_y = value
+	Settings.client.card_bounds_y = value
 
 
 func _on_cbz_value_changed(value: float) -> void:
-	Game.card_bounds_z = value
+	Settings.client.card_bounds_z = value
 
 
 func _on_crym_value_changed(value: float) -> void:
-	Game.card_rotation_y_multiplier = value
+	Settings.client.card_rotation_y_multiplier = value
 
 
 func _on_cdx_value_changed(value: float) -> void:
-	Game.card_distance_x = value
+	Settings.client.card_distance_x = value
 #endregion
 #endregion

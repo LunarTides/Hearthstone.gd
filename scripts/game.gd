@@ -122,32 +122,6 @@ var is_players_turn: bool:
 ## The turn counter of the game.
 var turn: int = 0
 
-# Config
-## The max amount of cards that can be on a player's board. Can be override by [code]Multiplayer.load_config()[/code].
-var max_board_space: int = 7
-
-## The max amount of cards that can be in a player's hand. Can be override by [code]Multiplayer.load_config()[/code].
-var max_hand_size: int = 10
-
-## The max amount of cards that can be in a player's deck. Can be override by [code]Multiplayer.load_config()[/code].
-var max_deck_size: int = 30
-
-## The min amount of cards that can be in a player's deck. Can be override by [code]Multiplayer.load_config()[/code].
-var min_deck_size: int = 30
-
-## The max amount of players that can be in a game at once. Any value other than 2 is not supported and will break.
-var max_players: int = 2
-# ------
-
-
-# There should be a better way of doing this.
-var card_bounds_x: float = -3.05
-var card_bounds_y: float = -0.5
-var card_bounds_z: float = 13
-var card_rotation_y_multiplier: float = 10.0
-var card_distance_x: float = 1.81
-
-
 ## Returns the board node
 var board_node: BoardNode:
 	get:
@@ -236,7 +210,7 @@ func start_game() -> void:
 	if not multiplayer.is_server():
 		return
 	
-	var id: int = randi_range(0, max_players - 1)
+	var id: int = randi_range(0, Settings.server.max_players - 1)
 	
 	var i: int = 0
 	for peer: int in multiplayer.get_peers():
@@ -265,10 +239,10 @@ func start_game() -> void:
 	
 	print("Sending config...")
 	Multiplayer.send_config.rpc(
-		max_board_space,
-		max_hand_size,
-		max_deck_size,
-		min_deck_size,
+		Settings.server.max_board_space,
+		Settings.server.max_hand_size,
+		Settings.server.max_deck_size,
+		Settings.server.min_deck_size,
 	)
 	
 	print("Changing to game scene...")

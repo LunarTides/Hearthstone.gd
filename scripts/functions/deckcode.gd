@@ -79,7 +79,7 @@ func _validate_deck(deckcode: String, hero_class: Player.Class, cards: Array[Car
 		return false
 	
 	# The size of the deck shouldn't be more than the max_deck_size or less than min_deck_size.
-	if cards.size() > Game.max_deck_size or cards.size() < Game.min_deck_size:
+	if cards.size() > Settings.server.max_deck_size or cards.size() < Settings.server.min_deck_size:
 		return false
 	
 	# The hero class should exist.

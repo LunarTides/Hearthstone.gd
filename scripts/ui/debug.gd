@@ -97,7 +97,7 @@ func _process(delta: float) -> void:
 	process_time_label.text = "Process Time: %s" % Performance.get_monitor(Performance.TIME_PROCESS)
 	physics_process_time_label.text = "Physics Process Time: %s" % Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS)
 
-	server_config_label.text = "Server Config: {max_board_space: %s, hand_hand_size: %s}" % [Game.max_board_space, Game.max_hand_size]
+	server_config_label.text = "Server Config: %s" % Settings.server
 	
 	if multiplayer.multiplayer_peer:
 		peer_id_label.text = "Peer ID: %d" % multiplayer.multiplayer_peer.get_unique_id()

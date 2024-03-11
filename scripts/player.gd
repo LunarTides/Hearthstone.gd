@@ -125,7 +125,7 @@ static func get_from_peer_id(peer_id: int) -> Player:
 #region Public Functions
 ## Sends a packet for the player to play a card. Returns if a packet was sent / success.
 func play_card(card: Card, board_index: int, send_packet: bool = true) -> bool:
-	if card.types.has(Card.Type.MINION) and board.size() >= Game.max_board_space:
+	if card.types.has(Card.Type.MINION) and board.size() >= Settings.server.max_board_space:
 		Game.feedback("You don't have enough space on the board.", Game.FeedbackType.ERROR)
 		return false
 	
@@ -144,7 +144,7 @@ func play_card(card: Card, board_index: int, send_packet: bool = true) -> bool:
 ## Sends a packet for the player to summon a card. Returns if a packet was sent / success.
 func summon_card(card: Card, board_index: int, send_packet: bool = true, bypass_checks: bool = false) -> bool:
 	if not bypass_checks:
-		if board.size() >= Game.max_board_space:
+		if board.size() >= Settings.server.max_board_space:
 			return false
 	
 	Packet.send_if(send_packet, Packet.PacketType.SUMMON, id, [card.location, card.index, board_index], true)
@@ -153,7 +153,7 @@ func summon_card(card: Card, board_index: int, send_packet: bool = true, bypass_
 
 ## Sends a packet to add a card to the player's hand. Returns if a packet was sent / success.
 func add_to_hand(card: Card, hand_index: int, send_packet: bool = true) -> bool:
-	if hand.size() >= Game.max_hand_size:
+	if hand.size() >= Settings.server.max_hand_size:
 		return false
 	
 	Packet.send_if(send_packet, Packet.PacketType.CREATE_CARD, id, [
