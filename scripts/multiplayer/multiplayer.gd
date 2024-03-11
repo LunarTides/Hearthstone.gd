@@ -116,7 +116,7 @@ func save_config() -> void:
 	var config: ConfigFile = ConfigFile.new()
 	config.set_value("Server", "port", Settings.server.port)
 	config.set_value("Server", "anticheat_level", Settings.server.anticheat_level)
-	config.set_value("Server", "anticheat_consequence", Settings.server.anticheat_conseqence)
+	config.set_value("Server", "anticheat_consequence", Settings.server.anticheat_consequence)
 	config.set_value("Server", "ban_list", Settings.server.ban_list)
 	
 	config.set_value("Game", "max_board_space", Settings.server.max_board_space)

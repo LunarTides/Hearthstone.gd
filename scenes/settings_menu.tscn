@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/ui/settings_menu.gd" id="1_wqkmw"]
 
-[node name="SettingsMenu" type="PanelContainer" node_paths=PackedStringArray("vsync", "fullscreen", "resolution", "debug", "cbx", "cby", "cbz", "crym", "cdx")]
+[node name="SettingsMenu" type="PanelContainer" node_paths=PackedStringArray("vsync", "fullscreen", "resolution", "animations", "debug", "cbx", "cby", "cbz", "crym", "cdx")]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -18,6 +18,7 @@ script = ExtResource("1_wqkmw")
 vsync = NodePath("TabContainer/Video/Vsync")
 fullscreen = NodePath("TabContainer/Video/Fullscreen")
 resolution = NodePath("TabContainer/Video/Resolution")
+animations = NodePath("TabContainer/Game/Animations")
 debug = NodePath("TabContainer/Debug")
 cbx = NodePath("TabContainer/Debug/CBX")
 cby = NodePath("TabContainer/Debug/CBY")
@@ -39,9 +40,19 @@ size_flags_horizontal = 0
 layout_mode = 2
 size_flags_horizontal = 0
 
-[node name="Vsync" type="CheckBox" parent="TabContainer/Video"]
+[node name="Vsync" type="CheckButton" parent="TabContainer/Video"]
 layout_mode = 2
+size_flags_horizontal = 0
 text = "V-Sync"
+
+[node name="Game" type="VBoxContainer" parent="TabContainer"]
+visible = false
+layout_mode = 2
+
+[node name="Animations" type="CheckButton" parent="TabContainer/Game"]
+layout_mode = 2
+size_flags_horizontal = 0
+text = "Animations"
 
 [node name="Debug" type="VBoxContainer" parent="TabContainer"]
 visible = false
@@ -98,6 +109,7 @@ text = "X"
 [connection signal="item_selected" from="TabContainer/Video/Fullscreen" to="." method="_on_fullscreen_item_selected"]
 [connection signal="item_selected" from="TabContainer/Video/Resolution" to="." method="_on_resolution_item_selected"]
 [connection signal="toggled" from="TabContainer/Video/Vsync" to="." method="_on_vsync_toggled"]
+[connection signal="toggled" from="TabContainer/Game/Animations" to="." method="_on_animations_toggled"]
 [connection signal="value_changed" from="TabContainer/Debug/CBX" to="." method="_on_cbx_value_changed"]
 [connection signal="value_changed" from="TabContainer/Debug/CBY" to="." method="_on_cby_value_changed"]
 [connection signal="value_changed" from="TabContainer/Debug/CBZ" to="." method="_on_cbz_value_changed"]

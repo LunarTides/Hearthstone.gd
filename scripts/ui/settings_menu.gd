@@ -30,9 +30,15 @@ const FULLSCREEN_MODES: Dictionary = {
 #region Exported Variables
 #region Video
 @export_category("Video")
-@export var vsync: CheckBox
+@export var vsync: CheckButton
 @export var fullscreen: OptionButton
 @export var resolution: OptionButton
+#endregion
+
+
+#region Game
+@export_category("Game")
+@export var animations: CheckButton
 #endregion
 
 
@@ -77,6 +83,11 @@ func _ready() -> void:
 	
 	var pixels: Vector2i = Settings.client.resolution
 	resolution.select(RESOLUTIONS.find(pixels))
+	#endregion
+	
+	
+	#region Game
+	animations.button_pressed = Settings.client.animations
 	#endregion
 	
 	
@@ -126,6 +137,12 @@ func _on_resolution_item_selected(index: int) -> void:
 	
 	Settings.client.resolution = Vector2i(pixels.x, pixels.y)
 	get_window().size = Settings.client.resolution
+#endregion
+
+
+#region Game
+func _on_animations_toggled(toggled_on: bool) -> void:
+	Settings.client.animations = toggled_on
 #endregion
 
 

@@ -110,7 +110,7 @@ func __send(packet_type: PacketType, player_id: int, info: Array) -> PacketFailu
 	if not Anticheat.run(packet_type, sender_peer_id, actor_player, info):
 		var consequence_text: String
 		
-		match Settings.server.anticheat_conseqence:
+		match Settings.server.anticheat_consequence:
 			Anticheat.Consequence.DROP_PACKET:
 				consequence_text = "PACKET DROPPED"
 			

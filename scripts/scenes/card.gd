@@ -454,10 +454,14 @@ func attack_target(target: Variant, send_packet: bool = true) -> bool:
 
 ## Sets up the card to do an effect (particles, animations, etc...) in [param callback].
 func do_effects(callback: Callable, should_layout: bool = false) -> void:
-	if not should_do_effects:
-		return
-	
 	await stabilize_layout_while(func() -> void:
+		if not should_do_effects or not Settings.client.animations:
+			scale = Vector3.ONE
+			
+			# Show the card, but don't do any effects.
+			await get_tree().create_timer(1.0).timeout
+			return
+		
 		var tween: Tween = create_tween().set_ease(Tween.EASE_OUT)
 		tween.tween_property(self, "scale", Vector3.ONE, 0.1)
 		await tween.finished
@@ -487,6 +491,12 @@ func stabilize_layout_while(callback: Callable, should_layout: bool = false) -> 
 
 ## Tweens the card to the specified parameters over the course of [param duration] seconds.
 func tween_to(duration: float, new_position: Vector3, new_rotation: Vector3 = rotation, new_scale: Vector3 = scale) -> void:
+	if not Settings.client.animations:
+		position = new_position
+		rotation = new_rotation
+		scale = new_scale
+		return
+	
 	_should_layout = false
 	
 	var tween: Tween = create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BOUNCE).set_parallel()
@@ -504,6 +514,9 @@ func layout(instant: bool = false) -> void:
 	if is_hovering or not _should_layout:
 		_layout_tween.kill()
 		return
+	
+	if not Settings.client.animations and not instant:
+		return layout(true)
 	
 	var result: Dictionary = {}
 	
@@ -698,12 +711,14 @@ func _update() -> void:
 		var old_scale: Vector3 = scale
 		
 		_should_layout = false
-		var tween: Tween = create_tween()
 		
-		# HACK: Don't set the scale to 0 to prevent https://github.com/godotengine/godot/issues/63012
-		tween.tween_property(self, "scale", Vector3(0.01, 0.01, 0.01), 0.5).set_ease(Tween.EASE_OUT)
-		
-		await tween.finished
+		if Settings.client.animations:
+			var tween: Tween = create_tween()
+			
+			# HACK: Don't set the scale to 0 to prevent https://github.com/godotengine/godot/issues/63012
+			tween.tween_property(self, "scale", Vector3(0.01, 0.01, 0.01), 0.5).set_ease(Tween.EASE_OUT)
+			
+			await tween.finished
 		
 		add_to_location(Location.GRAVEYARD, player.graveyard.size())
 		override_is_hidden = Game.NullableBool.NULL
@@ -828,13 +843,23 @@ func _start_hover() -> void:
 	
 	# Animate
 	var player_weight: int = 1 if player == Game.player else -1
+	
+	var new_position: Vector3 = Vector3(position.x, 1.0, position.z - (4 * player_weight))
+	var new_rotation_y: float = 0.0
+	var new_scale: Vector3 = Vector3(2, 2, 2)
+	
+	if not Settings.client.animations:
+		position = new_position
+		rotation.y = new_rotation_y
+		scale = new_scale
+		return
+	
 	var time: float = 0.1
 	
 	_hover_tween = create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_EXPO).set_parallel()
-	_hover_tween.tween_property(self, "position:y", 1, time)
-	_hover_tween.tween_property(self, "position:z", position.z - (4 * player_weight), time)
-	_hover_tween.tween_property(self, "rotation:y", 0, time)
-	_hover_tween.tween_property(self, "scale", Vector3(2, 2, 2), time)
+	_hover_tween.tween_property(self, "position", new_position, time)
+	_hover_tween.tween_property(self, "rotation:y", new_rotation_y, time)
+	_hover_tween.tween_property(self, "scale", new_scale, time)
 
 
 func _stop_hover() -> void:
@@ -921,12 +946,18 @@ func _make_way_for(card: Card) -> void:
 	if not visible:
 		return
 	
+	_should_layout = false
+	
 	var bias: int = 1 if global_position.x > card.global_position.x else -1
+	var new_position_x: float = _old_position.x + 2 * bias
+	
+	if not Settings.client.animations:
+		position.x = new_position_x
+		return
 	
 	var tween: Tween = create_tween()
 	tween.set_ease(Tween.EASE_OUT)
-	tween.tween_property(self, "position:x", _old_position.x + 2 * bias, 0.2)
-	_should_layout = false
+	tween.tween_property(self, "position:x", new_position_x, 0.2)
 
 
 func _stop_making_way() -> void:

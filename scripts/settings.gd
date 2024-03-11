@@ -41,6 +41,9 @@ var client: Dictionary = {
 	"resolution": Vector2i(ProjectSettings.get("display/window/size/viewport_width"), ProjectSettings.get("display/window/size/viewport_height")),
 	"vsync": true,
 	
+	# GAME
+	"animations": true,
+	
 	# DEBUG
 	"card_bounds_x": -3.05,
 	"card_bounds_y": -0.5,
