@@ -201,6 +201,9 @@ func host() -> void:
 ## Quits to main menu. Use this instead of [code]Game.exit_to_lobby[/code].
 func quit() -> void:
 	# CRITICAL: This function crashes clients somehow?
+	if not is_server:
+		push_warning("Quitting. This will crash the game for some reason.")
+	
 	save_config()
 	
 	# Do this since after the multiplayer is closed, is_server will always return false

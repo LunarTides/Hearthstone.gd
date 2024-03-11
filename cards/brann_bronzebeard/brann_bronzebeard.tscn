@@ -7,7 +7,8 @@
 [node name="BrannBronzebeard" type="Node3D" node_paths=PackedStringArray("card")]
 script = ExtResource("1_o78kn")
 card_name = "Brann Bronzebeard"
-text = "Your Battlecries trigger twice."
+text = "Your Battlecries trigger
+twice."
 cost = 3
 texture = ExtResource("2_1w15u")
 types = Array[int]([1])
