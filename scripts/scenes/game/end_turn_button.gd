@@ -8,7 +8,7 @@ extends Area3D
 
 #region Internal Functions
 func _ready() -> void:
-	rotation.x = deg_to_rad(180 if Game.player == Game.player2 else 0)
+	rotation_degrees.x = 180 if Game.player == Game.player2 else 0
 	
 	Game.turn_ended.connect(func(after: bool, player: Player, _sender_peer_id: int) -> void:
 		if not after:
@@ -16,8 +16,12 @@ func _ready() -> void:
 		
 		var degrees: float = 180 if player == Game.player else 0
 		
+		if not Settings.client.animations:
+			rotation_degrees.x = degrees
+			return
+		
 		var tween: Tween = create_tween().set_trans(Tween.TRANS_BACK)
-		tween.tween_property(self, "rotation:x", deg_to_rad(degrees), 0.5)
+		tween.tween_property(self, "rotation_degrees:x", degrees, 0.5)
 	)
 #endregion
 

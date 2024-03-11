@@ -31,7 +31,7 @@ var _connected: Array[Card]
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	if Game.is_player_2:
-		rotation.x += deg_to_rad(180)
+		rotation_degrees.x += 180
 		position.z -= 8
 	
 	# Use a timer to improve performance.
