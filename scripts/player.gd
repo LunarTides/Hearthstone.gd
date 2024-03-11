@@ -34,7 +34,17 @@ var id: int
 var hero_class: Class
 
 ## How much health the player has.
-var health: int = 30
+var health: int = 30:
+	set(new_health):
+		health = new_health
+		
+		if health <= 0 and should_die:
+			# TODO: Have an animation or something.
+			print("Player %d won!" % (opponent.id + 1))
+			
+			# TODO: Wait until the animation is finished instead of 1 second.
+			await Game.get_tree().create_timer(1.0).timeout
+			Multiplayer.quit()
 
 ## The maximum number that [member health] can go to.
 var max_health: int = 30
