@@ -259,6 +259,9 @@ var location_array: Array[Card]:
 ## Overrides [member is_hidden] if not set to [code]NULL[/code].
 var override_is_hidden: Game.NullableBool = Game.NullableBool.NULL
 
+## Whether or not [member cover] should be forced to be visible.
+var force_cover_visible: bool = false
+
 ## Whether or not the card is hidden. If it is, it will be covered. Cannot be set, set [member override_is_hidden] instead.
 var is_hidden: bool:
 	get:
@@ -323,6 +326,9 @@ var should_die: bool = true
 
 ## The card's hero power. Only set if this card is a [code]Hero[/code] and the [member hero_power_id] is set.
 var hero_power: Card
+
+## Whether or not the card has been refunded. Don't set manually.
+var refunded: bool = false
 
 ## The target requested from the [code]DRAG_TO_PLAY[/code] tag. Use this in an ability.
 var drag_to_play_target: Variant
@@ -1098,4 +1104,8 @@ func _make_way_for(card: Card) -> void:
 func _stop_making_way() -> void:
 	_should_layout = true
 	layout()
+
+
+func _refund() -> void:
+	player.mana += cost
 #endregion

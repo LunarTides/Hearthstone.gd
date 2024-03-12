@@ -6,7 +6,7 @@ func setup() -> void:
 	card.add_ability(Card.Ability.BATTLECRY, battlecry)
 
 
-func battlecry() -> void:
+func battlecry() -> int:
 	var callback: Callable = func(after: bool, played_card: Card, board_index: int, player_who_played: Player, sender_peer_id: int) -> void:
 		if not after:
 			# TODO: Implement better solution.
@@ -21,4 +21,5 @@ func battlecry() -> void:
 		if not after and killed_card == card:
 			Game.card_played.disconnect(callback)
 	)
-
+	
+	return SUCCESS

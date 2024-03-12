@@ -5,6 +5,14 @@ extends Node3D
 ## @experimental
 
 
+#region Enums
+enum {
+	REFUND,
+	SUCCESS,
+}
+#endregion
+
+
 #region Exported Variables
 #region Common
 # TODO: Remove in Godot 4.3 or maybe 4.2.2

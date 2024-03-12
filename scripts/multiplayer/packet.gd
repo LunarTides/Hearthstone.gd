@@ -267,7 +267,12 @@ func _accept_hero_power_packet(player: Player, sender_peer_id: int, info: Array)
 	
 	Game.hero_power.emit(false, player, sender_peer_id)
 	
+	hero_power.refunded = false
+	
 	_accept_trigger_ability_packet(player, sender_peer_id, [hero_power.location, hero_power.index, Card.Ability.HERO_POWER])
+	if hero_power.refunded:
+		return
+	
 	player.has_used_hero_power_this_turn = true
 	player.mana -= hero_power.cost
 	
@@ -291,15 +296,26 @@ func _accept_play_packet(player: Player, sender_peer_id: int, info: Array) -> vo
 	player.mana -= card.cost
 	player.armor += card.armor
 	
+	card.refunded = false
+	
 	if card.types.has(Card.Type.MINION):
-		player.summon_card(card, board_index, false, true)
-		
 		card.trigger_ability(Card.Ability.BATTLECRY, false)
 		await card._wait_for_ability(Card.Ability.BATTLECRY)
+		
+		if card.refunded:
+			card._refund()
+			return
+		
+		# Summon after ability for refunding.
+		player.summon_card(card, board_index, false, true)
 	
 	if card.types.has(Card.Type.SPELL):
 		card.trigger_ability(Card.Ability.CAST, false)
 		await card._wait_for_ability(Card.Ability.CAST)
+		
+		if card.refunded:
+			card._refund()
+			return
 		
 		card.location = Card.Location.NONE
 	
@@ -307,8 +323,10 @@ func _accept_play_packet(player: Player, sender_peer_id: int, info: Array) -> vo
 		card.trigger_ability(Card.Ability.BATTLECRY, false)
 		await card._wait_for_ability(Card.Ability.BATTLECRY)
 		
-		# TRIGGER_ABILITY relies on that the card can be found in `card.location_index`.
-		# It can't if the card is in the HERO location. So we need to set the location after the ability.
+		if card.refunded:
+			card._refund()
+			return
+		
 		card.location = Card.Location.HERO
 	
 	Game.card_played.emit(true, card, board_index, player, sender_peer_id)
@@ -372,8 +390,11 @@ func _accept_trigger_ability_packet(player: Player, sender_peer_id: int, info: A
 	Game.card_ability_triggered.emit(false, card, ability, player, sender_peer_id)
 	
 	for ability_callback: Callable in card.abilities[ability]:
-		# TODO: Add refunding
-		await ability_callback.call()
+		var success: int = await ability_callback.call()
+		
+		if success == Blueprint.REFUND:
+			card.refunded = true
+			break
 	
 	Game.card_ability_triggered.emit(true, card, ability, player, sender_peer_id)
 #endregion

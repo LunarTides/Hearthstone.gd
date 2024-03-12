@@ -6,7 +6,7 @@ func setup() -> void:
 	card.add_ability(Card.Ability.HERO_POWER, hero_power)
 
 
-func hero_power() -> void:
+func hero_power() -> int:
 	# Deal 1 damage.
 	var target: Variant = card.drag_to_play_target
 	
@@ -14,3 +14,5 @@ func hero_power() -> void:
 		target.health -= 1
 	elif target is Player:
 		target.damage(1)
+	
+	return SUCCESS
