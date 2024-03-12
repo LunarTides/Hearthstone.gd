@@ -2,18 +2,17 @@
 
 [ext_resource type="Script" path="res://cards/jaina_proudmoore/jaina_proudmoore.gd" id="1_scrip"]
 [ext_resource type="PackedScene" uid="uid://ccmb7s7hsvhju" path="res://scenes/card.tscn" id="2_cardd"]
-[ext_resource type="Texture2D" uid="uid://d30626m6lrq4g" path="res://cards/texture_template.png" id="2_hjs6i"]
+[ext_resource type="Texture2D" uid="uid://c32u3jvx6byys" path="res://cards/jaina_proudmoore/jaina_proudmoore.png" id="2_ykg1a"]
 
 [node name="JainaProudmoore" type="Node3D" node_paths=PackedStringArray("card")]
 script = ExtResource("1_scrip")
 card_name = "Jaina Proudmoore"
-texture = ExtResource("2_hjs6i")
+texture = ExtResource("2_ykg1a")
 types = Array[int]([4])
 classes = Array[int]([1])
 rarities = Array[int]([0])
 tags = Array[int]([1])
 id = 4
-health = 30
 hero_power_id = 5
 card = NodePath("Card")
 
