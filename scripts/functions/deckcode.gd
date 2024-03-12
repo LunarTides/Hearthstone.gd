@@ -63,6 +63,11 @@ func import(deckcode: String, player: Player, validate: bool = true) -> Dictiona
 	
 	if player:
 		hero.card.location = Card.Location.HERO
+		
+		var hero_power: Blueprint = Blueprint.create_from_id(hero.hero_power_id, player)
+		hero_power.card.location = Card.Location.HERO_POWER
+		
+		hero.card.hero_power = hero_power.card
 	
 	return {"hero": hero, "cards": cards}
 
@@ -89,9 +94,8 @@ func _validate_deck(deckcode: String, hero: Blueprint, cards: Array[Card]) -> bo
 		return false
 	
 	# The hero should be a starting hero card.
-	# TODO: Implement
-	#if not hero.tags.has(Card.Tag.STARTING_HERO):
-		#return false
+	if not hero.tags.has(Card.Tag.STARTING_HERO):
+		return false
 	
 	return true
 #endregion

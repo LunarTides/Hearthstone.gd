@@ -17,8 +17,10 @@ enum PacketType {
 	CREATE_CARD,
 	DRAW_CARDS,
 	END_TURN,
+	HERO_POWER,
 	PLAY,
 	REVEAL,
+	SET_DRAG_TO_PLAY_TARGET,
 	SUMMON,
 	TRIGGER_ABILITY,
 }
@@ -35,6 +37,11 @@ enum AttackMode {
 	CARD_VS_PLAYER,
 	PLAYER_VS_CARD,
 	PLAYER_VS_PLAYER,
+}
+
+enum TargetMode {
+	CARD,
+	PLAYER,
 }
 #endregion
 
@@ -255,6 +262,18 @@ func _accept_end_turn_packet(sender_player: Player, sender_peer_id: int, info: A
 	Game.turn_ended.emit(true, sender_player, sender_peer_id)
 
 
+func _accept_hero_power_packet(player: Player, sender_peer_id: int, info: Array) -> void:
+	var hero_power: Card = player.hero.hero_power
+	
+	Game.hero_power.emit(false, player, sender_peer_id)
+	
+	_accept_trigger_ability_packet(player, sender_peer_id, [hero_power.location, hero_power.index, Card.Ability.HERO_POWER])
+	player.has_used_hero_power_this_turn = true
+	player.mana -= hero_power.cost
+	
+	Game.hero_power.emit(true, player, sender_peer_id)
+
+
 func _accept_play_packet(player: Player, sender_peer_id: int, info: Array) -> void:
 	var location: Card.Location = info[0]
 	var location_index: int = info[1]
@@ -307,6 +326,26 @@ func _accept_reveal_packet(player: Player, sender_peer_id: int, info: Array) -> 
 	Game.card_revealed.emit(true, card, player, sender_peer_id)
 
 
+func _accept_set_drag_to_play_target_packet(player: Player, sender_peer_id: int, info: Array) -> void:
+	var target_mode: TargetMode = info[0]
+	
+	var location: Card.Location = info[1]
+	var location_index: int = info[2]
+	
+	var target_alignment: int = info[3]
+	var target_location: Card.Location = info[4]
+	var target_index: int = info[5]
+
+	var card: Card = Card.get_from_index(player, location, location_index)
+	var target_player: Player = Player.get_from_id(target_alignment)
+	
+	if target_mode == TargetMode.CARD:
+		var target_card: Card = Card.get_from_index(target_player, target_location, target_index)
+		card.drag_to_play_target = target_card
+	else:
+		card.drag_to_play_target = target_player
+
+
 func _accept_summon_packet(player: Player, sender_peer_id: int, info: Array) -> void:
 	# TODO: Determine if cards should be found like this.
 	#		This is problematic if a card is in the NONE location.
@@ -333,6 +372,7 @@ func _accept_trigger_ability_packet(player: Player, sender_peer_id: int, info: A
 	Game.card_ability_triggered.emit(false, card, ability, player, sender_peer_id)
 	
 	for ability_callback: Callable in card.abilities[ability]:
+		# TODO: Add refunding
 		await ability_callback.call()
 	
 	Game.card_ability_triggered.emit(true, card, ability, player, sender_peer_id)

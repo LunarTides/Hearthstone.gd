@@ -7,4 +7,10 @@ func setup() -> void:
 
 
 func hero_power() -> void:
-	print_debug("Hero Power")
+	# Deal 1 damage.
+	var target: Variant = card.drag_to_play_target
+	
+	if target is Card:
+		target.health -= 1
+	elif target is Player:
+		target.damage(1)

@@ -86,27 +86,9 @@ var should_die: bool = true:
 		
 		# Check if the player should die.
 		_die()
-#endregion
 
-
-#region Static Functions
-## Gets the [Player] with the specified [param id].
-static func get_from_id(id: int) -> Player:
-	if Multiplayer.is_server:
-		if id == 0:
-			return Game._player1_server
-		else:
-			return Game._player2_server
-	
-	if id == 0:
-		return Game.player1
-	else:
-		return Game.player2
-
-
-## Returns the [Player] from the [param peer_id].
-static func get_from_peer_id(peer_id: int) -> Player:
-	return Multiplayer.players.get(peer_id)
+## Whether or not this player has already used their hero power this turn.
+var has_used_hero_power_this_turn: bool = false
 #endregion
 
 
@@ -124,6 +106,14 @@ func play_card(card: Card, board_index: int, send_packet: bool = true) -> bool:
 	if mana < card.cost:
 		Game.feedback("You don't have enough mana.", Game.FeedbackType.ERROR)
 		return false
+	
+	if card.location == Card.Location.HERO_POWER:
+		if has_used_hero_power_this_turn:
+			Game.feedback("You have already used your hero power this turn.", Game.FeedbackType.ERROR)
+			return false
+		
+		Packet.send_if(send_packet, Packet.PacketType.HERO_POWER, id, [], true)
+		return true
 	
 	Packet.send_if(send_packet, Packet.PacketType.PLAY, id, [card.location, card.index, board_index, Vector3i(card.position.round())], true)
 	return true
@@ -186,6 +176,27 @@ func damage(amount: int) -> bool:
 	_die()
 	
 	return true
+#endregion
+
+
+#region Static Functions
+## Gets the [Player] with the specified [param id].
+static func get_from_id(id: int) -> Player:
+	if Multiplayer.is_server:
+		if id == 0:
+			return Game._player1_server
+		else:
+			return Game._player2_server
+	
+	if id == 0:
+		return Game.player1
+	else:
+		return Game.player2
+
+
+## Returns the [Player] from the [param peer_id].
+static func get_from_peer_id(peer_id: int) -> Player:
+	return Multiplayer.players.get(peer_id)
 #endregion
 
 

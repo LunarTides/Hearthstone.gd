@@ -14,6 +14,7 @@ texture = ExtResource("2_xwoo6")
 types = Array[int]([6])
 classes = Array[int]([1])
 rarities = Array[int]([0])
+tags = Array[int]([0])
 id = 5
 card = NodePath("Card")
 

@@ -36,6 +36,7 @@ extends Node3D
 @export var types: Array[Card.Type]
 @export var classes: Array[Player.Class]
 @export var rarities: Array[Card.Rarity]
+@export var tags: Array[Card.Tag]
 @export var collectible: bool
 
 ## This HAS to be unique per blueprint.
@@ -65,7 +66,7 @@ extends Node3D
 #region Hero
 @export_category("Hero")
 @export var armor: int
-@export var heropower_id: int
+@export var hero_power_id: int
 #endregion
 
 

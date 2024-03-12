@@ -11,9 +11,10 @@ texture = ExtResource("2_hjs6i")
 types = Array[int]([4])
 classes = Array[int]([1])
 rarities = Array[int]([0])
+tags = Array[int]([1])
 id = 4
 health = 30
-heropower_id = 5
+hero_power_id = 5
 card = NodePath("Card")
 
 [node name="Card" parent="." instance=ExtResource("2_cardd")]

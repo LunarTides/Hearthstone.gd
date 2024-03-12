@@ -68,6 +68,11 @@ enum Rarity {
 	LEGENDARY,
 }
 
+enum Tag {
+	DRAG_TO_PLAY,
+	STARTING_HERO,
+}
+
 enum Keyword {
 	DIVINE_SHIELD,
 	DORMANT,
@@ -142,6 +147,7 @@ enum Location {
 	BOARD,
 	GRAVEYARD,
 	HERO,
+	HERO_POWER,
 }
 #endregion
 
@@ -240,7 +246,9 @@ var location_array: Array[Card]:
 			Location.GRAVEYARD:
 				return player.graveyard
 			Location.HERO:
-				return []
+				return [self]
+			Location.HERO_POWER:
+				return [self]
 			Location.NONE:
 				return []
 			_:
@@ -251,7 +259,7 @@ var location_array: Array[Card]:
 ## Overrides [member is_hidden] if not set to [code]NULL[/code].
 var override_is_hidden: Game.NullableBool = Game.NullableBool.NULL
 
-## Whether or not the card is hidden. If it is, it will be covered by the [CardNode]. Cannot be set, set [member override_is_hidden] instead.
+## Whether or not the card is hidden. If it is, it will be covered. Cannot be set, set [member override_is_hidden] instead.
 var is_hidden: bool:
 	get:
 		if override_is_hidden == Game.NullableBool.FALSE:
@@ -259,7 +267,7 @@ var is_hidden: bool:
 		if override_is_hidden == Game.NullableBool.TRUE:
 			return true
 		
-		if location == Location.BOARD or location == Location.HERO:
+		if location == Location.BOARD or location == Location.HERO or location == Location.HERO_POWER:
 			return false
 		
 		if player != Game.player and not Multiplayer.is_server:
@@ -273,7 +281,8 @@ var is_hidden: bool:
 		is_hidden = new_is_hidden
 		
 		# Only change the essentials.
-		cover.visible = is_hidden
+		if not force_cover_visible:
+			cover.visible = is_hidden
 		mesh.visible = not is_hidden
 		texture_sprite.visible = not is_hidden
 		name_label.visible = not is_hidden
@@ -312,6 +321,12 @@ var is_dying: bool = false
 ## Whether or not this card should die. Used for animations.
 var should_die: bool = true
 
+## The card's hero power. Only set if this card is a [code]Hero[/code] and the [member hero_power_id] is set.
+var hero_power: Card
+
+## The target requested from the [code]DRAG_TO_PLAY[/code] tag. Use this in an ability.
+var drag_to_play_target: Variant
+
 #region Blueprint Fields
 #region Common
 var card_name: String
@@ -321,6 +336,7 @@ var texture: Texture2D
 var types: Array[Type]
 var classes: Array[Player.Class]
 var rarities: Array[Rarity]
+var tags: Array[Tag]
 var collectible: bool
 var id: int
 #endregion
@@ -386,6 +402,8 @@ func _ready() -> void:
 		
 		if location == Location.BOARD:
 			exhausted = false
+		
+		player.has_used_hero_power_this_turn = false
 	)
 	
 	# Use a timer to improve performance.
@@ -621,7 +639,12 @@ static func get_from_index(player: Player, location: Card.Location, index: int) 
 			return Game.get_or_null(player.board, index)
 		Location.GRAVEYARD:
 			return Game.get_or_null(player.graveyard, index)
+		Location.HERO:
+			return player.hero
+		Location.HERO_POWER:
+			return player.hero.hero_power
 		_:
+			assert(false, "The card doesn't exist at this location.")
 			return null
 
 
@@ -631,6 +654,8 @@ static func _update_card(card: Card, blueprint: Blueprint) -> void:
 	
 	if Engine.is_editor_hint():
 		lookup = blueprint
+	elif card.is_hidden:
+		return
 	
 	card.texture_sprite.texture = lookup.texture
 	card.name_label.text = lookup.card_name
@@ -718,7 +743,8 @@ func _update() -> void:
 	layout()
 	
 	is_hidden = is_hidden
-	if is_hidden and location != Location.HAND and location != Location.BOARD and location != Location.HERO:
+	# TODO: Put this condition into a function.
+	if is_hidden and location != Location.HAND and location != Location.BOARD and location != Location.HERO and location != Location.HERO_POWER:
 		hide()
 		return
 	
@@ -870,6 +896,27 @@ func _layout_hero() -> Dictionary:
 	}
 
 
+func _layout_hero_power() -> Dictionary:
+	var new_position: Vector3 = (await _layout_hero()).position
+	new_position.x -= 3
+	
+	var new_rotation: Vector3 = Vector3.ZERO
+	
+	if player.has_used_hero_power_this_turn:
+		force_cover_visible = true
+		cover.position.y = -0.5
+		cover.rotation_degrees.x = 180
+		cover.show()
+		
+		new_rotation.x = PI
+	
+	return {
+		"position": new_position,
+		"rotation": new_rotation,
+		"scale": Vector3(0.5, 0.5, 0.5),
+	}
+
+
 func _on_input_event(_camera: Node, event: InputEvent, pos: Vector3, _normal: Vector3, _shape_idx: int) -> void:
 	# Don't drag if this is an opposing card
 	if Game.player != player or Multiplayer.is_server:
@@ -931,6 +978,46 @@ func _start_dragging() -> void:
 	
 	if location == Location.BOARD:
 		_start_attacking()
+		return
+	
+	# Drag to play.
+	if tags.has(Tag.DRAG_TO_PLAY):
+		var target: Variant = await Target.prompt(
+			position,
+			self,
+			Target.CAN_SELECT_CARDS |
+			Target.CAN_SELECT_HEROES |
+			Target.CAN_SELECT_ENEMY_TARGETS |
+			Target.CAN_SELECT_FRIENDLY_TARGETS
+		)
+		
+		if not target:
+			return
+		
+		if target is Card:
+			if target.location == Location.HERO_POWER:
+				Game.feedback("Invalid Target.", Game.FeedbackType.ERROR)
+				return
+			
+			Packet.send(Packet.PacketType.SET_DRAG_TO_PLAY_TARGET, player.id, [
+				Packet.TargetMode.CARD,
+				location,
+				index,
+				target.player.id,
+				target.location,
+				target.index,
+			])
+		else:
+			Packet.send(Packet.PacketType.SET_DRAG_TO_PLAY_TARGET, player.id, [
+				Packet.TargetMode.PLAYER,
+				location,
+				index,
+				target.id,
+				0,
+				0,
+			])
+		
+		player.play_card(self, player.board.size())
 		return
 	
 	is_dragging = true
