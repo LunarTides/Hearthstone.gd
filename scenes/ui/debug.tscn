@@ -212,9 +212,13 @@ mouse_filter = 2
 text = "FPS: -1"
 fit_content = true
 
+[node name="Timer" type="Timer" parent="."]
+autostart = true
+
 [connection signal="pressed" from="PanelContainer/TabContainer/Debug Buttons/FlowContainer/GivePlayer1Button" to="." method="_on_give_player_1_button_pressed"]
 [connection signal="pressed" from="PanelContainer/TabContainer/Debug Buttons/FlowContainer/GivePlayer2Button" to="." method="_on_give_player_2_button_pressed"]
 [connection signal="pressed" from="PanelContainer/TabContainer/Debug Buttons/FlowContainer2/EndTurnButton" to="." method="_on_end_turn_button_pressed"]
 [connection signal="pressed" from="PanelContainer/TabContainer/Debug Buttons/FlowContainer2/10ManaButton" to="." method="_on_mana_button_pressed"]
 [connection signal="text_submitted" from="PanelContainer/TabContainer/Send Packet/FlowContainer/Info" to="." method="_on_info_text_submitted"]
 [connection signal="pressed" from="PanelContainer/TabContainer/Send Packet/Button" to="." method="_on_send_packet_button_pressed"]
+[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
