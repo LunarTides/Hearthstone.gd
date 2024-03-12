@@ -705,15 +705,22 @@ static func _update_card(card: Card, blueprint: Blueprint) -> void:
 	card.attack_label.visible = attack_visible
 	
 	# Health
-	var health_visible: bool = lookup.health > 0 or blueprint.health > 0
+	var health_visible: bool = lookup.health > 0 or blueprint.health > 0 or lookup.tags.has(Tag.STARTING_HERO)
 	card.get_node("Mesh/Health").visible = health_visible
 	card.get_node("Mesh/HealthFrame").visible = health_visible
 	card.health_label.visible = health_visible
 	
 	# Armor
-	var armor_visible: bool = lookup.armor > 0 or blueprint.armor > 0
+	var armor_visible: bool = lookup.armor > 0 or blueprint.armor > 0 or lookup.tags.has(Tag.STARTING_HERO)
 	card.get_node("Mesh/Armor").visible = armor_visible
 	card.armor_label.visible = armor_visible
+	
+	if health_visible:
+		card.get_node("Mesh/Armor").position.x = 0
+		card.armor_label.position.x = -1.3
+	else:
+		card.get_node("Mesh/Armor").position.x = 2.6
+		card.armor_label.position.x = 1.3
 	
 	# Tribe / Spell School
 	var tribe_visible: bool = (
@@ -759,10 +766,8 @@ func _update() -> void:
 	Card._update_card(self, blueprint)
 	
 	if location == Location.HERO:
-		# Set the armor to 0 to hide the armor mesh.
-		# TODO: Make a hero mesh.
-		armor = 0
-		health = player.health
+		armor_label.text = str(player.armor)
+		health_label.text = str(player.health)
 	
 	# TODO: Should this be done here?
 	if health <= 0 and location == Location.BOARD and not is_dying and should_die:

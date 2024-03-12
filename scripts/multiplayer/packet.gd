@@ -299,12 +299,13 @@ func _accept_play_packet(player: Player, sender_peer_id: int, info: Array) -> vo
 	card.refunded = false
 	
 	if card.types.has(Card.Type.MINION):
-		card.trigger_ability(Card.Ability.BATTLECRY, false)
-		await card._wait_for_ability(Card.Ability.BATTLECRY)
-		
-		if card.refunded:
-			card._refund()
-			return
+		if card.abilities.has(Card.Ability.BATTLECRY):
+			card.trigger_ability(Card.Ability.BATTLECRY, false)
+			await card._wait_for_ability(Card.Ability.BATTLECRY)
+			
+			if card.refunded:
+				card._refund()
+				return
 		
 		# Summon after ability for refunding.
 		player.summon_card(card, board_index, false, true)
