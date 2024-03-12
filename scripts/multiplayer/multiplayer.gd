@@ -150,8 +150,9 @@ func join(ip_address: String, port: int, deckcode: String) -> void:
 
 ## Hosts a server at [member port].
 func host() -> void:
-	# Will not really work with a dedicated server but there it nothing i can do.
-	OS.set_restart_on_exit(true, ["--server"])
+	if not OS.is_debug_build():
+		# Will not really work with a dedicated server but there it nothing i can do.
+		OS.set_restart_on_exit(true, ["--server"])
 	
 	peer.create_server(Settings.server.port, Settings.server.max_players)
 	multiplayer.multiplayer_peer = peer
@@ -249,7 +250,7 @@ func send_config(max_board_space: int, max_hand_size: int, max_deck_size: int, m
 @rpc("any_peer", "call_remote", "reliable")
 func send_deckcode(deckcode: String) -> void:
 	var sender_peer_id: int = multiplayer.get_remote_sender_id()
-	deckcode = deckcode if deckcode else "1/1:30/1"
+	deckcode = deckcode if deckcode else "4/1:30/1"
 	
 	if not Deckcode.validate(deckcode):
 		server_response.rpc_id(sender_peer_id, false, "Invalid deckcode")
@@ -303,7 +304,7 @@ func start_game(deckcode1: String, deckcode2: String) -> void:
 		var player: Player = Player.get_from_id(i)
 		var deck: Dictionary = Deckcode.import(deckcode, player, is_server)
 		
-		player.hero_class = deck.class
+		player.hero_class = deck.hero.classes[0]
 		player.deck = deck.cards
 		
 		player.draw_cards(3 if player.id == 0 else 4, false)

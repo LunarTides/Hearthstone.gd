@@ -182,14 +182,14 @@ func _ready() -> void:
 				get_window().position += Vector2i(get_window().size.x / 4, 0)
 			1:
 				# Instance 1 should join the server
-				Multiplayer.join("localhost", 4545, "1/1:30/1")
+				Multiplayer.join("localhost", 4545, "4/1:30/1")
 				await get_tree().create_timer(0.1).timeout
 				
 				@warning_ignore("integer_division")
 				get_window().position += Vector2i(-(get_window().size.x / 4), get_window().size.y / 4)
 			2:
 				# Instance 2 should join the server
-				Multiplayer.join("localhost", 4545, "1/1:30/1")
+				Multiplayer.join("localhost", 4545, "4/1:30/1")
 				await get_tree().create_timer(0.1).timeout
 				
 				@warning_ignore("integer_division")
@@ -253,6 +253,8 @@ func start_game() -> void:
 	player1.mana = 1
 	
 	var deckcodes: Dictionary = Multiplayer._deckcodes
+	
+	await wait_for_node("/root/Main")
 	Multiplayer.start_game.rpc(deckcodes[player1.peer_id], deckcodes[player2.peer_id])
 	
 	Multiplayer.create_blueprint_from_path.rpc("res://cards/the_coin/the_coin.tscn", player2.id, Card.Location.HAND, player2.hand.size())
@@ -344,19 +346,20 @@ func _attack_attacker_is_card_and_target_is_player(attacker: Card, target: Playe
 	
 	target.should_die = false
 	
-	await attacker.do_effects(func() -> void:
-		var _old_position: Vector3 = attacker.global_position
-		
-		var tween: Tween = attacker.create_tween()
-		tween.tween_property(attacker, "global_position", target.hero.global_position, 0.5).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_QUINT)
-		tween.tween_callback(func() -> void:
-			do_damage.call()
-			target.hero.attack_particles.restart()
-		)
-		tween.tween_property(attacker, "global_position", _old_position, 0.5).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUINT)
-		
-		await tween.finished
-		await target.hero.attack_particles.finished
+	await target.hero.stabilize_layout_while(func() -> void:
+		await attacker.do_effects(func() -> void:
+			var _old_position: Vector3 = attacker.global_position
+			
+			var tween: Tween = attacker.create_tween()
+			tween.tween_property(attacker, "global_position", target.hero.global_position, 0.5).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_QUINT)
+			tween.tween_callback(func() -> void:
+				do_damage.call()
+				target.hero.attack_particles.restart()
+			)
+			tween.tween_property(attacker, "global_position", _old_position, 0.5).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUINT)
+			
+			await target.hero.attack_particles.finished
+		, true)
 	, true)
 	
 	target.should_die = true

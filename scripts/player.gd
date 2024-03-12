@@ -74,18 +74,18 @@ var deckcode: String
 ## The player's peer id.
 var peer_id: int
 
-## The player's [HeroNode].
-var hero: HeroNode:
+## The player's hero [Card].
+var hero: Card:
 	get:
-		var main: Node3D = await Game.wait_for_node("/root/Main")
-		
-		if self == Game.player:
-			return main.player_hero_node
-		else:
-			return main.opponent_hero_node
+		return Card.get_all_owned_by(self).filter(func(card: Card) -> bool: return card.location == Card.Location.HERO)[0]
 
 ## Whether or not this player should die. Used for animations.
-var should_die: bool = true
+var should_die: bool = true:
+	set(new_should_die):
+		should_die = new_should_die
+		
+		# Check if the player should die.
+		_die()
 #endregion
 
 
@@ -183,14 +183,23 @@ func damage(amount: int) -> bool:
 		amount = absi(remaining_armor)
 	
 	health -= amount
-	
-	if health <= 0 and should_die:
-		# TODO: Have an animation or something.
-		print("Player %d won!" % (opponent.id + 1))
-		
-		# TODO: Wait until the animation is finished instead of 1 second.
-		await Game.get_tree().create_timer(1.0).timeout
-		Multiplayer.quit()
+	_die()
 	
 	return true
+#endregion
+
+
+#region Private Functions
+func _die() -> void:
+	if health > 0 or not should_die:
+		return
+	
+	# TODO: Have an animation or something.
+	print("Player %d won!" % (opponent.id + 1))
+	
+	# TODO: Wait until the animation is finished instead of 1 second.
+	Game.get_tree().paused = true
+	await Game.get_tree().create_timer(1.0).timeout
+	Multiplayer.quit()
+	Game.get_tree().paused = false
 #endregion

@@ -30,7 +30,7 @@ enum Type {
 	WEAPON,
 	HERO,
 	LOCATION,
-	HEROPOWER,
+	HERO_POWER,
 }
 
 enum Tribe {
@@ -141,6 +141,7 @@ enum Location {
 	DECK,
 	BOARD,
 	GRAVEYARD,
+	HERO,
 }
 #endregion
 
@@ -238,6 +239,8 @@ var location_array: Array[Card]:
 				return player.board
 			Location.GRAVEYARD:
 				return player.graveyard
+			Location.HERO:
+				return []
 			Location.NONE:
 				return []
 			_:
@@ -256,7 +259,7 @@ var is_hidden: bool:
 		if override_is_hidden == Game.NullableBool.TRUE:
 			return true
 		
-		if location == Location.BOARD:
+		if location == Location.BOARD or location == Location.HERO:
 			return false
 		
 		if player != Game.player and not Multiplayer.is_server:
@@ -341,7 +344,9 @@ var spell_schools: Array[SpellSchool]
 
 #region Hero
 var armor: int
-var heropower_id: int
+
+# TODO: Show the texure of the hero power in the bottom left corner of the card.
+var hero_power_id: int
 #endregion
 
 
@@ -433,13 +438,16 @@ func add_to_location(new_location: Location, index: int) -> void:
 	remove_from_location()
 	
 	location = new_location
-	location_array.insert(index, self)
+	location_array.insert(max(index, location_array.size()), self)
 
 
 ## Triggers an ability.
 func trigger_ability(ability: Ability, send_packet: bool = true) -> bool:
 	if not abilities.has(ability):
 		return false
+	
+	# Wait 1 frame so that `await wait_for_ability` can get called before the ability gets triggered.
+	await get_tree().process_frame
 	
 	Packet.send_if(send_packet, Packet.PacketType.TRIGGER_ABILITY, player.id, [location, index, ability])
 	
@@ -531,32 +539,20 @@ func layout(instant: bool = false) -> void:
 		_layout_tween.kill()
 		return
 	
+	if location == Location.NONE:
+		return
+	
 	if not Settings.client.animations and not instant:
 		return layout(true)
 	
-	var result: Dictionary = {}
 	
-	match location:
-		Card.Location.HAND:
-			result = _layout_hand()
-		
-		Card.Location.BOARD:
-			result = _layout_board()
-		
-		Card.Location.DECK:
-			result = _layout_deck()
-		
-		Card.Location.GRAVEYARD:
-			result = _layout_graveyard()
-		
-		Card.Location.NONE:
-			pass
-		
-		_:
-			assert(false, "Can't layout the card in this location.")
+	var method_name: String = "_layout_" + Card.Location.keys()[location].to_lower()
 	
-	if not result:
+	if not method_name in self:
+		assert(false, "Can't layout the card in this location.")
 		return
+	
+	var result: Dictionary = await self[method_name].call()
 	
 	var new_position: Vector3 = result.position
 	var new_rotation: Vector3 = result.rotation
@@ -654,6 +650,7 @@ static func _update_card(card: Card, blueprint: Blueprint) -> void:
 	
 	# Rarity Color
 	var rarity_node: MeshInstance3D = card.get_node("Mesh/Rarity")
+	rarity_node.visible = lookup.rarities.size() > 0 and not lookup.rarities.has(Rarity.FREE)
 	
 	var rarity_material: StandardMaterial3D = StandardMaterial3D.new()
 	if lookup.rarities.size() > 0:
@@ -667,20 +664,30 @@ static func _update_card(card: Card, blueprint: Blueprint) -> void:
 	if lookup.types.has(Card.Type.SPELL):
 		card.spell_school_label.show()
 	
+	# Cost
+	#card.get_node("Mesh/Crystal").visible = lookup.cost > 0
+	#card.cost_label.visible = lookup.cost > 0
 	
-	card.get_node("Mesh/Attack").visible = blueprint.attack > 0
-	card.attack_label.visible = blueprint.attack > 0
+	# Attack
+	var attack_visible: bool = lookup.attack > 0 or blueprint.attack > 0
+	card.get_node("Mesh/Attack").visible = attack_visible
+	card.attack_label.visible = attack_visible
 	
-	card.get_node("Mesh/Health").visible = blueprint.health > 0
-	card.get_node("Mesh/HealthFrame").visible = blueprint.health > 0
-	card.health_label.visible = blueprint.health > 0
+	# Health
+	var health_visible: bool = lookup.health > 0 or blueprint.health > 0
+	card.get_node("Mesh/Health").visible = health_visible
+	card.get_node("Mesh/HealthFrame").visible = health_visible
+	card.health_label.visible = health_visible
 	
-	card.get_node("Mesh/Armor").visible = blueprint.armor > 0
-	card.armor_label.visible = blueprint.armor > 0
+	# Armor
+	var armor_visible: bool = lookup.armor > 0 or blueprint.armor > 0
+	card.get_node("Mesh/Armor").visible = armor_visible
+	card.armor_label.visible = armor_visible
 	
+	# Tribe / Spell School
 	var tribe_visible: bool = (
-		(blueprint.tribes.size() > 0 and blueprint.tribes[0] != Tribe.NONE) or
-		(blueprint.spell_schools.size() > 0 and blueprint.spell_schools[0] != SpellSchool.NONE) 
+		(lookup.tribes.size() > 0 and lookup.tribes[0] != Tribe.NONE) or
+		(lookup.spell_schools.size() > 0 and lookup.spell_schools[0] != SpellSchool.NONE) 
 	)
 	
 	card.get_node("Mesh/TribeOrSpellSchool").visible = tribe_visible
@@ -711,13 +718,19 @@ func _update() -> void:
 	layout()
 	
 	is_hidden = is_hidden
-	if is_hidden and location != Location.HAND and location != Location.BOARD:
+	if is_hidden and location != Location.HAND and location != Location.BOARD and location != Location.HERO:
 		hide()
 		return
 	
 	show()
 	
 	Card._update_card(self, blueprint)
+	
+	if location == Location.HERO:
+		# Set the armor to 0 to hide the armor mesh.
+		# TODO: Make a hero mesh.
+		armor = 0
+		health = player.health
 	
 	# TODO: Should this be done here?
 	if health <= 0 and location == Location.BOARD and not is_dying and should_die:
@@ -808,7 +821,7 @@ func _layout_board() -> Dictionary:
 	new_position.x = (index - 4) * 3.5 + Settings.client.card_distance_x
 	new_position.y = 0
 	new_position.z = Game.board_node.player.position.z + player_weight * (
-		# I love hardcoded values
+		# I love hardcoded values.
 		3 if Game.is_player_1
 		else -6 if player == Game.opponent
 		else 11
@@ -839,6 +852,21 @@ func _layout_graveyard() -> Dictionary:
 		"position": position,
 		"rotation": rotation,
 		"scale": scale,
+	}
+
+
+func _layout_hero() -> Dictionary:
+	var new_position: Vector3 = position
+	
+	if player == Game.player:
+		new_position = (await Game.wait_for_node("/root/Main/PlayerHero")).position
+	else:
+		new_position = (await Game.wait_for_node("/root/Main/OpponentHero")).position
+	
+	return {
+		"position": new_position,
+		"rotation": rotation,
+		"scale": Vector3.ONE,
 	}
 
 

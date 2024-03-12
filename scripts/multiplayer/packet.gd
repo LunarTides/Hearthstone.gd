@@ -284,6 +284,14 @@ func _accept_play_packet(player: Player, sender_peer_id: int, info: Array) -> vo
 		
 		card.location = Card.Location.NONE
 	
+	if card.types.has(Card.Type.HERO):
+		card.trigger_ability(Card.Ability.BATTLECRY, false)
+		await card._wait_for_ability(Card.Ability.BATTLECRY)
+		
+		# TRIGGER_ABILITY relies on that the card can be found in `card.location_index`.
+		# It can't if the card is in the HERO location. So we need to set the location after the ability.
+		card.location = Card.Location.HERO
+	
 	Game.card_played.emit(true, card, board_index, player, sender_peer_id)
 
 

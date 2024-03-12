@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://b54x46cajrme"]
+
+[ext_resource type="Script" path="res://cards/jaina_proudmoore/hero_power/fireblast.gd" id="1_rm0rv"]
+[ext_resource type="PackedScene" uid="uid://ccmb7s7hsvhju" path="res://scenes/card.tscn" id="2_51yga"]
+[ext_resource type="Texture2D" uid="uid://d30626m6lrq4g" path="res://cards/texture_template.png" id="2_xwoo6"]
+
+[node name="Fireblast" type="Node3D" node_paths=PackedStringArray("card")]
+script = ExtResource("1_rm0rv")
+card_name = "Fireblast"
+text = "Hero Power
+Deal 1 damage."
+cost = 2
+texture = ExtResource("2_xwoo6")
+types = Array[int]([6])
+classes = Array[int]([1])
+rarities = Array[int]([0])
+id = 5
+card = NodePath("Card")
+
+[node name="Card" parent="." instance=ExtResource("2_51yga")]

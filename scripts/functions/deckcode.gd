@@ -2,14 +2,14 @@ extends Node
 
 
 #region Public Functions
-## Loads and decodes the specified [param deckcode]. Returns [code]{"class": Player.Class, "cards": Array[Card]}[/code]
+## Loads and decodes the specified [param deckcode]. Returns [code]{"hero": Blueprint, "cards": Array[Card]}[/code]
 func import(deckcode: String, player: Player, validate: bool = true) -> Dictionary:
 	# Reference:
-	# 1/1:30/1 - 30 Sheeps, Mage
-	# 1/1:20,2:5,3/1,2,3,4,5,6,7,8,9,a,b,c,d,e,f,10,11,12,13,14,15,16,17,18 - 1 copy of 20 cards, 2 copies of 5, Mage
+	# 4/1:30/1 - 30 Sheeps, Mage
+	# 4/1:20,2:5,3/1,2,3,4,5,6,7,8,9,a,b,c,d,e,f,10,11,12,13,14,15,16,17,18 - 1 copy of 20 cards, 2 copies of 5, Mage
 	var split: PackedStringArray = deckcode.split("/")
 	
-	var hero_class: Player.Class = split[0].to_int() as Player.Class
+	var hero_id: int = split[0].to_int()
 	var copy_definition: String = split[1]
 	var cards_string: String = split[2]
 	
@@ -55,10 +55,16 @@ func import(deckcode: String, player: Player, validate: bool = true) -> Dictiona
 			
 			cards.append(blueprint.card)
 	
-	if validate and not _validate_deck(deckcode, hero_class, cards):
+	var hero: Blueprint = Blueprint.create_from_id(hero_id, player)
+	
+	if validate and not _validate_deck(deckcode, hero, cards):
+		hero.queue_free()
 		return {}
 	
-	return {"class": hero_class, "cards": cards}
+	if player:
+		hero.card.location = Card.Location.HERO
+	
+	return {"hero": hero, "cards": cards}
 
 
 ## Returns [code]true[/code] if [param deckcode] is a valid deckcode.
@@ -68,8 +74,8 @@ func validate(deckcode: String) -> bool:
 
 
 #region Private Functions
-func _validate_deck(deckcode: String, hero_class: Player.Class, cards: Array[Card]) -> bool:
-	if deckcode == "1/1:30/1":
+func _validate_deck(deckcode: String, hero: Blueprint, cards: Array[Card]) -> bool:
+	if deckcode == "4/1:30/1":
 		# TODO: Uncomment
 		#return OS.is_debug_build()
 		return true
@@ -82,9 +88,10 @@ func _validate_deck(deckcode: String, hero_class: Player.Class, cards: Array[Car
 	if cards.size() > Settings.server.max_deck_size or cards.size() < Settings.server.min_deck_size:
 		return false
 	
-	# The hero class should exist.
-	if not Player.Class.values().has(hero_class):
-		return false
+	# The hero should be a starting hero card.
+	# TODO: Implement
+	#if not hero.tags.has(Card.Tag.STARTING_HERO):
+		#return false
 	
 	return true
 #endregion

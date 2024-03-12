@@ -1,0 +1,19 @@
+[gd_scene load_steps=4 format=3 uid="uid://cjnhuauhjaka6"]
+
+[ext_resource type="Script" path="res://cards/jaina_proudmoore/jaina_proudmoore.gd" id="1_scrip"]
+[ext_resource type="PackedScene" uid="uid://ccmb7s7hsvhju" path="res://scenes/card.tscn" id="2_cardd"]
+[ext_resource type="Texture2D" uid="uid://d30626m6lrq4g" path="res://cards/texture_template.png" id="2_hjs6i"]
+
+[node name="JainaProudmoore" type="Node3D" node_paths=PackedStringArray("card")]
+script = ExtResource("1_scrip")
+card_name = "Jaina Proudmoore"
+texture = ExtResource("2_hjs6i")
+types = Array[int]([4])
+classes = Array[int]([1])
+rarities = Array[int]([0])
+id = 4
+health = 30
+heropower_id = 5
+card = NodePath("Card")
+
+[node name="Card" parent="." instance=ExtResource("2_cardd")]
