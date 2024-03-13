@@ -1,5 +1,6 @@
-[gd_scene load_steps=2 format=3 uid="uid://dr1v6run3aqn0"]
+[gd_scene load_steps=3 format=3 uid="uid://dr1v6run3aqn0"]
 
+[ext_resource type="Theme" uid="uid://chdnrp0ux3pcx" path="res://assets/themes/lobby_theme.tres" id="1_neack"]
 [ext_resource type="Script" path="res://scenes/ui/debug.gd" id="1_u7nor"]
 
 [node name="Debug" type="Control" node_paths=PackedStringArray("show_hide_disabled_text", "show_hide_enabled_text", "fps_disabled_label", "panel", "fps_label", "object_count_label", "node_count_label", "orphan_count_label", "resource_count_label", "process_time_label", "physics_process_time_label", "server_config_label", "peer_id_label", "player_id_label", "latest_packet_label", "debug_buttons_card_id", "send_packet_type", "send_packet_player", "send_packet_info")]
@@ -10,6 +11,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+theme = ExtResource("1_neack")
 script = ExtResource("1_u7nor")
 show_hide_disabled_text = NodePath("ShowHideDisabledText")
 show_hide_enabled_text = NodePath("PanelContainer/ShowHideEnabledText")

@@ -462,7 +462,7 @@ func add_to_location(new_location: Location, index: int) -> void:
 	remove_from_location()
 	
 	location = new_location
-	location_array.insert(max(index, location_array.size()), self)
+	location_array.insert(min(index, location_array.size()), self)
 
 
 ## Triggers an ability.
@@ -650,7 +650,7 @@ static func get_from_index(player: Player, location: Card.Location, index: int) 
 		Location.HERO_POWER:
 			return player.hero.hero_power
 		_:
-			assert(false, "The card doesn't exist at this location.")
+			#assert(false, "The card doesn't exist at this location.")
 			return null
 
 

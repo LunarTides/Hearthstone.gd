@@ -1,107 +1,10 @@
-[gd_scene load_steps=16 format=3 uid="uid://bkgcab4wbckbx"]
+[gd_scene load_steps=6 format=3 uid="uid://bkgcab4wbckbx"]
 
 [ext_resource type="Script" path="res://scenes/ui/lobby.gd" id="1_u14ym"]
 [ext_resource type="PackedScene" uid="uid://dr1v6run3aqn0" path="res://scenes/ui/debug.tscn" id="2_o23aw"]
+[ext_resource type="Theme" uid="uid://chdnrp0ux3pcx" path="res://assets/themes/lobby_theme.tres" id="2_wbpai"]
+[ext_resource type="Material" uid="uid://scoyg017qyk" path="res://assets/themes/rounded_corners.tres" id="3_eyi4j"]
 [ext_resource type="PackedScene" uid="uid://cq0uj6ouxu45l" path="res://scenes/ui/pause_menu.tscn" id="3_il4p6"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bt1qw"]
-bg_color = Color(0.356863, 0.231373, 0.129412, 1)
-corner_radius_top_left = 60
-corner_radius_top_right = 60
-corner_radius_bottom_right = 60
-corner_radius_bottom_left = 60
-shadow_size = 270
-anti_aliasing = false
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1rojc"]
-bg_color = Color(0.117647, 0.101961, 0.0627451, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-corner_radius_top_left = 60
-corner_radius_top_right = 60
-corner_radius_bottom_right = 60
-corner_radius_bottom_left = 60
-expand_margin_left = 10.0
-expand_margin_right = 10.0
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fjp6v"]
-bg_color = Color(0.117647, 0.101961, 0.0627451, 1)
-corner_radius_top_left = 60
-corner_radius_top_right = 60
-corner_radius_bottom_right = 60
-corner_radius_bottom_left = 60
-expand_margin_left = 10.0
-expand_margin_right = 10.0
-
-[sub_resource type="Theme" id="Theme_l2osu"]
-LineEdit/styles/focus = SubResource("StyleBoxFlat_1rojc")
-LineEdit/styles/normal = SubResource("StyleBoxFlat_fjp6v")
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_goeq1"]
-bg_color = Color(0, 0.509804, 0.701961, 1)
-corner_radius_top_left = 20
-corner_radius_top_right = 20
-corner_radius_bottom_right = 20
-corner_radius_bottom_left = 20
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8qtr6"]
-bg_color = Color(0, 0.713726, 0.976471, 1)
-corner_radius_top_left = 20
-corner_radius_top_right = 20
-corner_radius_bottom_right = 20
-corner_radius_bottom_left = 20
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_aa1jc"]
-bg_color = Color(0, 0.317647, 0.447059, 1)
-corner_radius_top_left = 20
-corner_radius_top_right = 20
-corner_radius_bottom_right = 20
-corner_radius_bottom_left = 20
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_x62w4"]
-bg_color = Color(0, 0.509804, 0.701961, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-corner_radius_top_left = 20
-corner_radius_top_right = 20
-corner_radius_bottom_right = 20
-corner_radius_bottom_left = 20
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v6lv5"]
-bg_color = Color(0, 0.546086, 0.482081, 1)
-corner_radius_top_left = 20
-corner_radius_top_right = 20
-corner_radius_bottom_right = 20
-corner_radius_bottom_left = 20
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wx4wt"]
-bg_color = Color(0, 0.756863, 0.67451, 1)
-corner_radius_top_left = 20
-corner_radius_top_right = 20
-corner_radius_bottom_right = 20
-corner_radius_bottom_left = 20
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_g21qg"]
-bg_color = Color(0, 0.34902, 0.305882, 1)
-corner_radius_top_left = 20
-corner_radius_top_right = 20
-corner_radius_bottom_right = 20
-corner_radius_bottom_left = 20
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vhpof"]
-bg_color = Color(0, 0.545098, 0.482353, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-corner_radius_top_left = 20
-corner_radius_top_right = 20
-corner_radius_bottom_right = 20
-corner_radius_bottom_left = 20
 
 [node name="Lobby" type="Control" node_paths=PackedStringArray("join_button", "host_button", "ip_address", "port", "deckcode", "info_label")]
 layout_mode = 3
@@ -110,6 +13,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("2_wbpai")
 script = ExtResource("1_u14ym")
 join_button = NodePath("PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/JoinButton")
 host_button = NodePath("PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/HostButton")
@@ -125,9 +29,10 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0, 0.278431, 0.482353, 1)
+color = Color(0.258824, 0.270588, 0.262745, 1)
 
 [node name="PanelContainer" type="PanelContainer" parent="."]
+material = ExtResource("3_eyi4j")
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -140,7 +45,6 @@ offset_right = 233.0
 offset_bottom = 178.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_bt1qw")
 
 [node name="MarginContainer" type="MarginContainer" parent="PanelContainer"]
 layout_mode = 2
@@ -164,7 +68,6 @@ size_flags_vertical = 3
 [node name="IPAddress" type="LineEdit" parent="PanelContainer/MarginContainer/VBoxContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
-theme = SubResource("Theme_l2osu")
 placeholder_text = "IP Address"
 max_length = 45
 expand_to_text_length = true
@@ -174,7 +77,6 @@ clear_button_enabled = true
 [node name="Port" type="LineEdit" parent="PanelContainer/MarginContainer/VBoxContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
-theme = SubResource("Theme_l2osu")
 text = "4545"
 placeholder_text = "Port"
 max_length = 5
@@ -185,7 +87,6 @@ clear_button_enabled = true
 [node name="Deckcode" type="LineEdit" parent="PanelContainer/MarginContainer/VBoxContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
-theme = SubResource("Theme_l2osu")
 text = "4/1:30/1"
 placeholder_text = "Deckcode"
 expand_to_text_length = true
@@ -201,28 +102,19 @@ theme_override_constants/separation = 30
 [node name="JoinButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 26
-theme_override_styles/normal = SubResource("StyleBoxFlat_goeq1")
-theme_override_styles/hover = SubResource("StyleBoxFlat_8qtr6")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_aa1jc")
-theme_override_styles/focus = SubResource("StyleBoxFlat_x62w4")
+theme_type_variation = &"BlueButton"
 text = "Join"
 
 [node name="HostButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 26
-theme_override_styles/normal = SubResource("StyleBoxFlat_v6lv5")
-theme_override_styles/hover = SubResource("StyleBoxFlat_wx4wt")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_g21qg")
-theme_override_styles/focus = SubResource("StyleBoxFlat_vhpof")
+theme_type_variation = &"GreenButton"
 text = "Host"
 
 [node name="InfoLabel" type="Label" parent="PanelContainer"]
 visible = false
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_font_sizes/font_size = 26
 text = "Please wait for a client to connect..."
 horizontal_alignment = 1
 

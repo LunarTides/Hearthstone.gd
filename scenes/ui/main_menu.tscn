@@ -1,8 +1,11 @@
-[gd_scene load_steps=2 format=3 uid="uid://f1ytyj41tkfo"]
+[gd_scene load_steps=4 format=3 uid="uid://f1ytyj41tkfo"]
 
+[ext_resource type="Material" uid="uid://scoyg017qyk" path="res://assets/themes/rounded_corners.tres" id="1_dwm13"]
 [ext_resource type="Script" path="res://scenes/ui/main_menu.gd" id="1_iumpk"]
+[ext_resource type="Theme" uid="uid://chdnrp0ux3pcx" path="res://assets/themes/lobby_theme.tres" id="1_o0b2u"]
 
 [node name="MainMenu" type="PanelContainer"]
+material = ExtResource("1_dwm13")
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -14,11 +17,50 @@ offset_right = 272.0
 offset_bottom = 272.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("1_o0b2u")
 script = ExtResource("1_iumpk")
 
-[node name="JoinButton" type="Button" parent="."]
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+
+[node name="HBoxContainer" type="VBoxContainer" parent="MarginContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
+theme_override_constants/separation = 25
+
+[node name="UpPad" type="Control" parent="MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 2.0
+
+[node name="PlayButton" type="Button" parent="MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_type_variation = &"BlueButton"
 theme_override_font_sizes/font_size = 51
 text = "Play"
+
+[node name="CreditsButton" type="Button" parent="MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_type_variation = &"GreenButton"
+theme_override_font_sizes/font_size = 51
+text = "Credits"
+
+[node name="ExitButton" type="Button" parent="MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_type_variation = &"RedButton"
+theme_override_font_sizes/font_size = 51
+text = "Exit"
+
+[node name="DownPad" type="Control" parent="MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+size_flags_stretch_ratio = 2.0
+
+[connection signal="pressed" from="MarginContainer/HBoxContainer/PlayButton" to="." method="_on_play_button_pressed"]
+[connection signal="pressed" from="MarginContainer/HBoxContainer/CreditsButton" to="." method="_on_credits_button_pressed"]
+[connection signal="pressed" from="MarginContainer/HBoxContainer/ExitButton" to="." method="_on_exit_button_pressed"]

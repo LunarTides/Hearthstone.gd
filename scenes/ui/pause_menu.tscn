@@ -1,9 +1,12 @@
-[gd_scene load_steps=3 format=3 uid="uid://cq0uj6ouxu45l"]
+[gd_scene load_steps=5 format=3 uid="uid://cq0uj6ouxu45l"]
 
+[ext_resource type="Theme" uid="uid://chdnrp0ux3pcx" path="res://assets/themes/lobby_theme.tres" id="1_777sm"]
 [ext_resource type="Script" path="res://scenes/ui/pause_menu.gd" id="1_fco4o"]
+[ext_resource type="Material" uid="uid://scoyg017qyk" path="res://assets/themes/rounded_corners.tres" id="1_mpoet"]
 [ext_resource type="PackedScene" uid="uid://dxp0opjgunx6p" path="res://scenes/ui/settings_menu.tscn" id="2_t12mj"]
 
 [node name="PauseMenu" type="PanelContainer" node_paths=PackedStringArray("settings_menu")]
+material = ExtResource("1_mpoet")
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -15,34 +18,43 @@ offset_right = 225.0
 offset_bottom = 225.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("1_777sm")
 script = ExtResource("1_fco4o")
 settings_menu = NodePath("SettingsMenu")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 2
 size_flags_horizontal = 4
-size_flags_vertical = 4
+size_flags_vertical = 3
+theme_override_constants/separation = 20
+
+[node name="UpPad" type="Control" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 2.0
 
 [node name="ResumeButton" type="Button" parent="VBoxContainer"]
 layout_mode = 2
-size_flags_horizontal = 4
-size_flags_vertical = 0
-theme_override_font_sizes/font_size = 26
+size_flags_vertical = 3
+theme_type_variation = &"GreenButton"
 text = "Resume"
 
 [node name="SettingsButton" type="Button" parent="VBoxContainer"]
 layout_mode = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-theme_override_font_sizes/font_size = 26
+size_flags_vertical = 3
+theme_type_variation = &"BlueButton"
 text = "Settings"
 
 [node name="ExitButton" type="Button" parent="VBoxContainer"]
 layout_mode = 2
-size_flags_horizontal = 4
-size_flags_vertical = 8
-theme_override_font_sizes/font_size = 26
+size_flags_vertical = 3
+theme_type_variation = &"RedButton"
 text = "Exit"
+
+[node name="DownPad" type="Control" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 2.0
 
 [node name="SettingsMenu" parent="." instance=ExtResource("2_t12mj")]
 visible = false
