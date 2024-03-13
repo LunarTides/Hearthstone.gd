@@ -1,0 +1,54 @@
+[gd_scene load_steps=2 format=3 uid="uid://dd10nq6ay4kcb"]
+
+[ext_resource type="Script" path="res://scenes/ui/credits.gd" id="1_rdx13"]
+
+[node name="Credits" type="Control" node_paths=PackedStringArray("text")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_rdx13")
+speed = 25.0
+text = NodePath("MarginContainer/RichTextLabel")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_top = 1100
+
+[node name="RichTextLabel" type="RichTextLabel" parent="MarginContainer"]
+layout_mode = 2
+bbcode_enabled = true
+text = "[center]This game is licensed under the [url=https://www.gnu.org/licenses/gpl-3.0.html]GPL-3.0[/url] license. See [url=https://github.com/LunarTides/Hearthstone.gd/blob/main/LICENSE]here.[/url]
+
+Wood Texture by [url=https://unsplash.com/@adijoshi11?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash]Aditya Josh[/url] on [url=https://unsplash.com/photos/brown-parquet-board-wG923J9naFQ?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash]Unsplash[/url]
+Rounded Corners Shader by [url=https://godotshaders.com/author/jack/]jack[/url] on [url=https://godotshaders.com/shader/corner-radius/]Godot Shaders[/url]
+
+
+This game uses Godot Engine, available under the following license:
+
+Copyright (c) 2014-present Godot Engine contributors. Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+Thanks for playing <3"
+fit_content = true
+metadata/_edit_group_ = true
+
+[node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="MarginContainer/RichTextLabel"]
+position = Vector2(576, 207)
+scale = Vector2(137.1, 75)
+
+[connection signal="meta_clicked" from="MarginContainer/RichTextLabel" to="." method="_on_rich_text_label_meta_clicked"]
+[connection signal="screen_exited" from="MarginContainer/RichTextLabel/VisibleOnScreenNotifier2D" to="." method="_on_visible_on_screen_notifier_2d_screen_exited"]

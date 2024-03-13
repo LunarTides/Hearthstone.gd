@@ -316,9 +316,14 @@ func wait_for_node(node_path: NodePath) -> Node:
 	return get_node(node_path)
 
 
-## Exits to the main menu. You might want to use [code]Multiplayer.quit[/code] instead.
+## Exits to the lobby. You might want to use [code]Multiplayer.quit[/code] instead.
 func exit_to_lobby() -> void:
 	get_tree().change_scene_to_file.call_deferred("res://scenes/ui/lobby.tscn")
+
+
+## Exits to the main menu. You might want to use [code]Multiplayer.quit[/code] instead.
+func exit_to_main_menu() -> void:
+	get_tree().change_scene_to_file.call_deferred("res://scenes/ui/main_menu.tscn")
 
 
 ## Returns [code]array[index][/code] if it exists, otherwise it returns [code]null[/code].
