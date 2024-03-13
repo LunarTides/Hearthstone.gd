@@ -9,5 +9,7 @@ func setup() -> void:
 	card.add_ability(Card.Ability.BATTLECRY, battlecry)
 
 
-func battlecry() -> void:
+func battlecry() -> int:
 	print_debug("Battlecry")
+	
+	return SUCCESS

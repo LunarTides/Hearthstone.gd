@@ -1,7 +1,7 @@
 [gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://scoyg017qyk"]
 
-[ext_resource type="Shader" path="res://assets/themes/lobby.gdshader" id="1_xo1pe"]
+[ext_resource type="Shader" path="res://assets/themes/corner_radius.gdshader" id="1_4wto0"]
 
 [resource]
-shader = ExtResource("1_xo1pe")
-shader_parameter/corner_scale = 0.275
+shader = ExtResource("1_4wto0")
+shader_parameter/corner_scale = 0.3

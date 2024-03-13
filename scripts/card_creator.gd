@@ -5,8 +5,6 @@ extends EditorScript
 
 
 func _run() -> void:
-	print("Oooo! You want to make a card? :O")
-	
 	if DirAccess.make_dir_absolute("res://cards/rename_me") != OK:
 		push_error("An error occurred when creating the directory: `res://cards/rename_me`.")
 		return
@@ -20,8 +18,10 @@ func setup() -> void:
 	card.add_ability(Card.Ability.BATTLECRY, battlecry)
 
 
-func battlecry() -> void:
+func battlecry() -> int:
 	print_debug("Battlecry")
+	
+	return SUCCESS
 """)
 	
 	script.close()
