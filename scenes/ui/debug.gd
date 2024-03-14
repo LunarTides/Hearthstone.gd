@@ -53,7 +53,7 @@ func _ready() -> void:
 		fps_disabled_label.show()
 		return
 	
-	for key: String in Packet.PacketType.keys():
+	for key: String in Packet.packet_types:
 		send_packet_type.add_item(key)
 	
 	Game.game_started.connect(func() -> void:
@@ -109,7 +109,7 @@ func _on_send_packet_button_pressed() -> void:
 	if not OS.is_debug_build():
 		return
 	
-	var packet_type: Packet.PacketType = Packet.PacketType.values()[send_packet_type.selected]
+	var packet_type: StringName = Packet.packet_types[send_packet_type.selected]
 	
 	@warning_ignore("narrowing_conversion")
 	var player_id: int = send_packet_player.value
@@ -154,7 +154,7 @@ func _on_end_turn_button_pressed() -> void:
 		Game.feedback("Only the server can do this.", Game.FeedbackType.ERROR)
 		return
 	
-	Packet.send(Packet.PacketType.END_TURN, Game.current_player.id, [], true)
+	Packet.send(&"End Turn", Game.current_player.id, [], true)
 
 
 func _on_mana_button_pressed() -> void:

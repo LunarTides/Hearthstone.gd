@@ -35,6 +35,9 @@ func _process(delta: float) -> void:
 	
 	var blueprints: Array = Blueprint.get_all()
 	blueprints.sort_custom(func(a: Blueprint, b: Blueprint) -> bool:
+		if not a.id or not b.id:
+			return true
+		
 		return a.id <= b.id
 	)
 	

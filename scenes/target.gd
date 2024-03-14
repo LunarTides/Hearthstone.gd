@@ -76,7 +76,7 @@ func _input_event(camera: Camera3D, event: InputEvent, pos: Vector3, normal: Vec
 			target_selected.emit(null)
 			return _remove()
 		
-		if collider.location == Card.Location.HERO:
+		if collider.location == &"Hero":
 			if not flags & CAN_SELECT_HEROES:
 				Game.feedback("You cannot select heroes here.", Game.FeedbackType.ERROR)
 				target_selected.emit(null)

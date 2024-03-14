@@ -3,7 +3,7 @@ extends Blueprint
 
 # Called when the card is created
 func setup() -> void:
-	card.add_ability(Card.Ability.BATTLECRY, battlecry)
+	card.add_ability(&"Battlecry", battlecry)
 
 
 func battlecry() -> int:
@@ -12,7 +12,7 @@ func battlecry() -> int:
 			# TODO: Implement better solution.
 			played_card.should_do_effects = false
 			# TODO: Change this to battlecry.
-			played_card.trigger_ability(Card.Ability.CAST, false)
+			played_card.trigger_ability(&"Cast", false)
 			played_card.should_do_effects = true
 	
 	Game.card_played.connect(callback)

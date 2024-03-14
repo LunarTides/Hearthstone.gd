@@ -8,7 +8,7 @@ extends Blueprint
 func setup() -> void:
 	cast_particles.emitting = false
 	
-	card.add_ability(Card.Ability.CAST, cast)
+	card.add_ability(&"Cast", cast)
 
 
 func cast() -> int:

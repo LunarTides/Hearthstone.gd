@@ -5,21 +5,21 @@ extends Resource
 ## @experimental
 
 
-#region Enums
-enum Class {
-	NEUTRAL,
-	MAGE,
-	DRUID,
-	HUNTER,
-	WARRIOR,
-	PRIEST,
-	SHAMAN,
-	PALADIN,
-	WARLOCK,
-	ROGUE,
-	DEMON_HUNTER,
-	DEATH_KNIGHT,
-}
+#region Enum-likes
+var Class: Array[StringName] = [
+	&"Neutral",
+	&"Mage",
+	&"Druid",
+	&"Hunter",
+	&"Warrior",
+	&"Priest",
+	&"Shaman",
+	&"Paladin",
+	&"Warlock",
+	&"Rogue",
+	&"Demon Hunter",
+	&"Death Knight",
+]
 #endregion
 
 
@@ -31,7 +31,7 @@ var name: String
 var id: int
 
 ## The player's class.
-var hero_class: Class
+var hero_class: StringName
 
 ## How much health the player has. DON'T SET MANUALLY.
 var health: int = 30
@@ -77,7 +77,7 @@ var peer_id: int
 ## The player's hero [Card].
 var hero: Card:
 	get:
-		return Card.get_all_owned_by(self).filter(func(card: Card) -> bool: return card.location == Card.Location.HERO)[0]
+		return Card.get_all_owned_by(self).filter(func(card: Card) -> bool: return card.location == &"Hero")[0]
 
 ## Whether or not this player should die. Used for animations.
 var should_die: bool = true:
@@ -95,7 +95,7 @@ var has_used_hero_power_this_turn: bool = false
 #region Public Functions
 ## Sends a packet for the player to play a card. Returns if a packet was sent / success.
 func play_card(card: Card, board_index: int, send_packet: bool = true) -> bool:
-	if card.types.has(Card.Type.MINION) and board.size() >= Settings.server.max_board_space:
+	if card.types.has(&"Minion") and board.size() >= Settings.server.max_board_space:
 		Game.feedback("You don't have enough space on the board.", Game.FeedbackType.ERROR)
 		return false
 	
@@ -107,15 +107,15 @@ func play_card(card: Card, board_index: int, send_packet: bool = true) -> bool:
 		Game.feedback("You don't have enough mana.", Game.FeedbackType.ERROR)
 		return false
 	
-	if card.location == Card.Location.HERO_POWER:
+	if card.location == &"Hero Power":
 		if has_used_hero_power_this_turn:
 			Game.feedback("You have already used your hero power this turn.", Game.FeedbackType.ERROR)
 			return false
 		
-		Packet.send_if(send_packet, Packet.PacketType.HERO_POWER, id, [], true)
+		Packet.send_if(send_packet, &"Hero Power", id, [], true)
 		return true
 	
-	Packet.send_if(send_packet, Packet.PacketType.PLAY, id, [card.location, card.index, board_index, Vector3i(card.position.round())], true)
+	Packet.send_if(send_packet, &"Play", id, [card.location, card.index, board_index, Vector3i(card.position.round())], true)
 	return true
 
 
@@ -125,7 +125,7 @@ func summon_card(card: Card, board_index: int, send_packet: bool = true, bypass_
 		if board.size() >= Settings.server.max_board_space:
 			return false
 	
-	Packet.send_if(send_packet, Packet.PacketType.SUMMON, id, [card.location, card.index, board_index], true)
+	Packet.send_if(send_packet, &"Summon", id, [card.location, card.index, board_index], true)
 	return true
 
 
@@ -134,9 +134,9 @@ func add_to_hand(card: Card, hand_index: int, send_packet: bool = true) -> bool:
 	if hand.size() >= Settings.server.max_hand_size:
 		return false
 	
-	Packet.send_if(send_packet, Packet.PacketType.CREATE_CARD, id, [
+	Packet.send_if(send_packet, &"Create Card", id, [
 		card.id,
-		Card.Location.HAND,
+		&"Hand",
 		hand_index,
 	], true)
 	return true
@@ -144,9 +144,9 @@ func add_to_hand(card: Card, hand_index: int, send_packet: bool = true) -> bool:
 
 ## Sends a packet to add a card to the player's deck. Returns if a packet was sent / success.
 func add_to_deck(card: Card, deck_index: int, send_packet: bool = true) -> bool:
-	Packet.send_if(send_packet, Packet.PacketType.CREATE_CARD, id, [
+	Packet.send_if(send_packet, &"Create Card", id, [
 		card.id,
-		Card.Location.DECK,
+		&"Deck",
 		deck_index,
 	], true)
 	return true
@@ -154,7 +154,7 @@ func add_to_deck(card: Card, deck_index: int, send_packet: bool = true) -> bool:
 
 ## Sends a packet for the player to draw a card. Returns if a packet was sent / success.
 func draw_cards(amount: int, send_packet: bool = true) -> bool:
-	Packet.send_if(send_packet, Packet.PacketType.DRAW_CARDS, id, [amount], true)
+	Packet.send_if(send_packet, &"Draw Cards", id, [amount], true)
 	return true
 
 
