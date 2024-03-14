@@ -1,19 +1,19 @@
 [gd_scene load_steps=4 format=3 uid="uid://c8kcj58hy41o0"]
 
 [ext_resource type="Script" path="res://cards/sheep/sheep.gd" id="1_dgkpx"]
-[ext_resource type="Texture2D" uid="uid://brfqmj5tkr3o6" path="res://cards/sheep/sheep.png" id="2_bx6m4"]
+[ext_resource type="Texture2D" uid="uid://brfqmj5tkr3o6" path="res://cards/sheep/sheep.png" id="2_bd6tv"]
 [ext_resource type="PackedScene" uid="uid://ccmb7s7hsvhju" path="res://scenes/card.tscn" id="2_rjdbt"]
 
 [node name="Sheep" type="Node3D" node_paths=PackedStringArray("card")]
 script = ExtResource("1_dgkpx")
 card_name = "Sheep"
 cost = 1
-texture = ExtResource("2_bx6m4")
-types = Array[int]([1])
-classes = Array[int]([0])
-rarities = Array[int]([0])
+texture = ExtResource("2_bd6tv")
+types = Array[StringName]([&"Minion"])
+classes = Array[StringName]([&"Neutral"])
+rarities = Array[StringName]([&"Free"])
 id = 1
-tribes = Array[int]([1])
+tribes = Array[StringName]([&"Beast"])
 attack = 1
 health = 1
 card = NodePath("Card")

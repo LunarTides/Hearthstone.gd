@@ -263,7 +263,7 @@ func send_deckcode(deckcode: String) -> void:
 
 ## Creates a [Blueprint] from [param path].
 @rpc("authority", "call_local", "reliable")
-func create_blueprint_from_path(path: String, player_id: int, location: Card.Location, index: int) -> Blueprint:
+func create_blueprint_from_path(path: String, player_id: int, location: StringName, index: int) -> Blueprint:
 	var player: Player = Player.get_from_id(player_id)
 	var blueprint: Blueprint = Blueprint.create_from_path(path, player)
 	blueprint.card.add_to_location(location, index)

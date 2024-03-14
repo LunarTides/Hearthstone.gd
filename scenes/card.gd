@@ -11,147 +11,6 @@ signal released(position: Vector3)
 #endregion
 
 
-#region Constant Variables
-const RARITY_COLOR: Dictionary = {
-	Rarity.FREE: Color.WHITE,
-	Rarity.COMMON: Color.GRAY,
-	Rarity.RARE: Color.BLUE,
-	Rarity.EPIC: Color.PURPLE,
-	Rarity.LEGENDARY: Color.GOLD,
-}
-#endregion
-
-
-#region Enums
-enum Type {
-	NONE,
-	MINION,
-	SPELL,
-	WEAPON,
-	HERO,
-	LOCATION,
-	HERO_POWER,
-}
-
-enum Tribe {
-	NONE,
-	BEAST,
-	DEMON,
-	DRAGON,
-	ELEMENTAL,
-	MECH,
-	MURLOC,
-	NAGA,
-	PIRATE,
-	QUILBOAR,
-	TOTEM,
-	UNDEAD,
-	ALL,
-}
-
-enum SpellSchool {
-	NONE,
-	ARCANE,
-	FEL,
-	FIRE,
-	FROST,
-	HOLY,
-	NATURE,
-	SHADOW,
-}
-
-enum Rarity {
-	FREE,
-	COMMON,
-	RARE,
-	EPIC,
-	LEGENDARY,
-}
-
-enum Tag {
-	DRAG_TO_PLAY,
-	STARTING_HERO,
-}
-
-enum Keyword {
-	DIVINE_SHIELD,
-	DORMANT,
-	LIFESTEAL,
-	POISONOUS,
-	REBORN,
-	RUSH,
-	STEALTH,
-	TAUNT,
-	TRADEABLE,
-	FORGE,
-	WINDFURY,
-	OUTCAST,
-	CAST_ON_DRAW,
-	SUMMON_ON_DRAW,
-	UNBREAKABLE,
-	UNLIMITED_ATTACKS,
-	CHARGE,
-	MEGA_WINDFURY,
-	ECHO,
-	MAGNETIC,
-	TWINSPELL,
-	ELUSIVE,
-	FROZEN,
-	IMMUNE,
-	CORRUPT,
-	COLOSSAL,
-	INFUSE,
-	CLEAVE,
-	TITAN,
-	FORGETFUL,
-	CANT_ATTACK,
-}
-
-enum Ability {
-	ADAPT,
-	BATTLECRY,
-	CAST,
-	COMBO,
-	DEATHRATTLE,
-	FINALE,
-	FRENZY,
-	HONORABLE_KILL,
-	INFUSE,
-	INSPIRE,
-	INVOKE,
-	OUTCAST,
-	OVERHEAL,
-	OVERKILL,
-	PASSIVE,
-	SPELLBURST,
-	START_OF_GAME,
-	HERO_POWER,
-	USE,
-	PLACEHOLDER,
-	CONDITION,
-	REMOVE,
-	TICK,
-	TEST,
-}
-
-enum CostType {
-	MANA,
-	ARMOR,
-	HEALTH,
-}
-
-enum Location {
-	NONE,
-	HAND,
-	DECK,
-	BOARD,
-	GRAVEYARD,
-	HERO,
-	HERO_POWER,
-}
-#endregion
-
-
 #region Exported Variables
 ## The texture / image of the card.
 @export var texture_sprite: Sprite3D
@@ -227,8 +86,8 @@ var index: int:
 	get:
 		return location_array.find(self)
 
-## Where the card is. E.g. HAND, BOARD, DECK, ...
-var location: Location = Location.NONE:
+## Where the card is. E.g. Hand, Board, Deck, ...
+var location: StringName = &"None":
 	set(new_location):
 		remove_from_location()
 		location = new_location
@@ -237,19 +96,19 @@ var location: Location = Location.NONE:
 var location_array: Array[Card]:
 	get:
 		match location:
-			Location.HAND:
+			&"Hand":
 				return player.hand
-			Location.DECK:
+			&"Deck":
 				return player.deck
-			Location.BOARD:
+			&"Board":
 				return player.board
-			Location.GRAVEYARD:
+			&"Graveyard":
 				return player.graveyard
-			Location.HERO:
+			&"Hero":
 				return [self]
-			Location.HERO_POWER:
+			&"Hero Power":
 				return [self]
-			Location.NONE:
+			&"None":
 				return []
 			_:
 				push_error("Invalid Location")
@@ -270,13 +129,13 @@ var is_hidden: bool:
 		if override_is_hidden == Game.NullableBool.TRUE:
 			return true
 		
-		if location == Location.BOARD or location == Location.HERO or location == Location.HERO_POWER:
+		if location == &"Board" or location == &"Hero" or location == &"Hero Power":
 			return false
 		
 		if player != Game.player and not Multiplayer.is_server:
 			return true
 		
-		if location == Location.HAND:
+		if location == &"Hand":
 			return false
 		
 		return true
@@ -339,17 +198,17 @@ var card_name: String
 var text: String
 var cost: int
 var texture: Texture2D
-var types: Array[Type]
-var classes: Array[Player.Class]
-var rarities: Array[Rarity]
-var tags: Array[Tag]
+var types: Array[StringName]
+var classes: Array[StringName]
+var rarities: Array[StringName]
+var tags: Array[StringName]
 var collectible: bool
 var id: int
 #endregion
 
 
 #region Minion
-var tribes: Array[Tribe]
+var tribes: Array[StringName]
 #endregion
 
 
@@ -360,7 +219,7 @@ var health: int
 
 
 #region Spell
-var spell_schools: Array[SpellSchool]
+var spell_schools: Array[StringName]
 #endregion
 
 
@@ -406,7 +265,7 @@ func _ready() -> void:
 		
 		has_attacked_this_turn = false
 		
-		if location == Location.BOARD:
+		if location == &"Board":
 			exhausted = false
 		
 		player.has_used_hero_power_this_turn = false
@@ -458,7 +317,7 @@ func remove_from_location() -> void:
 
 
 ## Add the card to the correct [param index] in it's [member location].
-func add_to_location(new_location: Location, index: int) -> void:
+func add_to_location(new_location: StringName, index: int) -> void:
 	remove_from_location()
 	
 	location = new_location
@@ -466,20 +325,20 @@ func add_to_location(new_location: Location, index: int) -> void:
 
 
 ## Triggers an ability.
-func trigger_ability(ability: Ability, send_packet: bool = true) -> bool:
+func trigger_ability(ability: StringName, send_packet: bool = true) -> bool:
 	if not abilities.has(ability):
 		return false
 	
 	# Wait 1 frame so that `await wait_for_ability` can get called before the ability gets triggered.
 	await get_tree().process_frame
 	
-	Packet.send_if(send_packet, Packet.PacketType.TRIGGER_ABILITY, player.id, [location, index, ability])
+	Packet.send_if(send_packet, &"Trigger Ability", player.id, [location, index, ability])
 	
 	return true
 
 
 ## Adds an ability to this card.
-func add_ability(ability_name: Ability, callback: Callable) -> void:
+func add_ability(ability_name: StringName, callback: Callable) -> void:
 	if not abilities.has(ability_name):
 		abilities[ability_name] = []
 	
@@ -493,9 +352,9 @@ func attack_target(target: Variant, send_packet: bool = true) -> bool:
 		return false
 	
 	if target is Card:
-		Packet.send_if(send_packet, Packet.PacketType.ATTACK, player.id, [Packet.AttackMode.CARD_VS_CARD, location, index, target.location, target.index])
+		Packet.send_if(send_packet, &"Attack", player.id, [&"Card Vs Card", location, index, target.location, target.index, 0, 0])
 	else:
-		Packet.send_if(send_packet, Packet.PacketType.ATTACK, player.id, [Packet.AttackMode.CARD_VS_PLAYER, location, index, target.id, 0])
+		Packet.send_if(send_packet, &"Attack", player.id, [&"Card Vs Player", location, index, StringName(), 0, 0, target.id])
 	
 	return true
 
@@ -563,14 +422,14 @@ func layout(instant: bool = false) -> void:
 		_layout_tween.kill()
 		return
 	
-	if location == Location.NONE:
+	if location == &"None":
 		return
 	
 	if not Settings.client.animations and not instant:
 		return layout(true)
 	
 	
-	var method_name: String = "_layout_" + Card.Location.keys()[location].to_lower()
+	var method_name: String = "_layout_" + location.to_snake_case()
 	
 	if not method_name in self:
 		assert(false, "Can't layout the card in this location.")
@@ -635,19 +494,19 @@ static func layout_all_owned_by(player: Player) -> void:
 
 
 ## Gets the [param player]'s [Card] in [param location] at [param index].
-static func get_from_index(player: Player, location: Card.Location, index: int) -> Card:
+static func get_from_index(player: Player, location: StringName, index: int) -> Card:
 	match location:
-		Location.HAND:
+		&"Hand":
 			return Game.get_or_null(player.hand, index)
-		Location.DECK:
+		&"Deck":
 			return Game.get_or_null(player.deck, index)
-		Location.BOARD:
+		&"Board":
 			return Game.get_or_null(player.board, index)
-		Location.GRAVEYARD:
+		&"Graveyard":
 			return Game.get_or_null(player.graveyard, index)
-		Location.HERO:
+		&"Hero":
 			return player.hero
-		Location.HERO_POWER:
+		&"Hero Power":
 			return player.hero.hero_power
 		_:
 			#assert(false, "The card doesn't exist at this location.")
@@ -672,27 +531,25 @@ static func _update_card(card: Card, blueprint: Blueprint) -> void:
 	card.armor_label.text = str(lookup.armor)
 	
 	# Tribes
-	var tribe_keys: PackedStringArray = PackedStringArray(Card.Tribe.keys())
-	card.tribe_label.text = " / ".join(lookup.tribes.map(func(tribe: Card.Tribe) -> String: return tribe_keys[tribe].capitalize()))
+	card.tribe_label.text = " / ".join(lookup.tribes)
 	
 	# Spell schools
-	var spell_school_keys: PackedStringArray = PackedStringArray(Card.SpellSchool.keys())
-	card.spell_school_label.text = " / ".join(lookup.spell_schools.map(func(spell_school: Card.SpellSchool) -> String: return spell_school_keys[spell_school].capitalize()))
+	card.spell_school_label.text = " / ".join(lookup.spell_schools)
 	
 	# Rarity Color
 	var rarity_node: MeshInstance3D = card.get_node("Mesh/Rarity")
-	rarity_node.visible = lookup.rarities.size() > 0 and not lookup.rarities.has(Rarity.FREE)
+	rarity_node.visible = lookup.rarities.size() > 0 and not lookup.rarities.has(&"Free")
 	
 	var rarity_material: StandardMaterial3D = StandardMaterial3D.new()
-	if lookup.rarities.size() > 0:
-		rarity_material.albedo_color = Card.RARITY_COLOR.get(lookup.rarities[0])
+	if lookup.rarities.size() > 0 and not Engine.is_editor_hint():
+		rarity_material.albedo_color = Blueprint.all_rarity_colors.get(lookup.rarities[0], Color.WHITE)
 	rarity_material.cull_mode = BaseMaterial3D.CULL_DISABLED
 	rarity_node.set_surface_override_material(0, rarity_material)
 	
 	# Show non-essential labels
-	if lookup.types.has(Card.Type.MINION):
+	if lookup.types.has(&"Minion"):
 		card.tribe_label.show()
-	if lookup.types.has(Card.Type.SPELL):
+	if lookup.types.has(&"Spell"):
 		card.spell_school_label.show()
 	
 	# Cost
@@ -705,13 +562,13 @@ static func _update_card(card: Card, blueprint: Blueprint) -> void:
 	card.attack_label.visible = attack_visible
 	
 	# Health
-	var health_visible: bool = lookup.health > 0 or blueprint.health > 0 or lookup.tags.has(Tag.STARTING_HERO)
+	var health_visible: bool = lookup.health > 0 or blueprint.health > 0 or lookup.tags.has(&"Starting Hero")
 	card.get_node("Mesh/Health").visible = health_visible
 	card.get_node("Mesh/HealthFrame").visible = health_visible
 	card.health_label.visible = health_visible
 	
 	# Armor
-	var armor_visible: bool = lookup.armor > 0 or blueprint.armor > 0 or lookup.tags.has(Tag.STARTING_HERO)
+	var armor_visible: bool = lookup.armor > 0 or blueprint.armor > 0 or lookup.tags.has(&"Starting Hero")
 	card.get_node("Mesh/Armor").visible = armor_visible
 	card.armor_label.visible = armor_visible
 	
@@ -724,8 +581,8 @@ static func _update_card(card: Card, blueprint: Blueprint) -> void:
 	
 	# Tribe / Spell School
 	var tribe_visible: bool = (
-		(lookup.tribes.size() > 0 and lookup.tribes[0] != Tribe.NONE) or
-		(lookup.spell_schools.size() > 0 and lookup.spell_schools[0] != SpellSchool.NONE) 
+		(lookup.tribes.size() > 0 and lookup.tribes[0] != &"None") or
+		(lookup.spell_schools.size() > 0 and lookup.spell_schools[0] != &"None") 
 	)
 	
 	card.get_node("Mesh/TribeOrSpellSchool").visible = tribe_visible
@@ -735,20 +592,20 @@ static func _update_card(card: Card, blueprint: Blueprint) -> void:
 
 
 #region Private Functions
-func _wait_for_ability(target_ability: Ability) -> void:
+func _wait_for_ability(target_ability: StringName) -> void:
 	while true:
 		var info: Array = await Game.card_ability_triggered
 		
 		var after: bool = info[0]
 		var card: Card = info[1]
-		var ability: Ability = info[2]
+		var ability: StringName = info[2]
 		
 		if after and card == self and ability == target_ability:
 			break
 
 
 func _update() -> void:
-	if location == Card.Location.NONE:
+	if location == &"None":
 		remove_from_location()
 		queue_free()
 		return
@@ -757,7 +614,7 @@ func _update() -> void:
 	
 	is_hidden = is_hidden
 	# TODO: Put this condition into a function.
-	if is_hidden and location != Location.HAND and location != Location.BOARD and location != Location.HERO and location != Location.HERO_POWER:
+	if is_hidden and location != &"Hand" and location != &"Board" and location != &"Hero" and location != &"Hero Power":
 		hide()
 		return
 	
@@ -765,12 +622,12 @@ func _update() -> void:
 	
 	Card._update_card(self, blueprint)
 	
-	if location == Location.HERO:
+	if location == &"Hero":
 		armor_label.text = str(player.armor)
 		health_label.text = str(player.health)
 	
 	# TODO: Should this be done here?
-	if health <= 0 and location == Location.BOARD and not is_dying and should_die:
+	if health <= 0 and location == &"Board" and not is_dying and should_die:
 		is_dying = true
 		Game.card_killed.emit(false, self, player, multiplayer.get_unique_id())
 		
@@ -790,7 +647,7 @@ func _update() -> void:
 			
 			await tween.finished
 		
-		add_to_location(Location.GRAVEYARD, player.graveyard.size())
+		add_to_location(&"Graveyard", player.graveyard.size())
 		override_is_hidden = Game.NullableBool.NULL
 		# HACK: Disabling the collision so it doesn't interfere.
 		$CollisionShape3D.disabled = true
@@ -987,12 +844,12 @@ func _start_dragging() -> void:
 	if Game.player != player or Multiplayer.is_server:
 		return
 	
-	if location == Location.BOARD:
+	if location == &"Board":
 		_start_attacking()
 		return
 	
 	# Drag to play.
-	if tags.has(Tag.DRAG_TO_PLAY):
+	if tags.has(&"Drag To Play"):
 		var target: Variant = await Target.prompt(
 			position,
 			self,
@@ -1006,12 +863,12 @@ func _start_dragging() -> void:
 			return
 		
 		if target is Card:
-			if target.location == Location.HERO_POWER:
+			if target.location == &"Hero Power":
 				Game.feedback("Invalid Target.", Game.FeedbackType.ERROR)
 				return
 			
-			Packet.send(Packet.PacketType.SET_DRAG_TO_PLAY_TARGET, player.id, [
-				Packet.TargetMode.CARD,
+			Packet.send(&"Set Drag To Play Target", player.id, [
+				&"Card",
 				location,
 				index,
 				target.player.id,
@@ -1019,12 +876,12 @@ func _start_dragging() -> void:
 				target.index,
 			])
 		else:
-			Packet.send(Packet.PacketType.SET_DRAG_TO_PLAY_TARGET, player.id, [
-				Packet.TargetMode.PLAYER,
+			Packet.send(&"Set Drag To Play Target", player.id, [
+				&"Player",
 				location,
 				index,
 				target.id,
-				0,
+				StringName(),
 				0,
 			])
 		
@@ -1072,7 +929,7 @@ func _start_attacking() -> void:
 	var target: Variant = await Target.prompt(position, self, Target.CAN_SELECT_CARDS | Target.CAN_SELECT_HEROES | Target.CAN_SELECT_ENEMY_TARGETS)
 	
 	if target is Card:
-		if target.location != Location.BOARD:
+		if target.location != &"Board":
 			return
 	
 	attack_target(target) 
@@ -1080,7 +937,7 @@ func _start_attacking() -> void:
 
 func _make_way(stop: bool = false) -> void:
 	for card: Card in Card.get_all_owned_by(player).filter(func(card: Card) -> bool:
-		return card != self and card.location == Card.Location.BOARD
+		return card != self and card.location == &"Board"
 	):
 		if is_dragging:
 			card._make_way_for(self)

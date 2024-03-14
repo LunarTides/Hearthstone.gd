@@ -36,6 +36,15 @@ func register_hook(_signal: Signal, callable: Callable) -> void:
 		await _register_hook(_signal, callable)
 
 
+func register_keyword(keyword: StringName) -> void:
+	Blueprint.all_keywords.append(keyword)
+
+
+func register_rarity(rarity: StringName, color: Color) -> void:
+	Blueprint.all_rarities.append(rarity)
+	Blueprint.all_rarity_colors[rarity] = color
+
+
 ## Waits for the modules to respond to [param _signal]. Use [code]await[/code] on this.[br]
 ## Returns [code]{"result: bool, "amount": int}[/code].
 func wait_for_response(_signal: Signal) -> Dictionary:

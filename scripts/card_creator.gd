@@ -15,7 +15,7 @@ func _run() -> void:
 
 # Called when the card is created
 func setup() -> void:
-	card.add_ability(Card.Ability.BATTLECRY, battlecry)
+	card.add_ability(&"Battlecry", battlecry)
 
 
 func battlecry() -> int:

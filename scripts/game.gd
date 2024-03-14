@@ -35,7 +35,7 @@ signal card_revealed(after: bool, card: Card, player: Player, sender_peer_id: in
 signal card_summoned(after: bool, card: Card, board_index: int, player: Player, sender_peer_id: int)
 
 ## Emits whenever one of a card's abilities gets triggered for any player.
-signal card_ability_triggered(after: bool, card: Card, ability: Card.Ability, player: Player, sender_peer_id: int)
+signal card_ability_triggered(after: bool, card: Card, ability: StringName, player: Player, sender_peer_id: int)
 #endregion
 
 
@@ -260,7 +260,7 @@ func start_game() -> void:
 	await wait_for_node("/root/Main")
 	Multiplayer.start_game.rpc(deckcodes[player1.peer_id], deckcodes[player2.peer_id])
 	
-	Multiplayer.create_blueprint_from_path.rpc("res://cards/the_coin/the_coin.tscn", player2.id, Card.Location.HAND, player2.hand.size())
+	Multiplayer.create_blueprint_from_path.rpc("res://cards/the_coin/the_coin.tscn", player2.id, &"Hand", player2.hand.size())
 
 
 ## Sends a packet to end the [member current_player]'s turn. Returns if a packet was sent.
@@ -269,7 +269,7 @@ func end_turn() -> bool:
 		feedback("It is not your turn.", FeedbackType.ERROR)
 		return false
 	
-	Packet.send(Packet.PacketType.END_TURN, current_player.id, [], true)
+	Packet.send(&"End Turn", current_player.id, [], true)
 	return true
 
 

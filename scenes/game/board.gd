@@ -38,7 +38,7 @@ func _ready() -> void:
 	timer.timeout.connect(func() -> void:
 		for card: Card in Card.get_all().filter(func(card: Card) -> bool: return not _connected.has(card)):
 			card.released.connect(func(pos: Vector3) -> void:
-				if card.location == Card.Location.HAND and self["player%d" % (card.player.id + 1)].get_overlapping_areas().has(card):
+				if card.location == &"Hand" and self["player%d" % (card.player.id + 1)].get_overlapping_areas().has(card):
 					_place_card(card.player, card, pos)
 			)
 			_connected.append(card)
@@ -54,6 +54,6 @@ func _place_card(player: Player, card: Card, pos: Vector3) -> void:
 
 func _get_index(pos: Vector3, player: Player) -> int:
 	return Card.get_all_owned_by(player).filter(func(card: Card) -> bool:
-		return card.global_position.x < pos.x and card.location == Card.Location.BOARD
+		return card.global_position.x < pos.x and card.location == &"Board"
 	).size()
 #endregion
