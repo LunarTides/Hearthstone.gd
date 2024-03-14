@@ -4,59 +4,82 @@ extends Node
 
 
 #region Signals
+# TODO: Add documentation.
+signal requested(what: StringName, info: Array)
+
 ## Emits when all modules have responded to a signal. Use [method wait_for_response] instead of [code]await[/code]-ing this.
-signal response(result: Dictionary)
+signal responded(result: Dictionary)
+
+## Emits when the modules have stopped processing a request. Used internally.
+signal stopped_processing
 #endregion
 
 
 #region Private Variables
-var _running: bool = false
+var _processing: bool = false
 var _result: bool = true
 var _modules_responded: int = 0
+var _modules_count: int = 0
 
 var _queue: Array
-var _modules_for_signal: Dictionary
 #endregion
 
 
 #region Public Functions
-## Registers a hook into a signal in the game. Calls [param callable] whenever that signal gets emitted.[br]
-## [param callable] needs to return a [bool] and gets the arguments from the [param _signal]
-func register_hook(_signal: Signal, callable: Callable) -> void:
-	# Register the module for the signal.
-	var signal_name: StringName = _signal.get_name()
-	
-	if not _modules_for_signal.get(signal_name):
-		_modules_for_signal[signal_name] = 0
-	
-	_modules_for_signal[signal_name] += 1
+## Registers a hook. Calls [param callable] whenever something happens.
+func register_hooks(callable: Callable) -> void:
+	_modules_count += 1
 	
 	# Keep on connecting.
 	while true:
-		await _register_hook(_signal, callable)
+		await _register_hooks(callable)
 
 
+## Registers a new keyword to be used in-game.
 func register_keyword(keyword: StringName) -> void:
 	Blueprint.all_keywords.append(keyword)
 
 
+## Registers a new rarity to be used in-game.
 func register_rarity(rarity: StringName, color: Color) -> void:
 	Blueprint.all_rarities.append(rarity)
 	Blueprint.all_rarity_colors[rarity] = color
 
 
-## Waits for the modules to respond to [param _signal]. Use [code]await[/code] on this.[br]
-## Returns [code]{"result: bool, "amount": int}[/code].
-func wait_for_response(_signal: Signal) -> Dictionary:
-	var signal_name: StringName = _signal.get_name()
+## Requests the modules to respond to a request.
+func request(what: StringName, info: Array = []) -> bool:
+	print_verbose("[Modules] Requested %s with the following info: %s" % [what, info])
+	await Modules.wait_in_queue()
 	
-	if not _modules_for_signal.get(signal_name):
+	requested.emit(what, info)
+	
+	print_verbose("[Modules] Waiting for response...")
+	var modules_result: Dictionary = await Modules.wait_for_response()
+	print_verbose("[Modules] Modules Responded to %s. Parsing response..." % what)
+	
+	if modules_result.is_empty():
+		# No CSCs in modules.
+		print_verbose("[Modules] No Modules Responded. Passing...")
+		return false
+	
+	var modules_response: bool = modules_result.result
+	var modules_amount: int = modules_result.amount
+	
+	print_verbose("[Modules] %d Modules Responded. Result: %s\n" % [modules_amount, modules_response])
+	
+	return modules_response
+
+
+## Waits for the modules to respond to a request. Use [code]await[/code] on this.[br]
+## Returns [code]{"result: bool, "amount": int}[/code].
+func wait_for_response() -> Dictionary:
+	if _modules_count <= 0:
 		return {}
 	
-	return await response
+	return await responded
 
 
-## Waits for the [param _signal] to be emitted and processed by the modules.[br]
+## Waits for the all queued requests to be processed by the modules.[br]
 ## Use [code]await[/code] on this before emitting a signal to be used by modules.
 ## [codeblock]
 ## await Modules.wait_in_queue(my_signal)
@@ -65,9 +88,21 @@ func wait_for_response(_signal: Signal) -> Dictionary:
 ## 
 ## var result: Dictionary = await Modules.wait_for_response(my_signal)
 ## [/codeblock]
-func wait_in_queue(_signal: Signal) -> void:
-	if not _running:
+##
+## [b]Note: Use [method request] instead in a real scenario.[/b]
+func wait_in_queue() -> void:
+	if _queue.is_empty():
 		# Don't add to queue if the module system is idle.
+		if _processing:
+			print_verbose("[Modules] Queue is empty, but we are already processing a request. Waiting...")
+			
+			await stopped_processing
+			await get_tree().process_frame
+			
+			print_verbose("[Modules] Stopped processing previous request. Processing...")
+		else:
+			print_verbose("[Modules] Queue is empty. Processing immediately...")
+		
 		return
 	
 	# Add to queue.
@@ -77,7 +112,7 @@ func wait_in_queue(_signal: Signal) -> void:
 	print_verbose("[Modules] `%d` waiting in queue..." % id)
 	
 	while true:
-		await wait_for_response(_signal)
+		await wait_for_response()
 		
 		if _queue[0] == id:
 			break
@@ -93,17 +128,14 @@ func wait_in_queue(_signal: Signal) -> void:
 
 
 #region Private Functions
-func _register_hook(_signal: Signal, callable: Callable) -> void:
-	var signal_name: StringName = _signal.get_name()
-	
+func _register_hooks(callable: Callable) -> void:
 	# Wait for the signal.
-	var info: Variant = await _signal
+	_processing = false
+	stopped_processing.emit()
 	
-	_running = true
+	var info: Variant = await requested
 	
-	# Turn the response into an array.
-	if not info is Array:
-		info = [info]
+	_processing = true
 	
 	# Call the callback function with the result of the signal.
 	var callable_result: bool = callable.callv(info)
@@ -112,14 +144,14 @@ func _register_hook(_signal: Signal, callable: Callable) -> void:
 	_modules_responded += 1
 	_result = _result and callable_result
 	
-	if _modules_responded == _modules_for_signal[signal_name]:
+	if _modules_responded == _modules_count:
 		# All modules have responded
 		
 		# HACK: Wait 1 frame so that the `wait_for_response` method has a chance of being called
 		#       before the response gets emitted.
 		await get_tree().process_frame
 		
-		response.emit({
+		responded.emit({
 			"result": _result,
 			"amount": _modules_responded,
 		})
@@ -127,5 +159,4 @@ func _register_hook(_signal: Signal, callable: Callable) -> void:
 		# Reset.
 		_modules_responded = 0
 		_result = true
-		_running = false
 #endregion
