@@ -95,7 +95,7 @@ func send_if(condition: bool, packet_type: Packet.PacketType, player_id: int, in
 #region Private Functions
 @rpc("any_peer", "call_local", "reliable")
 func _send(packet_type: PacketType, player_id: int, info: Array) -> void:
-	var result: PacketFailureType = __send(packet_type, player_id, info)
+	var result: PacketFailureType = await __send(packet_type, player_id, info)
 	
 	if result != PacketFailureType.NONE:
 		push_warning("Packet dropped with code [%s] ^^^^" % PacketFailureType.keys()[result])
@@ -114,7 +114,7 @@ func __send(packet_type: PacketType, player_id: int, info: Array) -> PacketFailu
 	print(get_readable(sender_peer_id, packet_type, player_id, info))
 	
 	# Anticheat
-	if not Anticheat.run(packet_type, sender_peer_id, actor_player, info):
+	if not await Anticheat.run(packet_type, sender_peer_id, actor_player, info):
 		var consequence_text: String
 		
 		match Settings.server.anticheat_consequence:

@@ -2,6 +2,12 @@ extends Node
 ## @experimental
 
 
+#region Signals
+## Emits when the anticheat handles a request. Supports the Module system: on [code]false[/code], fail the anticheat.
+signal request(packet_type: Packet.PacketType, sender_peer_id: int, sender_player: Player, actor_player: Player, info: Array)
+#endregion
+
+
 #region Enums
 enum Consequence {
 	## Drops the cheated packet.
@@ -32,8 +38,32 @@ func run(packet_type: Packet.PacketType, sender_peer_id: int, actor_player: Play
 	var method: Callable = self[method_name]
 	
 	assert(method, "No anticheat logic for '%s'" % Packet.PacketType.keys()[packet_type])
-	return method.call(sender_peer_id, sender_player, actor_player, info)
-#endregion
+	var core_anticheat_response: bool = method.call(sender_peer_id, sender_player, actor_player, info)
+	
+	print_verbose("\n[AC] Core Response: %s" % core_anticheat_response)
+	
+	if not core_anticheat_response:
+		return false
+	
+	# Passed the core anticheat. Let the modules do their anticheat.
+	await Modules.wait_in_queue(request)
+	
+	request.emit(packet_type, sender_peer_id, sender_player, actor_player, info)
+	
+	var modules_anticheat_result: Dictionary = await Modules.wait_for_response(request)
+	print_verbose("[AC] Modules Responded. Parsing response...")
+	
+	if modules_anticheat_result.size() == 0:
+		# No anticheat in modules.
+		print_verbose("[AC] No Modules Responded. Passing...")
+		return true
+	
+	var modules_anticheat_response: bool = modules_anticheat_result.result
+	var modules_anticheat_amount: int = modules_anticheat_result.amount
+	
+	print_verbose("[AC] %d Modules Responded to %s. Result: %s\n" % [modules_anticheat_amount, packet_name, modules_anticheat_response])
+	
+	return modules_anticheat_response
 
 
 #region Helper Functions

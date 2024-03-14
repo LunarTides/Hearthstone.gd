@@ -25,9 +25,12 @@ UPnP="*res://scripts/multiplayer/upnp.gd"
 Packet="*res://scripts/multiplayer/packet.gd"
 Anticheat="*res://scripts/multiplayer/anticheat.gd"
 Settings="*res://scripts/settings.gd"
+Modules="*res://scripts/modules.gd"
+TauntModule="res://modules/taunt/taunt.gd"
 
 [debug]
 
+settings/stdout/verbose_stdout=true
 gdscript/warnings/unused_variable=0
 gdscript/warnings/unused_parameter=0
 gdscript/warnings/shadowed_variable=0
@@ -43,6 +46,7 @@ folder_colors={
 "res://assets/icons/": "blue",
 "res://assets/models/": "orange",
 "res://cards/": "pink",
+"res://modules/": "teal",
 "res://scenes/": "red",
 "res://scenes/game/": "green",
 "res://scenes/ui/": "teal",
