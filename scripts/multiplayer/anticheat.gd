@@ -36,18 +36,24 @@ func run(packet_type: Packet.PacketType, sender_peer_id: int, actor_player: Play
 #endregion
 
 
-#region Private Functions
 #region Helper Functions
+## Sends feedback to the client. Optimized for the anticheat.
+func feedback(text: String, sender_peer_id: int) -> void:
+	Multiplayer.feedback.rpc_id(sender_peer_id, "Anticheat Failed - %s" % text)
+
+
 ## Returns if [param condition] is true and [member anticheat_level] is more or equal to [param min_level].
-func _check(condition: bool, min_level: int) -> bool:
+func check(condition: bool, min_level: int) -> bool:
 	return condition and (Settings.server.anticheat_level >= min_level or Settings.server.anticheat_level < 0)
 
 
-func _check_card(player: Player, location: Card.Location, index: int, sender_peer_id: int) -> bool:
+## If the card gotten from [param player], [param location], [param index] doesn't exist, returns [code]true[/code].[br]
+## Use this instead of [method check].
+func check_card(player: Player, location: Card.Location, index: int, sender_peer_id: int) -> bool:
 	var card: Card = Card.get_from_index(player, location, index)
 	
-	if _check(not card, 1):
-		_feedback("The specified card does not exist in Player %d's %s at %d." % [
+	if check(not card, 1):
+		feedback("The specified card does not exist in Player %d's %s at %d." % [
 			player.id + 1,
 			Card.Location.keys()[location],
 			index,
@@ -58,7 +64,7 @@ func _check_card(player: Player, location: Card.Location, index: int, sender_pee
 
 
 ## Returns if [param info]'s size is equal to [param types]'s size and the elements in [param info] matches the types in [param types].
-func _info_check(info: Array, types: PackedInt32Array) -> bool:
+func info_check(info: Array, types: PackedInt32Array) -> bool:
 	if info.size() != types.size():
 		return false
 	
@@ -88,7 +94,7 @@ func _info_check(info: Array, types: PackedInt32Array) -> bool:
 
 
 ## Returns if [param info] is in the history within [param range].
-func _in_packet_history(info: Array, history_range: int, only_use_server_packets: bool = false) -> bool:
+func in_packet_history(info: Array, history_range: int, only_use_server_packets: bool = false) -> bool:
 	history_range = history_range if history_range < Packet.history.size() else Packet.history.size()
 	
 	for i: int in history_range:
@@ -100,20 +106,16 @@ func _in_packet_history(info: Array, history_range: int, only_use_server_packets
 			return true
 	
 	return false
-
-
-# Send feedback to the client. Optimized for the anticheat.
-func _feedback(text: String, sender_peer_id: int) -> void:
-	Multiplayer.feedback.rpc_id(sender_peer_id, "Anticheat Failed - %s" % text)
 #endregion
 
 
+#region Private Functions
 #region Packet Specific Anticheat
 # Attack
 func _run_attack_packet(sender_peer_id: int, sender_player: Player, actor_player: Player, info: Array) -> bool:
 	# The info needs to be correct.
-	if not _info_check(info, [TYPE_INT, TYPE_INT, TYPE_INT, TYPE_INT, TYPE_INT]):
-		_feedback("Invalid ATTACK info.", sender_peer_id)
+	if not info_check(info, [TYPE_INT, TYPE_INT, TYPE_INT, TYPE_INT, TYPE_INT]):
+		feedback("Invalid ATTACK info.", sender_peer_id)
 		return false
 	
 	var attack_mode: Packet.AttackMode = info[0]
@@ -131,47 +133,47 @@ func _run_attack_packet(sender_peer_id: int, sender_player: Player, actor_player
 	var target_player: Player = Player.get_from_id(target_location_or_player_id)
 	
 	# The player whose turn it is should be the same player as the one who sent the packet.
-	if _check(sender_player != Game.current_player, 2):
-		_feedback("It is not this player's turn.", sender_peer_id)
+	if check(sender_player != Game.current_player, 2):
+		feedback("It is not this player's turn.", sender_peer_id)
 		return false
 	
 	# The player who attacks should be the same player as the one who sent the packet.
-	if _check(sender_player != actor_player, 2):
-		_feedback("You are not authorized to attack for your opponent.", sender_peer_id)
+	if check(sender_player != actor_player, 2):
+		feedback("You are not authorized to attack for your opponent.", sender_peer_id)
 		return false
 	
 	# Test the attacker card
 	if attack_mode == Packet.AttackMode.CARD_VS_CARD or attack_mode == Packet.AttackMode.CARD_VS_PLAYER:
 		# The attacking card needs to exist.
-		if _check(attacker_card == null, 1):
-			_feedback("The attacking card was not found.", sender_peer_id)
+		if check(attacker_card == null, 1):
+			feedback("The attacking card was not found.", sender_peer_id)
 			return false
 		
 		# The attacking card needs to be owned by the actor.
-		if _check(attacker_card.player != actor_player, 2):
-			_feedback("You don't own the attacking card.", sender_peer_id)
+		if check(attacker_card.player != actor_player, 2):
+			feedback("You don't own the attacking card.", sender_peer_id)
 			return false
 		
 		# The attacking card cannot have attacked this turn.
-		if _check(attacker_card.has_attacked_this_turn, 2):
-			_feedback("The attacker has already attacked this turn.", sender_peer_id)
+		if check(attacker_card.has_attacked_this_turn, 2):
+			feedback("The attacker has already attacked this turn.", sender_peer_id)
 			return false
 		
 		# The attacking card cannot be exhausted.
-		if _check(attacker_card.exhausted, 2):
-			_feedback("The attacker is exhausted.", sender_peer_id)
+		if check(attacker_card.exhausted, 2):
+			feedback("The attacker is exhausted.", sender_peer_id)
 			return false
 	
 	# Test the target card
 	if attack_mode == Packet.AttackMode.CARD_VS_CARD or attack_mode == Packet.AttackMode.PLAYER_VS_CARD:
 		# The target card needs to exist.
-		if _check(target_card == null, 1):
-			_feedback("The target card was not found.", sender_peer_id)
+		if check(target_card == null, 1):
+			feedback("The target card was not found.", sender_peer_id)
 			return false
 		
 		# The target card needs to be owned by the actor's opponent.
-		if _check(target_card.player != actor_player.opponent, 2):
-			_feedback("You own the target card.", sender_peer_id)
+		if check(target_card.player != actor_player.opponent, 2):
+			feedback("You own the target card.", sender_peer_id)
 			return false
 	
 	# TODO: Implement this when player attacking is added.
@@ -184,8 +186,8 @@ func _run_attack_packet(sender_peer_id: int, sender_player: Player, actor_player
 # Create Card
 func _run_create_card_packet(sender_peer_id: int, sender_player: Player, actor_player: Player, info: Array) -> bool:
 	# The info needs to be correct.
-	if not _info_check(info, [TYPE_INT, TYPE_INT, TYPE_INT]):
-		_feedback("Invalid CREATE_CARD info.", sender_peer_id)
+	if not info_check(info, [TYPE_INT, TYPE_INT, TYPE_INT]):
+		feedback("Invalid CREATE_CARD info.", sender_peer_id)
 		return false
 	
 	var id: int = info[0]
@@ -193,24 +195,24 @@ func _run_create_card_packet(sender_peer_id: int, sender_player: Player, actor_p
 	var location_index: int = info[2]
 	
 	# Id needs to be valid.
-	if _check(Blueprint.create_from_id(id, Game.player) == null, 1):
-		_feedback("Invalid id.", sender_peer_id)
+	if check(Blueprint.create_from_id(id, Game.player) == null, 1):
+		feedback("Invalid id.", sender_peer_id)
 		return false
 	
 	# Only the server can do this.
-	if _check(true, 2):
-		_feedback("Only the server can do this.", sender_peer_id)
+	if check(true, 2):
+		feedback("Only the server can do this.", sender_peer_id)
 		return false
 	
 	if location == Card.Location.HAND:
 		# The player needs to have enough space in their hand.
-		if _check(actor_player.hand.size() >= Settings.server.max_hand_size, 1):
-			_feedback("You do not have enough space in your hand.", sender_peer_id)
+		if check(actor_player.hand.size() >= Settings.server.max_hand_size, 1):
+			feedback("You do not have enough space in your hand.", sender_peer_id)
 			return false
 	elif location == Card.Location.BOARD:
 		# The player needs to have enough space on their board.
-		if _check(actor_player.board.size() >= Settings.server.max_board_space, 1):
-			_feedback("You do not have enough space on your board.", sender_peer_id)
+		if check(actor_player.board.size() >= Settings.server.max_board_space, 1):
+			feedback("You do not have enough space on your board.", sender_peer_id)
 			return false
 	
 	return true
@@ -219,15 +221,15 @@ func _run_create_card_packet(sender_peer_id: int, sender_player: Player, actor_p
 # Draw Cards
 func _run_draw_cards_packet(sender_peer_id: int, sender_player: Player, actor_player: Player, info: Array) -> bool:
 	# The info needs to be correct.
-	if not _info_check(info, [TYPE_INT]):
-		_feedback("Invalid DRAW_CARDS info.", sender_peer_id)
+	if not info_check(info, [TYPE_INT]):
+		feedback("Invalid DRAW_CARDS info.", sender_peer_id)
 		return false
 	
 	var amount: int = info[0]
 	
 	# Only the server can do this.
-	if _check(true, 2):
-		_feedback("Only the server can do this.", sender_peer_id)
+	if check(true, 2):
+		feedback("Only the server can do this.", sender_peer_id)
 		return false
 	
 	return true
@@ -236,18 +238,18 @@ func _run_draw_cards_packet(sender_peer_id: int, sender_player: Player, actor_pl
 # End Turn
 func _run_end_turn_packet(sender_peer_id: int, sender_player: Player, actor_player: Player, info: Array) -> bool:
 	# The info needs to be correct.
-	if not _info_check(info, []):
-		_feedback("Invalid END_TURN info.", sender_peer_id)
+	if not info_check(info, []):
+		feedback("Invalid END_TURN info.", sender_peer_id)
 		return false
 	
 	# The player whose turn it is should be the same player as the one who sent the packet.
-	if _check(sender_player != Game.current_player, 2):
-		_feedback("It is not your turn.", sender_peer_id)
+	if check(sender_player != Game.current_player, 2):
+		feedback("It is not your turn.", sender_peer_id)
 		return false
 	
 	# The player who ends the turn should be the same player as the one who sent the packet.
-	if _check(sender_player != actor_player, 2):
-		_feedback("You are not authorized to end your opponent's turn.", sender_peer_id)
+	if check(sender_player != actor_player, 2):
+		feedback("You are not authorized to end your opponent's turn.", sender_peer_id)
 		return false
 	
 	return true
@@ -256,25 +258,25 @@ func _run_end_turn_packet(sender_peer_id: int, sender_player: Player, actor_play
 # Hero Power
 func _run_hero_power_packet(sender_peer_id: int, sender_player: Player, actor_player: Player, info: Array) -> bool:
 	# The info needs to be correct.
-	if not _info_check(info, []):
-		_feedback("Invalid HERO_POWER info.", sender_peer_id)
+	if not info_check(info, []):
+		feedback("Invalid HERO_POWER info.", sender_peer_id)
 		return false
 	
 	var hero_power: Card = actor_player.hero.hero_power
 	
 	# The player should not have already used the hero power this turn.
-	if _check(actor_player.has_used_hero_power_this_turn, 1):
-		_feedback("This player has already used their hero power this turn.", sender_peer_id)
+	if check(actor_player.has_used_hero_power_this_turn, 1):
+		feedback("This player has already used their hero power this turn.", sender_peer_id)
 		return false
 	
 	# The player should afford the hero power.
-	if _check(actor_player.mana < hero_power.cost, 1):
-		_feedback("This player cannot afford their hero power.", sender_peer_id)
+	if check(actor_player.mana < hero_power.cost, 1):
+		feedback("This player cannot afford their hero power.", sender_peer_id)
 		return false
 	
 	# The player who sent the packet should own the card.
-	if _check(sender_player != actor_player, 2):
-		_feedback("You are not authorized to trigger the hero power on behalf of your opponent.", sender_peer_id)
+	if check(sender_player != actor_player, 2):
+		feedback("You are not authorized to trigger the hero power on behalf of your opponent.", sender_peer_id)
 		return false
 	
 	return true
@@ -283,8 +285,8 @@ func _run_hero_power_packet(sender_peer_id: int, sender_player: Player, actor_pl
 # Play
 func _run_play_packet(sender_peer_id: int, sender_player: Player, actor_player: Player, info: Array) -> bool:
 	# The info needs to be correct.
-	if not _info_check(info, [TYPE_INT, TYPE_INT, TYPE_INT, TYPE_VECTOR3I]):
-		_feedback("Invalid PLAY info.", sender_peer_id)
+	if not info_check(info, [TYPE_INT, TYPE_INT, TYPE_INT, TYPE_VECTOR3I]):
+		feedback("Invalid PLAY info.", sender_peer_id)
 		return false
 	
 	var location: Card.Location = info[0]
@@ -295,34 +297,34 @@ func _run_play_packet(sender_peer_id: int, sender_player: Player, actor_player: 
 	var card: Card = Card.get_from_index(sender_player, location, location_index)
 	
 	# The card should exist.
-	if _check_card(sender_player, location, location_index, sender_peer_id):
+	if check_card(sender_player, location, location_index, sender_peer_id):
 		return false
 	
 	# The player should afford the card.
-	if _check(actor_player.mana < card.cost, 1):
-		_feedback("You can not afford this card.", sender_peer_id)
+	if check(actor_player.mana < card.cost, 1):
+		feedback("You can not afford this card.", sender_peer_id)
 		return false
 	
 	# It should be the player's turn.
-	if _check(actor_player != Game.current_player, 1):
-		_feedback("It is not your turn.", sender_peer_id)
+	if check(actor_player != Game.current_player, 1):
+		feedback("It is not your turn.", sender_peer_id)
 		return false
 	
 	# The player who play the card should be the same player as the one who sent the packet.
-	if _check(sender_player != actor_player, 2):
-		_feedback("You are not authorized to play a card on behalf of your opponent.", sender_peer_id)
+	if check(sender_player != actor_player, 2):
+		feedback("You are not authorized to play a card on behalf of your opponent.", sender_peer_id)
 		return false
 	
 	# The card should be in the player's hand.
-	if _check(card.location != Card.Location.HAND, 3):
-		_feedback("That card is not in your hand.", sender_peer_id)
+	if check(card.location != Card.Location.HAND, 3):
+		feedback("That card is not in your hand.", sender_peer_id)
 		return false
 	
 	# Minion
 	if card.types.has(Card.Type.MINION):
 		# The player should have enough space on their board.
-		if _check(actor_player.board.size() >= Settings.server.max_board_space, 1):
-			_feedback("You do not have enough space on the board.", sender_peer_id)
+		if check(actor_player.board.size() >= Settings.server.max_board_space, 1):
+			feedback("You do not have enough space on the board.", sender_peer_id)
 			return false
 	
 	return true
@@ -331,16 +333,16 @@ func _run_play_packet(sender_peer_id: int, sender_player: Player, actor_player: 
 # Reveal
 func _run_reveal_packet(sender_peer_id: int, sender_player: Player, actor_player: Player, info: Array) -> bool:
 	# The info needs to be correct.
-	if not _info_check(info, [TYPE_INT, TYPE_INT]):
-		_feedback("Invalid REVEAL info.", sender_peer_id)
+	if not info_check(info, [TYPE_INT, TYPE_INT]):
+		feedback("Invalid REVEAL info.", sender_peer_id)
 		return false
 	
 	var location: Card.Location = info[0]
 	var index: int = info[1]
 	
 	# The player whose card gets revealed should be the same player as the one who sent the packet
-	if _check(sender_player != actor_player, 2):
-		_feedback("You are not authorized to reveal a card on behalf of your opponent.", sender_peer_id)
+	if check(sender_player != actor_player, 2):
+		feedback("You are not authorized to reveal a card on behalf of your opponent.", sender_peer_id)
 		return false
 	
 	return true
@@ -349,8 +351,8 @@ func _run_reveal_packet(sender_peer_id: int, sender_player: Player, actor_player
 # Set Drag To Play
 func _run_set_drag_to_play_target_packet(sender_peer_id: int, sender_player: Player, actor_player: Player, info: Array) -> bool:
 	# The info needs to be correct.
-	if not _info_check(info, [TYPE_INT, TYPE_INT, TYPE_INT, TYPE_INT, TYPE_INT, TYPE_INT]):
-		_feedback("Invalid SET_DRAG_TO_PLAY info.", sender_peer_id)
+	if not info_check(info, [TYPE_INT, TYPE_INT, TYPE_INT, TYPE_INT, TYPE_INT, TYPE_INT]):
+		feedback("Invalid SET_DRAG_TO_PLAY info.", sender_peer_id)
 		return false
 	
 	var target_mode: Packet.TargetMode = info[0]
@@ -366,23 +368,23 @@ func _run_set_drag_to_play_target_packet(sender_peer_id: int, sender_player: Pla
 	var target_player: Player = Player.get_from_id(target_alignment)
 	
 	# The card should exist.
-	if _check_card(actor_player, location, location_index, sender_peer_id):
+	if check_card(actor_player, location, location_index, sender_peer_id):
 		return false
 	
 	# The player who who owns the card should be the same player as the one who sent the packet.
-	if _check(sender_player != actor_player, 2):
-		_feedback("You are not authorized to summon a card on behalf of your opponent.", sender_peer_id)
+	if check(sender_player != actor_player, 2):
+		feedback("You are not authorized to summon a card on behalf of your opponent.", sender_peer_id)
 		return false
 	
 	if target_mode == Packet.TargetMode.CARD:
 		var target_card: Card = Card.get_from_index(target_player, target_location, target_index)
 		
 		# The card should exist.
-		if _check_card(target_player, location, location_index, sender_peer_id):
+		if check_card(target_player, location, location_index, sender_peer_id):
 			return false
 	else:
-		if _check(not target_player, 1):
-			_feedback("The specified player does not exist: %d." % target_alignment, sender_peer_id)
+		if check(not target_player, 1):
+			feedback("The specified player does not exist: %d." % target_alignment, sender_peer_id)
 			return false
 	
 	return true
@@ -391,8 +393,8 @@ func _run_set_drag_to_play_target_packet(sender_peer_id: int, sender_player: Pla
 # Summon
 func _run_summon_packet(sender_peer_id: int, sender_player: Player, actor_player: Player, info: Array) -> bool:
 	# The info needs to be correct.
-	if not _info_check(info, [TYPE_INT, TYPE_INT, TYPE_INT]):
-		_feedback("Invalid SUMMON info.", sender_peer_id)
+	if not info_check(info, [TYPE_INT, TYPE_INT, TYPE_INT]):
+		feedback("Invalid SUMMON info.", sender_peer_id)
 		return false
 	
 	var location: Card.Location = info[0]
@@ -402,39 +404,39 @@ func _run_summon_packet(sender_peer_id: int, sender_player: Player, actor_player
 	var card: Card = Card.get_from_index(sender_player, location, location_index)
 	
 	# The card should exist.
-	if _check_card(sender_player, location, location_index, sender_peer_id):
+	if check_card(sender_player, location, location_index, sender_peer_id):
 		return false
 		
 	# The player should have enough space on their board.
-	if _check(actor_player.board.size() >= Settings.server.max_board_space, 1):
-		_feedback("You do not have enough space on your board.", sender_peer_id)
+	if check(actor_player.board.size() >= Settings.server.max_board_space, 1):
+		feedback("You do not have enough space on your board.", sender_peer_id)
 		return false
 		
 	# The player who summons the card should be the same player as the one who sent the packet.
-	if _check(sender_player != actor_player, 2):
-		_feedback("You are not authorized to summon a card on behalf of your opponent.", sender_peer_id)
+	if check(sender_player != actor_player, 2):
+		feedback("You are not authorized to summon a card on behalf of your opponent.", sender_peer_id)
 		return false
 	
 	# The card should be summonable
-	if _check(not card.types.has(Card.Type.MINION) and not card.types.has(Card.Type.LOCATION), 2):
-		_feedback("A minion with these types (%s) cannot be summoned." % ", ".join(card.types.map(func(type: Card.Type) -> String:
+	if check(not card.types.has(Card.Type.MINION) and not card.types.has(Card.Type.LOCATION), 2):
+		feedback("A minion with these types (%s) cannot be summoned." % ", ".join(card.types.map(func(type: Card.Type) -> String:
 			return Card.Type.keys()[type]
 		)), sender_peer_id)
 		return false
 	
 	# Only the server can do this.
-	if _check(true, 2):
-		_feedback("Only the server can do this.", sender_peer_id)
+	if check(true, 2):
+		feedback("Only the server can do this.", sender_peer_id)
 		return false
 	
 	# The card should be in the player's hand.
-	if _check(card.location != Card.Location.HAND, 3):
-		_feedback("That card is not in your hand.", sender_peer_id)
+	if check(card.location != Card.Location.HAND, 3):
+		feedback("That card is not in your hand.", sender_peer_id)
 		return false
 	
 	# Check if the card is queued to be summoned.
-	if _check(_in_packet_history([location, location_index, board_index], 2, true), 3):
-		_feedback("That card does not have sufficent reason to be summoned.", sender_peer_id)
+	if check(in_packet_history([location, location_index, board_index], 2, true), 3):
+		feedback("That card does not have sufficent reason to be summoned.", sender_peer_id)
 		return false
 	
 	return true
@@ -443,8 +445,8 @@ func _run_summon_packet(sender_peer_id: int, sender_player: Player, actor_player
 # Trigger Ability
 func _run_trigger_ability_packet(sender_peer_id: int, sender_player: Player, actor_player: Player, info: Array) -> bool:
 	# The info needs to be correct.
-	if not _info_check(info, [TYPE_INT, TYPE_INT, TYPE_INT]):
-		_feedback("Invalid TRIGGER_ABILITY info.", sender_peer_id)
+	if not info_check(info, [TYPE_INT, TYPE_INT, TYPE_INT]):
+		feedback("Invalid TRIGGER_ABILITY info.", sender_peer_id)
 		return false
 	
 	var location: Card.Location = info[0]
@@ -454,27 +456,27 @@ func _run_trigger_ability_packet(sender_peer_id: int, sender_player: Player, act
 	var card: Card = Card.get_from_index(actor_player, location, location_index)
 	
 	# The card should exist.
-	if _check_card(actor_player, location, location_index, sender_peer_id):
+	if check_card(actor_player, location, location_index, sender_peer_id):
 		return false
 	
 	# The ability should exist.
-	if _check(not Card.Ability.values().has(ability), 1):
-		_feedback("The specified ability (%s) does not exist." % ability, sender_peer_id)
+	if check(not Card.Ability.values().has(ability), 1):
+		feedback("The specified ability (%s) does not exist." % ability, sender_peer_id)
 		return false
 	
 	# The ability should exist on that card.
-	if _check(not card.abilities.has(ability), 1):
-		_feedback("The specified card does not have that ability (%s)." % Card.Ability.keys()[ability], sender_peer_id)
+	if check(not card.abilities.has(ability), 1):
+		feedback("The specified card does not have that ability (%s)." % Card.Ability.keys()[ability], sender_peer_id)
 		return false
 	
 	# The player who sent the packet should own the card.
-	if _check(sender_player != actor_player, 2):
-		_feedback("You are not authorized to trigger a card's ability on behalf of your opponent.", sender_peer_id)
+	if check(sender_player != actor_player, 2):
+		feedback("You are not authorized to trigger a card's ability on behalf of your opponent.", sender_peer_id)
 		return false
 	
 	# Check if the card has already been triggered.
-	if _check(_in_packet_history([location, location_index, ability], 3, true), 3):
-		_feedback("That card does not have sufficent reason to for its ability to be triggered.", sender_peer_id)
+	if check(in_packet_history([location, location_index, ability], 3, true), 3):
+		feedback("That card does not have sufficent reason to for its ability to be triggered.", sender_peer_id)
 		return false
 	
 	return true
