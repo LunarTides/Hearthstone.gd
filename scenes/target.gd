@@ -82,6 +82,9 @@ func _input_event(camera: Camera3D, event: InputEvent, pos: Vector3, normal: Vec
 				target_selected.emit(null)
 				return _remove()
 			
+			if not await Modules.request(&"Select Target", [self, flags, collider]):
+				return
+			
 			player_selected.emit(player)
 			target_selected.emit(player)
 		else:
@@ -89,6 +92,9 @@ func _input_event(camera: Camera3D, event: InputEvent, pos: Vector3, normal: Vec
 				Game.feedback("You cannot select cards here.", Game.FeedbackType.ERROR)
 				target_selected.emit(null)
 				return _remove()
+			
+			if not await Modules.request(&"Select Target", [self, flags, collider]):
+				return
 			
 			card_selected.emit(collider)
 			target_selected.emit(collider)

@@ -75,9 +75,6 @@ var is_hovering: bool = false
 ## Whether or not the player is dragging this card.
 var is_dragging: bool = false
 
-## The card's keywords. Looks like this: [code]{Keyword: "Any additional info", Keyword.DORMANT: 2}[/code]
-var keywords: Dictionary
-
 ## The card's abiltiies. Looks like this: [code]{Ability: Array[Callable]}[/code]
 var abilities: Dictionary
 
@@ -201,6 +198,7 @@ var texture: Texture2D
 var types: Array[StringName]
 var classes: Array[StringName]
 var rarities: Array[StringName]
+var keywords: Array[StringName]
 var tags: Array[StringName]
 var collectible: bool
 var id: int
@@ -329,6 +327,9 @@ func trigger_ability(ability: StringName, send_packet: bool = true) -> bool:
 	if not abilities.has(ability):
 		return false
 	
+	if not await Modules.request(&"Trigger Ability", [self, ability, send_packet]):
+		return false
+	
 	# Wait 1 frame so that `await wait_for_ability` can get called before the ability gets triggered.
 	await get_tree().process_frame
 	
@@ -338,17 +339,23 @@ func trigger_ability(ability: StringName, send_packet: bool = true) -> bool:
 
 
 ## Adds an ability to this card.
-func add_ability(ability_name: StringName, callback: Callable) -> void:
-	if not abilities.has(ability_name):
-		abilities[ability_name] = []
+func add_ability(ability: StringName, callback: Callable) -> void:
+	if not abilities.has(ability):
+		abilities[ability] = []
 	
-	abilities[ability_name].append(callback)
+	if not await Modules.request(&"Add Ability", [self, ability]):
+		return
+	
+	abilities[ability].append(callback)
 
 
 ## Makes this card attack a [Card] or [Player].
 func attack_target(target: Variant, send_packet: bool = true) -> bool:
 	if not target:
 		Game.feedback("That target is not valid.", Game.FeedbackType.ERROR)
+		return false
+	
+	if not await Modules.request(&"Attack", [self, target, send_packet]):
 		return false
 	
 	if target is Card:
@@ -924,6 +931,9 @@ func _start_attacking() -> void:
 	
 	if has_attacked_this_turn:
 		Game.feedback("This card has already attacked this turn.", Game.FeedbackType.ERROR)
+		return
+	
+	if not await Modules.request(&"Start Attacking", [self]):
 		return
 	
 	var target: Variant = await Target.prompt(position, self, Target.CAN_SELECT_CARDS | Target.CAN_SELECT_HEROES | Target.CAN_SELECT_ENEMY_TARGETS)

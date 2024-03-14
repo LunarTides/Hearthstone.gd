@@ -44,6 +44,7 @@ enum {
 @export var types: Array[StringName]
 @export var classes: Array[StringName]
 @export var rarities: Array[StringName]
+@export var keywords: Array[StringName]
 @export var tags: Array[StringName]
 @export var collectible: bool
 

@@ -45,24 +45,7 @@ func run(packet_type: StringName, sender_peer_id: int, actor_player: Player, inf
 		return false
 	
 	# Passed the core anticheat. Let the modules do their anticheat.
-	await Modules.wait_in_queue(request)
-	
-	request.emit(packet_type, sender_peer_id, sender_player, actor_player, info)
-	
-	var modules_anticheat_result: Dictionary = await Modules.wait_for_response(request)
-	print_verbose("[AC] Modules Responded. Parsing response...")
-	
-	if modules_anticheat_result.size() == 0:
-		# No anticheat in modules.
-		print_verbose("[AC] No Modules Responded. Passing...")
-		return true
-	
-	var modules_anticheat_response: bool = modules_anticheat_result.result
-	var modules_anticheat_amount: int = modules_anticheat_result.amount
-	
-	print_verbose("[AC] %d Modules Responded to %s. Result: %s\n" % [modules_anticheat_amount, packet_type, modules_anticheat_response])
-	
-	return modules_anticheat_response
+	return await Modules.request(&"Anticheat", [packet_type, sender_peer_id, sender_player, actor_player, info])
 
 
 #region Helper Functions
