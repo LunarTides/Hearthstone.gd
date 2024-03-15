@@ -27,6 +27,7 @@ Anticheat="*res://scripts/multiplayer/anticheat.gd"
 Settings="*res://scripts/settings.gd"
 Modules="*res://scripts/modules.gd"
 TauntModule="res://modules/taunt/taunt.gd"
+RarityModule="res://modules/rarity/rarity.gd"
 
 [debug]
 

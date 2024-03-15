@@ -23,7 +23,9 @@ this turn only."
 texture = ExtResource("2_rv7d8")
 types = Array[StringName]([&"Spell"])
 classes = Array[StringName]([&"Neutral"])
-rarities = Array[StringName]([&"Free"])
+modules = {
+"rarities": [&"Free"]
+}
 id = 2
 spell_schools = Array[StringName]([&"None"])
 card = NodePath("Card")

@@ -197,9 +197,9 @@ var cost: int
 var texture: Texture2D
 var types: Array[StringName]
 var classes: Array[StringName]
-var rarities: Array[StringName]
 var keywords: Array[StringName]
 var tags: Array[StringName]
+var modules: Dictionary
 var collectible: bool
 var id: int
 #endregion
@@ -543,16 +543,6 @@ static func _update_card(card: Card, blueprint: Blueprint) -> void:
 	# Spell schools
 	card.spell_school_label.text = " / ".join(lookup.spell_schools)
 	
-	# Rarity Color
-	var rarity_node: MeshInstance3D = card.get_node("Mesh/Rarity")
-	rarity_node.visible = lookup.rarities.size() > 0 and not lookup.rarities.has(&"Free")
-	
-	var rarity_material: StandardMaterial3D = StandardMaterial3D.new()
-	if lookup.rarities.size() > 0 and not Engine.is_editor_hint():
-		rarity_material.albedo_color = Blueprint.all_rarity_colors.get(lookup.rarities[0], Color.WHITE)
-	rarity_material.cull_mode = BaseMaterial3D.CULL_DISABLED
-	rarity_node.set_surface_override_material(0, rarity_material)
-	
 	# Show non-essential labels
 	if lookup.types.has(&"Minion"):
 		card.tribe_label.show()
@@ -632,6 +622,8 @@ func _update() -> void:
 	if location == &"Hero":
 		armor_label.text = str(player.armor)
 		health_label.text = str(player.health)
+	
+	await Modules.send(&"Update Card", [self])
 	
 	# TODO: Should this be done here?
 	if health <= 0 and location == &"Board" and not is_dying and should_die:

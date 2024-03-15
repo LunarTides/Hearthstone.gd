@@ -13,7 +13,9 @@ cost = 3
 texture = ExtResource("2_1w15u")
 types = Array[StringName]([&"Minion"])
 classes = Array[StringName]([&"Neutral"])
-rarities = Array[StringName]([&"Legendary"])
+modules = {
+"rarities": [&"Legendary"]
+}
 collectible = true
 id = 3
 tribes = Array[StringName]([&"None"])
