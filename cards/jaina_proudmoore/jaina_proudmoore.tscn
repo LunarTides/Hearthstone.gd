@@ -10,8 +10,10 @@ card_name = "Jaina Proudmoore"
 texture = ExtResource("2_ykg1a")
 types = Array[StringName]([&"Hero"])
 classes = Array[StringName]([&"Mage"])
-rarities = Array[StringName]([&"Free"])
 tags = Array[StringName]([&"Starting Hero"])
+modules = {
+"rarities": [&"Free"]
+}
 id = 4
 hero_power_id = 5
 card = NodePath("Card")

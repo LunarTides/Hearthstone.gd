@@ -43,9 +43,9 @@ enum {
 @export var texture: Texture2D
 @export var types: Array[StringName]
 @export var classes: Array[StringName]
-@export var rarities: Array[StringName]
 @export var keywords: Array[StringName]
 @export var tags: Array[StringName]
+@export var modules: Dictionary
 @export var collectible: bool
 
 ## This HAS to be unique per blueprint.
@@ -128,22 +128,6 @@ static var all_spell_schools: Array[StringName] = [
 	&"Nature",
 	&"Shadow",
 ]
-
-static var all_rarities: Array[StringName] = [
-	&"Free",
-	&"Common",
-	&"Rare",
-	&"Epic",
-	&"Legendary",
-]
-
-static var all_rarity_colors: Dictionary = {
-	&"Free": Color.WHITE,
-	&"Common": Color.GRAY,
-	&"Rare": Color.BLUE,
-	&"Epic": Color.PURPLE,
-	&"Legendary": Color.GOLD,
-}
 
 static var all_tags: Array[StringName] = [
 	&"Drag To Play",

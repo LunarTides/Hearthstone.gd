@@ -13,8 +13,10 @@ cost = 2
 texture = ExtResource("2_g4x2h")
 types = Array[StringName]([&"Hero Power"])
 classes = Array[StringName]([&"Mage"])
-rarities = Array[StringName]([&"Free"])
 tags = Array[StringName]([&"Drag To Play"])
+modules = {
+"rarities": [&"Free"]
+}
 id = 5
 card = NodePath("Card")
 

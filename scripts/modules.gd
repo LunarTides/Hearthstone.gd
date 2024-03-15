@@ -40,34 +40,36 @@ func register_keyword(keyword: StringName) -> void:
 	Blueprint.all_keywords.append(keyword)
 
 
-## Registers a new rarity to be used in-game.
-func register_rarity(rarity: StringName, color: Color) -> void:
-	Blueprint.all_rarities.append(rarity)
-	Blueprint.all_rarity_colors[rarity] = color
-
-
 ## Requests the modules to respond to a request.
 func request(what: StringName, info: Array = []) -> bool:
-	print_verbose("[Modules] Requested %s with the following info: %s" % [what, info])
+	#print_verbose("[Modules] Requested %s with the following info: %s" % [what, info])
 	await Modules.wait_in_queue()
 	
 	requested.emit(what, info)
 	
-	print_verbose("[Modules] Waiting for response...")
+	#print_verbose("[Modules] Waiting for response...")
 	var modules_result: Dictionary = await Modules.wait_for_response()
-	print_verbose("[Modules] Modules Responded to %s. Parsing response..." % what)
+	#print_verbose("[Modules] Modules Responded to %s. Parsing response..." % what)
 	
 	if modules_result.is_empty():
 		# No CSCs in modules.
-		print_verbose("[Modules] No Modules Responded. Passing...")
+		#print_verbose("[Modules] No Modules Responded. Passing...")
 		return false
 	
 	var modules_response: bool = modules_result.result
 	var modules_amount: int = modules_result.amount
 	
-	print_verbose("[Modules] %d Modules Responded. Result: %s\n" % [modules_amount, modules_response])
+	#print_verbose("[Modules] %d Modules Responded. Result: %s\n" % [modules_amount, modules_response])
 	
 	return modules_response
+
+
+## Sends something to the modules. Does not return anything.
+func send(what: StringName, info: Array = []) -> void:
+	#print_verbose("[Modules] Requested %s with the following info: %s" % [what, info])
+	await Modules.wait_in_queue()
+	
+	requested.emit(what, info)
 
 
 ## Waits for the modules to respond to a request. Use [code]await[/code] on this.[br]
@@ -94,14 +96,14 @@ func wait_in_queue() -> void:
 	if _queue.is_empty():
 		# Don't add to queue if the module system is idle.
 		if _processing:
-			print_verbose("[Modules] Queue is empty, but we are already processing a request. Waiting...")
+			#print_verbose("[Modules] Queue is empty, but we are already processing a request. Waiting...")
 			
 			await stopped_processing
 			await get_tree().process_frame
 			
-			print_verbose("[Modules] Stopped processing previous request. Processing...")
-		else:
-			print_verbose("[Modules] Queue is empty. Processing immediately...")
+			#print_verbose("[Modules] Stopped processing previous request. Processing...")
+		#else:
+			#print_verbose("[Modules] Queue is empty. Processing immediately...")
 		
 		return
 	
@@ -109,7 +111,7 @@ func wait_in_queue() -> void:
 	var id: int = ResourceUID.create_id()
 	_queue.append(id)
 	
-	print_verbose("[Modules] `%d` waiting in queue..." % id)
+	#print_verbose("[Modules] `%d` waiting in queue..." % id)
 	
 	while true:
 		await wait_for_response()
@@ -117,7 +119,7 @@ func wait_in_queue() -> void:
 		if _queue[0] == id:
 			break
 	
-	print_verbose("[Modules] Queue over for `%d`." % id)
+	#print_verbose("[Modules] Queue over for `%d`." % id)
 	
 	# Same rationale as in `_register_hook`.
 	await get_tree().process_frame
