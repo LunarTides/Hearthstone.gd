@@ -5,7 +5,7 @@ extends Node
 func _ready() -> void:
 	Modules.register_hooks(handler)
 	
-	Modules.register_keyword(&"Taunt")
+	KeywordModule.register_keyword(&"Taunt")
 #endregion
 
 
@@ -40,8 +40,8 @@ func attack_hook(attacker: Card, target: Variant, send_packet: bool) -> bool:
 func _check_for_taunt(target: Variant) -> bool:
 	var target_owner: Player = target if target is Player else target.player
 	
-	if Card.get_all_owned_by(target_owner).any(func(card: Card) -> bool: return card.keywords.has(&"Taunt") and card.location == &"Board"):
-		if target is Card and target.keywords.has(&"Taunt"):
+	if Card.get_all_owned_by(target_owner).any(func(card: Card) -> bool: return card.modules.has("keywords") and card.modules.keywords.has(&"Taunt") and card.location == &"Board"):
+		if target is Card and target.modules.keywords and target.modules.keywords.has(&"Taunt"):
 			return true
 		
 		Game.feedback("There is a minion with taunt in the way.", Game.FeedbackType.ERROR)

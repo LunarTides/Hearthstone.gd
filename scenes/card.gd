@@ -197,7 +197,6 @@ var cost: int
 var texture: Texture2D
 var types: Array[StringName]
 var classes: Array[StringName]
-var keywords: Array[StringName]
 var tags: Array[StringName]
 var modules: Dictionary
 var collectible: bool

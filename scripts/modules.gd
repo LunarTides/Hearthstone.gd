@@ -35,11 +35,6 @@ func register_hooks(callable: Callable) -> void:
 		await _register_hooks(callable)
 
 
-## Registers a new keyword to be used in-game.
-func register_keyword(keyword: StringName) -> void:
-	Blueprint.all_keywords.append(keyword)
-
-
 ## Requests the modules to respond to a request.
 func request(what: StringName, info: Array = []) -> bool:
 	#print_verbose("[Modules] Requested %s with the following info: %s" % [what, info])

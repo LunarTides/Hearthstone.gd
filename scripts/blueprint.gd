@@ -43,7 +43,6 @@ enum {
 @export var texture: Texture2D
 @export var types: Array[StringName]
 @export var classes: Array[StringName]
-@export var keywords: Array[StringName]
 @export var tags: Array[StringName]
 @export var modules: Dictionary
 @export var collectible: bool
@@ -133,8 +132,6 @@ static var all_tags: Array[StringName] = [
 	&"Drag To Play",
 	&"Starting Hero",
 ]
-
-static var all_keywords: Array[StringName] = []
 
 static var all_abilities: Array[StringName] = [
 	&"Adapt",
