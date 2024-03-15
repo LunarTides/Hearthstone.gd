@@ -11,8 +11,8 @@ cost = 1
 texture = ExtResource("2_bd6tv")
 types = Array[StringName]([&"Minion"])
 classes = Array[StringName]([&"Neutral"])
-keywords = Array[StringName]([&"Taunt"])
 modules = {
+"keywords": [&"Taunt"],
 "rarities": [&"Free"]
 }
 id = 1
