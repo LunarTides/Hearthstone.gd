@@ -361,7 +361,8 @@ func _attack_attacker_is_card_and_target_is_player(attacker: Card, target: Playe
 	
 	target.should_die = false
 	
-	await target.hero.stabilize_layout_while(func() -> void:
+	# CRITICAL: Remove this.
+	await LayoutModule.stabilize_layout_while(target.hero, func() -> void:
 		await attacker.do_effects(func() -> void:
 			var _old_position: Vector3 = attacker.global_position
 			
@@ -374,7 +375,7 @@ func _attack_attacker_is_card_and_target_is_player(attacker: Card, target: Playe
 			tween.tween_property(attacker, "global_position", _old_position, 0.5).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUINT)
 			
 			await target.hero.attack_particles.finished
-		, true)
+		)
 	, true)
 	
 	target.should_die = true
@@ -395,7 +396,8 @@ func _attack_attacker_is_card_and_target_is_card(attacker: Card, target: Card) -
 	attacker.should_die = false
 	target.should_die = false
 	
-	await target.stabilize_layout_while(func() -> void:
+	# CRITICAL: Remove this.
+	await LayoutModule.stabilize_layout_while(target, func() -> void:
 		await attacker.do_effects(func() -> void:
 			var _old_position: Vector3 = attacker.global_position
 			
@@ -410,7 +412,7 @@ func _attack_attacker_is_card_and_target_is_card(attacker: Card, target: Card) -
 			
 			await tween.finished
 			await target.attack_particles.finished
-		, true)
+		)
 	, true)
 	
 	attacker.should_die = true

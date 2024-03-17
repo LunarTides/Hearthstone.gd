@@ -59,14 +59,6 @@ func request(what: StringName, info: Array = []) -> bool:
 	return modules_response
 
 
-## Sends something to the modules. Does not return anything.
-func send(what: StringName, info: Array = []) -> void:
-	#print_verbose("[Modules] Requested %s with the following info: %s" % [what, info])
-	await Modules.wait_in_queue()
-	
-	requested.emit(what, info)
-
-
 ## Waits for the modules to respond to a request. Use [code]await[/code] on this.[br]
 ## Returns [code]{"result: bool, "amount": int}[/code].
 func wait_for_response() -> Dictionary:
