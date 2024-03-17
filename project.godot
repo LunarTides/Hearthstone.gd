@@ -27,8 +27,16 @@ Anticheat="*res://scripts/multiplayer/anticheat.gd"
 Settings="*res://scripts/settings.gd"
 Modules="*res://scripts/modules.gd"
 KeywordModule="*res://modules/keyword/keyword.gd"
-TauntModule="res://modules/keyword/taunt/taunt.gd"
-RarityModule="res://modules/rarity/rarity.gd"
+KeywordTauntModule="*res://modules/keyword/taunt/taunt.gd"
+RarityModule="*res://modules/rarity/rarity.gd"
+LocationModule="*res://modules/location/location.gd"
+LayoutModule="*res://modules/location/layout/layout.gd"
+LayoutHandModule="*res://modules/location/layout/hand/hand.gd"
+LayoutBoardModule="*res://modules/location/layout/board/board.gd"
+LayoutDeckModule="*res://modules/location/layout/deck/deck.gd"
+LayoutGraveyardModule="*res://modules/location/layout/graveyard/graveyard.gd"
+LayoutHeroModule="*res://modules/location/layout/hero/hero.gd"
+LayoutHeroPowerModule="*res://modules/location/layout/hero_power/hero_power.gd"
 
 [debug]
 

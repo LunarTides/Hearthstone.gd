@@ -240,9 +240,6 @@ var cooldown: int
 #region Private Variables
 var _hover_tween: Tween
 var _should_hover: bool = true
-
-var _layout_tween: Tween
-var _should_layout: bool = true
 #endregion
 
 
@@ -365,41 +362,21 @@ func attack_target(target: Variant, send_packet: bool = true) -> bool:
 	return true
 
 
-## Sets up the card to do an effect (particles, animations, etc...) in [param callback].
-func do_effects(callback: Callable, should_layout: bool = false) -> void:
-	await stabilize_layout_while(func() -> void:
-		if not should_do_effects or not Settings.client.animations:
-			scale = Vector3.ONE
-			
-			# Show the card, but don't do any effects.
-			await get_tree().create_timer(1.0).timeout
-			return
+## Sets up the card to do an effect (particles, animations, etc...) in [param callback].[br]
+## You should probably run this in [method LayoutModule.stabilize_layout_while].
+func do_effects(callback: Callable) -> void:
+	if not should_do_effects or not Settings.client.animations:
+		scale = Vector3.ONE
 		
-		var tween: Tween = create_tween().set_ease(Tween.EASE_OUT)
-		tween.tween_property(self, "scale", Vector3.ONE, 0.1)
-		await tween.finished
-		
-		await callback.call()
-	, should_layout)
-
-
-## Stabilize this card's layout. This will freeze it's position, rotation, and scale in it's correct place while [param callback] is being called.
-func stabilize_layout_while(callback: Callable, should_layout: bool = false) -> void:
-	if _hover_tween:
-		_hover_tween.kill()
+		# Show the card, but don't do any effects.
+		await get_tree().create_timer(1.0).timeout
+		return
 	
-	is_hovering = false
-	
-	if should_layout:
-		layout(true)
-	
-	_should_layout = false
-	_should_hover = false
+	var tween: Tween = create_tween().set_ease(Tween.EASE_OUT)
+	tween.tween_property(self, "scale", Vector3.ONE, 0.1)
+	await tween.finished
 	
 	await callback.call()
-	
-	_should_layout = true
-	_should_hover = true
 
 
 ## Tweens the card to the specified parameters over the course of [param duration] seconds.
@@ -410,57 +387,13 @@ func tween_to(duration: float, new_position: Vector3, new_rotation: Vector3 = ro
 		scale = new_scale
 		return
 	
-	_should_layout = false
+	await Modules.request(&"Card Starting Tweening To", [self, duration, new_position, new_rotation, new_scale])
 	
 	var tween: Tween = create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BOUNCE).set_parallel()
 	tween.tween_property(self, "position", new_position, duration)
 	tween.tween_property(self, "rotation", new_rotation, duration)
 	tween.tween_property(self, "scale", new_scale, duration)
 	await tween.finished
-
-
-## Change the position / rotation of the card to be correct.
-func layout(instant: bool = false) -> void:
-	if not visible:
-		return
-	
-	if is_hovering or not _should_layout:
-		_layout_tween.kill()
-		return
-	
-	if location == &"None":
-		return
-	
-	if not Settings.client.animations and not instant:
-		return layout(true)
-	
-	
-	var method_name: String = "_layout_" + location.to_snake_case()
-	
-	if not method_name in self:
-		assert(false, "Can't layout the card in this location.")
-		return
-	
-	var result: Dictionary = await self[method_name].call()
-	
-	var new_position: Vector3 = result.position
-	var new_rotation: Vector3 = result.rotation
-	var new_scale: Vector3 = result.scale
-	
-	if instant:
-		position = new_position
-		rotation = new_rotation
-		scale = new_scale
-	else:
-		if _layout_tween:
-			_layout_tween.kill()
-		
-		_layout_tween = create_tween().set_ease(Tween.EASE_OUT).set_parallel()
-		_layout_tween.tween_property(self, "position", new_position, 0.5)
-		_layout_tween.tween_property(self, "rotation", new_rotation, 0.5)
-		_layout_tween.tween_property(self, "scale", new_scale, 0.5)
-	
-	_old_position = new_position
 #endregion
 
 
@@ -485,18 +418,6 @@ static func get_all() -> Array[Card]:
 		return not card.is_queued_for_deletion()
 	))
 	return array
-
-
-## Lays out all the cards. Only works client side.
-static func layout_all() -> void:
-	for card: Card in get_all():
-		card.layout()
-
-
-## Lays out all the cards for the specified player. Only works client side.
-static func layout_all_owned_by(player: Player) -> void:
-	for card: Card in get_all_owned_by(player):
-		card.layout()
 
 
 ## Gets the [param player]'s [Card] in [param location] at [param index].
@@ -606,8 +527,6 @@ func _update() -> void:
 		queue_free()
 		return
 	
-	layout()
-	
 	is_hidden = is_hidden
 	# TODO: Put this condition into a function.
 	if is_hidden and location != &"Hand" and location != &"Board" and location != &"Hero" and location != &"Hero Power":
@@ -622,7 +541,7 @@ func _update() -> void:
 		armor_label.text = str(player.armor)
 		health_label.text = str(player.health)
 	
-	await Modules.send(&"Update Card", [self])
+	await Modules.request(&"Update Card", [self])
 	
 	# TODO: Should this be done here?
 	if health <= 0 and location == &"Board" and not is_dying and should_die:
@@ -634,8 +553,6 @@ func _update() -> void:
 			return
 		
 		var old_scale: Vector3 = scale
-		
-		_should_layout = false
 		
 		if Settings.client.animations:
 			var tween: Tween = create_tween()
@@ -656,131 +573,10 @@ func _update() -> void:
 		await get_tree().process_frame
 		
 		scale = old_scale
-		_should_layout = true
 		
 		Game.card_killed.emit(true, self, player, multiplayer.get_unique_id())
+		await Modules.request(&"Card Killed", [self])
 		return
-
-
-func _layout_hand() -> Dictionary:
-	var new_position: Vector3 = position
-	var new_rotation: Vector3 = rotation
-	var new_scale: Vector3 = scale
-	
-	# TODO: Dont hardcode this
-	var player_weight: int = 1 if player == Game.player else -1
-	
-	# Integer division, but it's not a problem.
-	@warning_ignore("integer_division")
-	var half_hand_size: int = player.hand.size() / 2
-	
-	new_position.x = -(half_hand_size * 2) + Settings.client.card_bounds_x + (index * Settings.client.card_distance_x)
-	new_position.y = Settings.client.card_bounds_y * abs(half_hand_size - index)
-	new_position.z = Settings.client.card_bounds_z * player_weight
-	
-	new_rotation = Vector3.ZERO
-	
-	if index != half_hand_size:
-		# Tilt it to the left/right.
-		new_rotation.y = deg_to_rad(Settings.client.card_rotation_y_multiplier * player_weight * (half_hand_size - index))
-	
-	# Position it futher away the more rotated it is.
-	# This makes it easier to select the right card.
-	new_position.x -= new_rotation.y * player_weight
-	
-	# Rotate the card 180 degrees if it isn't already
-	if player != Game.player and new_rotation.y < PI:
-		new_rotation.y += PI
-	
-	new_scale = Vector3.ONE
-	
-	return {
-		"position": new_position,
-		"rotation": new_rotation,
-		"scale": new_scale,
-	}
-
-
-func _layout_board() -> Dictionary:
-	var new_position: Vector3 = position
-	var new_rotation: Vector3 = rotation
-	var new_scale: Vector3 = scale
-	
-	var player_weight: int = 1 if player == Game.player else -1
-	
-	new_rotation = Vector3.ZERO
-	
-	new_position.x = (index - 4) * 3.5 + Settings.client.card_distance_x
-	new_position.y = 0
-	new_position.z = Game.board_node.player.position.z + player_weight * (
-		# I love hardcoded values.
-		3 if Game.is_player_1
-		else -6 if player == Game.opponent
-		else 11
-	)
-	
-	if Game.is_player_1 and player == Game.opponent:
-		new_position.z += 1
-	
-	new_scale = Vector3.ONE
-	
-	return {
-		"position": new_position,
-		"rotation": new_rotation,
-		"scale": new_scale,
-	}
-
-
-func _layout_deck() -> Dictionary:
-	return {
-		"position": position,
-		"rotation": rotation,
-		"scale": scale,
-	}
-
-
-func _layout_graveyard() -> Dictionary:
-	return {
-		"position": position,
-		"rotation": rotation,
-		"scale": scale,
-	}
-
-
-func _layout_hero() -> Dictionary:
-	var new_position: Vector3 = position
-	
-	if player == Game.player:
-		new_position = (await Game.wait_for_node("/root/Main/PlayerHero")).position
-	else:
-		new_position = (await Game.wait_for_node("/root/Main/OpponentHero")).position
-	
-	return {
-		"position": new_position,
-		"rotation": rotation,
-		"scale": Vector3.ONE,
-	}
-
-
-func _layout_hero_power() -> Dictionary:
-	var new_position: Vector3 = (await _layout_hero()).position
-	new_position.x -= 3
-	
-	var new_rotation: Vector3 = Vector3.ZERO
-	
-	if player.has_used_hero_power_this_turn:
-		force_cover_visible = true
-		cover.position.y = -0.5
-		cover.rotation_degrees.x = 180
-		cover.show()
-		
-		new_rotation.x = PI
-	
-	return {
-		"position": new_position,
-		"rotation": new_rotation,
-		"scale": Vector3(0.5, 0.5, 0.5),
-	}
 
 
 func _on_input_event(_camera: Node, event: InputEvent, pos: Vector3, _normal: Vector3, _shape_idx: int) -> void:
@@ -799,8 +595,8 @@ func _start_hover() -> void:
 		return
 	
 	is_hovering = true
-	if _layout_tween:
-		_layout_tween.kill()
+	
+	await Modules.request(&"Card Start Hover", [self])
 	
 	# Animate
 	var player_weight: int = 1 if player == Game.player else -1
@@ -831,7 +627,7 @@ func _stop_hover() -> void:
 		_hover_tween.kill()
 	
 	is_hovering = false
-	layout()
+	await Modules.request(&"Card Stop Hover")
 
 
 func _start_dragging() -> void:
@@ -950,7 +746,7 @@ func _make_way_for(card: Card) -> void:
 	if not visible:
 		return
 	
-	_should_layout = false
+	await Modules.request(&"Card Start Making Way", [self, card])
 	
 	var bias: int = 1 if global_position.x > card.global_position.x else -1
 	var new_position_x: float = _old_position.x + 2 * bias
@@ -965,8 +761,7 @@ func _make_way_for(card: Card) -> void:
 
 
 func _stop_making_way() -> void:
-	_should_layout = true
-	layout()
+	await Modules.request(&"Card Stop Making Way", [self])
 
 
 func _refund() -> void:
