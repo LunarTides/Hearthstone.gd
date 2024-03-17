@@ -13,7 +13,7 @@ types = Array[StringName]([&"Minion"])
 classes = Array[StringName]([&"Neutral"])
 modules = {
 "keywords": [&"Taunt"],
-"rarities": [&"Free"]
+"rarities": [&"Legendary"]
 }
 id = 1
 tribes = Array[StringName]([&"Beast"])

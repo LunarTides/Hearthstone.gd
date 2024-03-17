@@ -24,7 +24,7 @@ texture = ExtResource("2_rv7d8")
 types = Array[StringName]([&"Spell"])
 classes = Array[StringName]([&"Neutral"])
 modules = {
-"rarities": [&"Free"]
+"rarities": [&"Epic"]
 }
 id = 2
 spell_schools = Array[StringName]([&"None"])

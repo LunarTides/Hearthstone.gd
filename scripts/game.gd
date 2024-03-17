@@ -260,7 +260,11 @@ func start_game() -> void:
 	await wait_for_node("/root/Main")
 	Multiplayer.start_game.rpc(deckcodes[player1.peer_id], deckcodes[player2.peer_id])
 	
-	Multiplayer.create_blueprint_from_path.rpc("res://cards/the_coin/the_coin.tscn", player2.id, &"Hand", player2.hand.size())
+	# HACK: Wait until the 2nd player has 4 cards to spawn the coin.
+	while player2.hand.size() < 4:
+		await get_tree().create_timer(0.5).timeout
+	
+	Multiplayer.create_blueprint_from_id.rpc(2, player2.id, &"Hand", player2.hand.size())
 
 
 ## Sends a packet to end the [member current_player]'s turn. Returns if a packet was sent.

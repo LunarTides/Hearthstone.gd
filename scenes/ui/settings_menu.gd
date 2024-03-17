@@ -1,7 +1,7 @@
 extends PanelContainer
 
 
-#region Constant Variables
+#region Constants
 const RESOLUTIONS: Array[Vector2i] = [
 	Vector2i(320, 240),
 	Vector2i(384, 288),

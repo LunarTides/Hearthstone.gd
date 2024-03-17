@@ -9,7 +9,7 @@ signal server_responded(success: bool)
 #endregion
 
 
-#region Constant Variables
+#region Constants
 const CONFIG_FILE_PATH: String = "./server.cfg"
 #endregion
 
@@ -261,11 +261,11 @@ func send_deckcode(deckcode: String) -> void:
 	server_response.rpc_id(sender_peer_id, true)
 
 
-## Creates a [Blueprint] from [param path].
+## Creates a [Blueprint] from [param id].
 @rpc("authority", "call_local", "reliable")
-func create_blueprint_from_path(path: String, player_id: int, location: StringName, index: int) -> Blueprint:
+func create_blueprint_from_id(id: int, player_id: int, location: StringName, index: int) -> Blueprint:
 	var player: Player = Player.get_from_id(player_id)
-	var blueprint: Blueprint = Blueprint.create_from_path(path, player)
+	var blueprint: Blueprint = Blueprint.create_from_id(id, player)
 	blueprint.card.add_to_location(location, index)
 	
 	return blueprint
