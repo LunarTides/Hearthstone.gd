@@ -273,7 +273,7 @@ func end_turn() -> bool:
 		feedback("It is not your turn.", FeedbackType.ERROR)
 		return false
 	
-	if not await Modules.request(&"End Turn", [current_player]):
+	if not await Modules.request(&"End Turn", false, [current_player]):
 		return false
 	
 	Packet.send(&"End Turn", current_player.id, [], true)

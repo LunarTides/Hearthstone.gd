@@ -69,7 +69,7 @@ func stop_making_way(card: Card) -> bool:
 
 
 func play_card_before(card: Card) -> bool:
-	card._should_layout = true
+	_should_layouts[card.get_rid()] = true
 	return true
 
 

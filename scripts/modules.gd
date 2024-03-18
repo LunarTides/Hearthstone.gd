@@ -21,7 +21,8 @@ var _result: bool = true
 var _modules_responded: int = 0
 var _modules_count: int = 0
 
-var _queue: Array
+var _gameplay_queue: Array[int]
+var _visual_queue: Array[int]
 #endregion
 
 
@@ -36,9 +37,12 @@ func register_hooks(callable: Callable) -> void:
 
 
 ## Requests the modules to respond to a request.
-func request(what: StringName, info: Array = []) -> bool:
+func request(what: StringName, visual: bool, info: Array = []) -> bool:
+	if visual:
+		await get_tree().create_timer(1.0 + _visual_queue.size()).timeout
+	
 	#print_verbose("[Modules] Requested %s with the following info: %s" % [what, info])
-	await Modules.wait_in_queue()
+	await Modules.wait_in_queue(_visual_queue if visual else _gameplay_queue)
 	
 	requested.emit(what, info)
 	
@@ -79,8 +83,12 @@ func wait_for_response() -> Dictionary:
 ## [/codeblock]
 ##
 ## [b]Note: Use [method request] instead in a real scenario.[/b]
-func wait_in_queue() -> void:
-	if _queue.is_empty():
+func wait_in_queue(queue: Array) -> void:
+	# Add to queue.
+	var id: int = ResourceUID.create_id()
+	queue.append(id)
+	
+	if queue.size() == 1:
 		# Don't add to queue if the module system is idle.
 		if _processing:
 			#print_verbose("[Modules] Queue is empty, but we are already processing a request. Waiting...")
@@ -92,18 +100,20 @@ func wait_in_queue() -> void:
 		#else:
 			#print_verbose("[Modules] Queue is empty. Processing immediately...")
 		
+		queue.pop_front()
+		
 		return
-	
-	# Add to queue.
-	var id: int = ResourceUID.create_id()
-	_queue.append(id)
 	
 	#print_verbose("[Modules] `%d` waiting in queue..." % id)
 	
 	while true:
 		await wait_for_response()
 		
-		if _queue[0] == id:
+		if Game.instance_num == 1:
+			print_verbose("%d %s" % [_gameplay_queue.size(), _visual_queue.size()])
+		
+		# Prioritize gameplay queue.
+		if queue[0] == id and (Game.get_or_null(_gameplay_queue, 0) == id or _gameplay_queue.size() == 0):
 			break
 	
 	#print_verbose("[Modules] Queue over for `%d`." % id)
@@ -112,7 +122,7 @@ func wait_in_queue() -> void:
 	await get_tree().process_frame
 	
 	# Remove from queue.
-	_queue.pop_front()
+	queue.pop_front()
 #endregion
 
 

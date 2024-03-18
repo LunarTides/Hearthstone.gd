@@ -107,7 +107,7 @@ func play_card(card: Card, board_index: int, send_packet: bool = true) -> bool:
 		Game.feedback("You don't have enough mana.", Game.FeedbackType.ERROR)
 		return false
 	
-	if not await Modules.request(&"Play Card", [self, card, board_index, send_packet]):
+	if not await Modules.request(&"Play Card", false, [self, card, board_index, send_packet]):
 		return false
 	
 	if card.location == &"Hero Power":
@@ -128,7 +128,7 @@ func summon_card(card: Card, board_index: int, send_packet: bool = true, bypass_
 		if board.size() >= Settings.server.max_board_space:
 			return false
 		
-		if not await Modules.request(&"Summon Card", [self, card, board_index, send_packet]):
+		if not await Modules.request(&"Summon Card", false, [self, card, board_index, send_packet]):
 			return false
 		
 	Packet.send_if(send_packet, &"Summon", id, [card.location, card.index, board_index], true)
@@ -140,7 +140,7 @@ func add_to_hand(card: Card, hand_index: int, send_packet: bool = true) -> bool:
 	if hand.size() >= Settings.server.max_hand_size:
 		return false
 	
-	if not await Modules.request(&"Add To Hand", [self, card, hand_index, send_packet]):
+	if not await Modules.request(&"Add To Hand", false, [self, card, hand_index, send_packet]):
 		return false
 	
 	Packet.send_if(send_packet, &"Create Card", id, [
@@ -153,7 +153,7 @@ func add_to_hand(card: Card, hand_index: int, send_packet: bool = true) -> bool:
 
 ## Sends a packet to add a card to the player's deck. Returns if a packet was sent / success.
 func add_to_deck(card: Card, deck_index: int, send_packet: bool = true) -> bool:
-	if not await Modules.request(&"Add To Deck", [self, card, deck_index, send_packet]):
+	if not await Modules.request(&"Add To Deck", false, [self, card, deck_index, send_packet]):
 		return false
 	
 	Packet.send_if(send_packet, &"Create Card", id, [
@@ -166,7 +166,7 @@ func add_to_deck(card: Card, deck_index: int, send_packet: bool = true) -> bool:
 
 ## Sends a packet for the player to draw a card. Returns if a packet was sent / success.
 func draw_cards(amount: int, send_packet: bool = true) -> bool:
-	if not await Modules.request(&"Draw Cards", [self, amount, send_packet]):
+	if not await Modules.request(&"Draw Cards", false, [self, amount, send_packet]):
 		return false
 	
 	Packet.send_if(send_packet, &"Draw Cards", id, [amount], true)
@@ -175,7 +175,7 @@ func draw_cards(amount: int, send_packet: bool = true) -> bool:
 
 ## Deals [param amount] damage to this player. Does not send a packet.
 func damage(amount: int) -> bool:
-	if not await Modules.request(&"Damage", [self, amount, absi(armor - amount)]):
+	if not await Modules.request(&"Damage", false, [self, amount, absi(armor - amount)]):
 		return false
 	
 	# Armor logic
@@ -220,7 +220,7 @@ static func get_from_peer_id(peer_id: int) -> Player:
 
 #region Private Functions
 func _die() -> void:
-	if not await Modules.request(&"Player Die", [self]):
+	if not await Modules.request(&"Player Die", false, [self]):
 		return
 	
 	if health > 0 or not should_die:
