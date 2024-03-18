@@ -82,7 +82,7 @@ func _input_event(camera: Camera3D, event: InputEvent, pos: Vector3, normal: Vec
 				target_selected.emit(null)
 				return _remove()
 			
-			if not await Modules.request(&"Select Target", [self, flags, collider]):
+			if not await Modules.request(&"Select Target", false, [self, flags, collider]):
 				return
 			
 			player_selected.emit(player)
@@ -93,7 +93,7 @@ func _input_event(camera: Camera3D, event: InputEvent, pos: Vector3, normal: Vec
 				target_selected.emit(null)
 				return _remove()
 			
-			if not await Modules.request(&"Select Target", [self, flags, collider]):
+			if not await Modules.request(&"Select Target", false, [self, flags, collider]):
 				return
 			
 			card_selected.emit(collider)
