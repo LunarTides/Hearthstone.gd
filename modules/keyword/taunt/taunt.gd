@@ -3,9 +3,13 @@ extends Node
 
 #region Internal Functions
 func _ready() -> void:
-	Modules.register_hooks(handler)
-	
-	KeywordModule.register_keyword(&"Taunt")
+	Modules.register(&"Taunt", [&"Keyword"], func() -> void:
+		Modules.register_hooks(&"Taunt", self.handler)
+		
+		KeywordModule.register_keyword(&"Taunt")
+	, func() -> void:
+		KeywordModule.unregister_keyword(&"Taunt")
+	)
 #endregion
 
 

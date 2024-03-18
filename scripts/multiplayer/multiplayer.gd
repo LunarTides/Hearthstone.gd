@@ -139,6 +139,13 @@ func kick(peer_id: int, force: bool = false) -> void:
 
 ## Joins a server at the specified [param ip_address] and [param port].
 func join(ip_address: String, port: int, deckcode: String) -> void:
+	Modules.load_config()
+	
+	await get_tree().create_timer(0.5).timeout
+	Modules.load_all()
+	
+	Modules.save_config()
+	
 	peer.create_client(ip_address if ip_address else "localhost", port)
 	multiplayer.multiplayer_peer = peer
 	
@@ -158,6 +165,13 @@ func host() -> void:
 	multiplayer.multiplayer_peer = peer
 	
 	load_config()
+	
+	Modules.load_config()
+	
+	await get_tree().create_timer(0.5).timeout
+	
+	Modules.load_all()
+	Modules.save_config()
 	
 	# UPnP
 	if not UPnP.has_tried_upnp:
@@ -181,6 +195,7 @@ func quit() -> void:
 		push_warning("Quitting. This will crash the game for some reason.")
 	
 	save_config()
+	Modules.save_config()
 	
 	# Do this since after the multiplayer is closed, is_server will always return false
 	var _is_server: bool = is_server
@@ -267,6 +282,8 @@ func create_blueprint_from_id(id: int, player_id: int, location: StringName, ind
 	var player: Player = Player.get_from_id(player_id)
 	var blueprint: Blueprint = Blueprint.create_from_id(id, player)
 	blueprint.card.add_to_location(location, index)
+	
+	await Modules.request(&"Create Blueprint", false, [blueprint])
 	
 	return blueprint
 

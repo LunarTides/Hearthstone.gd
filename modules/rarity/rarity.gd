@@ -14,13 +14,21 @@ var rarity_colors: Dictionary = {}
 
 #region Internal Functions
 func _ready() -> void:
-	Modules.register_hooks(handler)
-	
-	register_rarity(&"Free", Color.WHITE)
-	register_rarity(&"Common", Color.GRAY)
-	register_rarity(&"Rare", Color.BLUE)
-	register_rarity(&"Epic", Color.PURPLE)
-	register_rarity(&"Legendary", Color.GOLD)
+	Modules.register(&"Rarity", [], func() -> void:
+		Modules.register_hooks(&"Rarity", self.handler)
+		
+		register_rarity(&"Free", Color.WHITE)
+		register_rarity(&"Common", Color.GRAY)
+		register_rarity(&"Rare", Color.BLUE)
+		register_rarity(&"Epic", Color.PURPLE)
+		register_rarity(&"Legendary", Color.GOLD)
+	, func() -> void:
+		unregister_rarity(&"Free")
+		unregister_rarity(&"Common")
+		unregister_rarity(&"Rare")
+		unregister_rarity(&"Epic")
+		unregister_rarity(&"Legendary")
+	)
 #endregion
 
 
@@ -67,5 +75,10 @@ func update_card_hook(card: Card) -> bool:
 func register_rarity(rarity: StringName, color: Color) -> void:
 	rarities.append(rarity)
 	rarity_colors[rarity] = color
+
+
+func unregister_rarity(rarity: StringName) -> void:
+	rarities.erase(rarity)
+	rarity_colors.erase(rarity)
 #endregion
 

@@ -8,17 +8,21 @@ var keywords: Array[StringName] = []
 
 #region Internal Functions
 func _ready() -> void:
-	Modules.register_hooks(handler)
+	Modules.register(&"Keyword", [], func() -> void:
+		pass
+	, func() -> void:
+		pass
+	)
 #endregion
 
 
 #region Public Functions
-func handler(what: StringName, info: Array) -> bool:
-	return true
-
-
 ## Registers a new keyword to be used in-game.
 func register_keyword(keyword: StringName) -> void:
 	keywords.append(keyword)
+
+
+func unregister_keyword(keyword: StringName) -> void:
+	keywords.erase(keyword)
 #endregion
 
