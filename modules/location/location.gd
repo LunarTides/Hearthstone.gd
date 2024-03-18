@@ -5,12 +5,9 @@ extends Node
 
 #region Internal Functions
 func _ready() -> void:
-	Modules.register_hooks(handler)
+	Modules.register(&"Location", [], func() -> void:
+		pass
+	, func() -> void:
+		pass
+	)
 #endregion
-
-
-#region Public Functions
-func handler(what: StringName, info: Array) -> bool:
-	return true
-#endregion
-

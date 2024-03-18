@@ -9,7 +9,11 @@ var _should_layouts: Dictionary
 
 #region Internal Functions
 func _ready() -> void:
-	Modules.register_hooks(handler)
+	Modules.register(&"Layout", [&"Location"], func() -> void:
+		Modules.register_hooks(&"Layout", self.handler)
+	, func() -> void:
+		pass
+	)
 #endregion
 
 
@@ -128,6 +132,10 @@ func layout(card: Card, instant: bool = false) -> bool:
 
 func register_layout(location: StringName, callback: Callable) -> void:
 	_layouts[location] = callback
+
+
+func unregister_layout(location: StringName) -> void:
+	_layouts.erase(location)
 
 
 ## Stabilize a card's layout. This will freeze it's position, rotation, and scale in it's correct place while [param callback] is being called.

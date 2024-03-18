@@ -2,3 +2,4 @@
 .godot/
 **/*.blend1
 server.cfg
+modules.cfg

@@ -3,7 +3,11 @@ extends Node
 
 #region Internal Functions
 func _ready() -> void:
-	LayoutModule.register_layout(&"Board", layout_board)
+	Modules.register(&"LayoutBoard", [&"Layout"], func() -> void:
+		LayoutModule.register_layout(&"Board", self.layout_board)
+	, func() -> void:
+		LayoutModule.unregister_layout(&"Board")
+	)
 #endregion
 
 
