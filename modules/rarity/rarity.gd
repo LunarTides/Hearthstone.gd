@@ -16,6 +16,7 @@ var rarity_colors: Dictionary = {}
 func _ready() -> void:
 	Modules.register(&"Rarity", [], func() -> void:
 		Modules.register_hooks(&"Rarity", self.handler)
+		Modules.register_card_mesh(&"Rarity", RARITY_MESH, Vector3(0, 0.2, 0.6))
 		
 		register_rarity(&"Free", Color.WHITE)
 		register_rarity(&"Common", Color.GRAY)
@@ -23,6 +24,8 @@ func _ready() -> void:
 		register_rarity(&"Epic", Color.PURPLE)
 		register_rarity(&"Legendary", Color.GOLD)
 	, func() -> void:
+		Modules.unregister_card_mesh(&"Rarity")
+		
 		unregister_rarity(&"Free")
 		unregister_rarity(&"Common")
 		unregister_rarity(&"Rare")
@@ -40,26 +43,27 @@ func handler(what: Modules.Hook, info: Array) -> bool:
 	return true
 
 
+func register_rarity(rarity: StringName, color: Color) -> void:
+	rarities.append(rarity)
+	rarity_colors[rarity] = color
+
+
+func unregister_rarity(rarity: StringName) -> void:
+	rarities.erase(rarity)
+	rarity_colors.erase(rarity)
+
+
+
+#region Hooks
 func update_card_hook(card: Card) -> bool:
-	# FIXME: For some reason, this hook doesn't get called on all cards.
-	#print(card.player.id, card.location, card.index)
-	
 	# Rarity Color
-	if not card.modules.get("rarities"):
+	if not card.modules.has("rarities"):
 		assert(false, "'%s' (%d) doesn't have a rarity." % [card.name, card.id])
 		return false
 	
 	var rarity_node: MeshInstance3D = card.mesh.get_node_or_null("Rarity")
-	
 	if not rarity_node:
-		var root_node: Node3D = RARITY_MESH.instantiate()
-		card.mesh.add_child(root_node)
-		
-		rarity_node = root_node.get_child(0)
-		rarity_node.reparent(card.mesh)
-		rarity_node.position = Vector3(0, 0.2, 0.6)
-		
-		root_node.queue_free()
+		return true
 	
 	rarity_node.visible = card.modules.rarities.size() > 0 and not card.modules.rarities.has(&"Free")
 	
@@ -70,15 +74,5 @@ func update_card_hook(card: Card) -> bool:
 	rarity_node.set_surface_override_material(0, rarity_material)
 	
 	return true
-
-
-func register_rarity(rarity: StringName, color: Color) -> void:
-	rarities.append(rarity)
-	rarity_colors[rarity] = color
-
-
-func unregister_rarity(rarity: StringName) -> void:
-	rarities.erase(rarity)
-	rarity_colors.erase(rarity)
 #endregion
-
+#endregion

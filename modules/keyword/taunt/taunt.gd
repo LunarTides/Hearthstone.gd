@@ -23,6 +23,7 @@ func handler(what: Modules.Hook, info: Array) -> bool:
 	return true
 
 
+#region Hooks
 func anticheat_hook(packet_type: StringName, sender_peer_id: int, sender_player: Player, actor_player: Player, info: Array) -> bool:
 	if packet_type != &"Attack":
 		return true
@@ -37,6 +38,7 @@ func anticheat_hook(packet_type: StringName, sender_peer_id: int, sender_player:
 
 func attack_hook(attacker: Card, target: Variant, send_packet: bool) -> bool:
 	return _check_for_taunt(target)
+#endregion
 #endregion
 
 

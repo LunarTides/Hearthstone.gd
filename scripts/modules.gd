@@ -27,6 +27,7 @@ enum Hook {
 	CARD_ABILITY_TRIGGER,
 	CARD_ADD_TO_DECK,
 	CARD_ADD_TO_HAND,
+	CARD_CHANGE_HIDDEN,
 	CARD_HOVER_START,
 	CARD_HOVER_STOP,
 	CARD_KILL,
@@ -34,6 +35,7 @@ enum Hook {
 	CARD_MAKE_WAY_STOP,
 	CARD_PLAY,
 	CARD_PLAY_BEFORE,
+	CARD_PLAY_CHECK,
 	CARD_SUMMON,
 	CARD_TWEEN_START,
 	CARD_UPDATE,
@@ -165,6 +167,33 @@ func register_hooks(module_name: StringName, callable: Callable) -> void:
 	# Keep on connecting.
 	while _loaded_modules.has(module_name):
 		await _register_hooks(callable)
+
+
+func register_card_mesh(module_name: StringName, mesh: PackedScene, position: Vector3) -> void:
+	register_hooks(module_name, func(what: Hook, info: Array) -> bool:
+		if what == Hook.BLUEPRINT_CREATE:
+			var blueprint: Blueprint = info[0]
+			var card: Card = blueprint.card
+			
+			var root_node: Node3D = mesh.instantiate()
+			card.mesh.add_child(root_node)
+			
+			var mesh_node: MeshInstance3D = root_node.get_child(0)
+			mesh_node.name = module_name.replace(" ", "")
+			mesh_node.reparent(card.mesh)
+			mesh_node.position = position
+			
+			root_node.queue_free()
+		return true
+	)
+
+
+func unregister_card_mesh(module_name: StringName) -> void:
+	for card: Card in Card.get_all():
+		var mesh: MeshInstance3D = card.get_node_or_null("Mesh/%s" % module_name.replace(" ", ""))
+		
+		if mesh:
+			mesh.queue_free()
 
 
 ## Requests the modules to respond to a request.

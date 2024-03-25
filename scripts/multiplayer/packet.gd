@@ -289,7 +289,7 @@ func _accept_play_packet(player: Player, sender_peer_id: int, info: Array) -> vo
 	
 	card.override_is_hidden = Game.NullableBool.FALSE
 	
-	if not await Modules.request(Modules.Hook.CARD_PLAY_BEFORE, false, [card]):
+	if not await Modules.request(Modules.Hook.CARD_PLAY_BEFORE, false, [card, board_index, position]):
 		return
 	
 	await card.tween_to(0.3, position, Vector3.ZERO, Vector3.ONE)
@@ -299,37 +299,9 @@ func _accept_play_packet(player: Player, sender_peer_id: int, info: Array) -> vo
 	
 	card.refunded = false
 	
-	if card.types.has(&"Minion"):
-		if card.abilities.has(&"Battlecry"):
-			card.trigger_ability(&"Battlecry", false)
-			await card._wait_for_ability(&"Battlecry")
-			
-			if card.refunded:
-				card._refund()
-				return
-		
-		# Summon after ability for refunding.
-		player.summon_card(card, board_index, false, true)
-	
-	if card.types.has(&"Spell"):
-		card.trigger_ability(&"Cast", false)
-		await card._wait_for_ability(&"Cast")
-		
-		if card.refunded:
-			card._refund()
-			return
-		
-		card.location = &"None"
-	
-	if card.types.has(&"Hero"):
-		card.trigger_ability(&"Battlecry", false)
-		await card._wait_for_ability(&"Battlecry")
-		
-		if card.refunded:
-			card._refund()
-			return
-		
-		card.location = &"Hero"
+	if not await Modules.request(Modules.Hook.CARD_PLAY, false, [card, board_index, position]):
+		card._refund()
+		return
 	
 	Game.card_played.emit(true, card, board_index, player, sender_peer_id)
 

@@ -340,13 +340,6 @@ func _run_play_packet(sender_peer_id: int, sender_player: Player, actor_player: 
 		feedback("That card is not in your hand.", sender_peer_id)
 		return false
 	
-	# Minion
-	if card.types.has(&"Minion"):
-		# The player should have enough space on their board.
-		if check(actor_player.board.size() >= Settings.server.max_board_space, 1):
-			feedback("You do not have enough space on the board.", sender_peer_id)
-			return false
-	
 	return true
 
 
@@ -439,11 +432,6 @@ func _run_summon_packet(sender_peer_id: int, sender_player: Player, actor_player
 	# The player who summons the card should be the same player as the one who sent the packet.
 	if check(sender_player != actor_player, 2):
 		feedback("You are not authorized to summon a card on behalf of your opponent.", sender_peer_id)
-		return false
-	
-	# The card should be summonable
-	if check(not card.types.has(&"Minion") and not card.types.has(&"Location"), 2):
-		feedback("A minion with these types (%s) cannot be summoned." % ", ".join(card.types), sender_peer_id)
 		return false
 	
 	# Only the server can do this.

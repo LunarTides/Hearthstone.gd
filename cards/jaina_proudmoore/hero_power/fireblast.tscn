@@ -11,11 +11,11 @@ text = "Hero Power
 Deal 1 damage."
 cost = 2
 texture = ExtResource("2_g4x2h")
-types = Array[StringName]([&"Hero Power"])
 classes = Array[StringName]([&"Mage"])
 tags = Array[StringName]([&"Drag To Play"])
 modules = {
-"rarities": [&"Free"]
+"rarities": [&"Free"],
+"types": [&"Hero Power"]
 }
 id = 5
 card = NodePath("Card")

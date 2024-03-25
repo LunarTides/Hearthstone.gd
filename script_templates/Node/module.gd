@@ -5,7 +5,7 @@ extends Node
 func _ready() -> void:
 	Modules.register(&"MODULE NAME", [], func() -> void:
 		# Load module.
-		Modules.register_hooks(&"MODULE NAME", handler)
+		Modules.register_hooks(&"MODULE NAME", self.handler)
 	, func() -> void:
 		# Unload module. No need to unregister hooks.
 		pass

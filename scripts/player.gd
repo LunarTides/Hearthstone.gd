@@ -95,10 +95,6 @@ var has_used_hero_power_this_turn: bool = false
 #region Public Functions
 ## Sends a packet for the player to play a card. Returns if a packet was sent / success.
 func play_card(card: Card, board_index: int, send_packet: bool = true) -> bool:
-	if card.types.has(&"Minion") and board.size() >= Settings.server.max_board_space:
-		Game.feedback("You don't have enough space on the board.", Game.FeedbackType.ERROR)
-		return false
-	
 	if not Game.is_players_turn:
 		Game.feedback("It is not your turn.", Game.FeedbackType.ERROR)
 		return false
@@ -107,7 +103,7 @@ func play_card(card: Card, board_index: int, send_packet: bool = true) -> bool:
 		Game.feedback("You don't have enough mana.", Game.FeedbackType.ERROR)
 		return false
 	
-	if not await Modules.request(Modules.Hook.CARD_PLAY, false, [self, card, board_index, send_packet]):
+	if not await Modules.request(Modules.Hook.CARD_PLAY_CHECK, false, [self, card, board_index, send_packet]):
 		return false
 	
 	if card.location == &"Hero Power":

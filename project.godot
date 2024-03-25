@@ -37,6 +37,10 @@ LayoutDeckModule="*res://modules/location/layout/deck/deck.gd"
 LayoutGraveyardModule="*res://modules/location/layout/graveyard/graveyard.gd"
 LayoutHeroModule="*res://modules/location/layout/hero/hero.gd"
 LayoutHeroPowerModule="*res://modules/location/layout/hero_power/hero_power.gd"
+TypeModule="*res://modules/type/type.gd"
+TypeMinionModule="*res://modules/type/minion/minion.gd"
+TypeMinionTribeModule="*res://modules/type/minion/tribe/tribe.gd"
+TypeSpellModule="*res://modules/type/spell/spell.gd"
 
 [debug]
 

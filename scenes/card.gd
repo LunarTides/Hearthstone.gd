@@ -42,16 +42,6 @@ signal released(position: Vector3)
 ## The health label of the card.
 @export var health_label: Label3D
 
-@export_category("Minion")
-
-## The tribe label of the card.
-@export var tribe_label: Label3D
-
-@export_category("Spell")
-
-## The spell school label of the card.
-@export var spell_school_label: Label3D
-
 @export_category("Hero")
 
 ## The armor label of the card.
@@ -137,6 +127,7 @@ var is_hidden: bool:
 		
 		return true
 	set(new_is_hidden):
+		# TODO: Rename new_is_hidden -> value
 		is_hidden = new_is_hidden
 		
 		# Only change the essentials.
@@ -152,9 +143,9 @@ var is_hidden: bool:
 			# Hide all the non-essentials in here.
 			attack_label.hide()
 			health_label.hide()
-			tribe_label.hide()
-			spell_school_label.hide()
 			armor_label.hide()
+		
+		await Modules.request(Modules.Hook.CARD_CHANGE_HIDDEN, true, [self, new_is_hidden])
 
 ## Whether or not this card has attacked this turn. Gets set to true every [signal Game.turn_ended] emission.
 var has_attacked_this_turn: bool = false
@@ -204,19 +195,10 @@ var id: int
 #endregion
 
 
-#region Minion
-var tribes: Array[StringName]
-#endregion
-
-
 #region Minion / Weapon
 var attack: int
 var health: int
 #endregion
-
-
-#region Spell
-var spell_schools: Array[StringName]
 #endregion
 
 
@@ -460,18 +442,6 @@ static func _update_card(card: Card, blueprint: Blueprint) -> void:
 	card.health_label.text = str(lookup.health)
 	card.armor_label.text = str(lookup.armor)
 	
-	# Tribes
-	card.tribe_label.text = " / ".join(lookup.tribes)
-	
-	# Spell schools
-	card.spell_school_label.text = " / ".join(lookup.spell_schools)
-	
-	# Show non-essential labels
-	if lookup.types.has(&"Minion"):
-		card.tribe_label.show()
-	if lookup.types.has(&"Spell"):
-		card.spell_school_label.show()
-	
 	# Cost
 	#card.get_node("Mesh/Crystal").visible = lookup.cost > 0
 	#card.cost_label.visible = lookup.cost > 0
@@ -498,16 +468,6 @@ static func _update_card(card: Card, blueprint: Blueprint) -> void:
 	else:
 		card.get_node("Mesh/Armor").position.x = 2.6
 		card.armor_label.position.x = 1.3
-	
-	# Tribe / Spell School
-	var tribe_visible: bool = (
-		(lookup.tribes.size() > 0 and lookup.tribes[0] != &"None") or
-		(lookup.spell_schools.size() > 0 and lookup.spell_schools[0] != &"None") 
-	)
-	
-	card.get_node("Mesh/TribeOrSpellSchool").visible = tribe_visible
-	card.tribe_label.visible = tribe_visible
-	card.spell_school_label.visible = tribe_visible
 #endregion
 
 
