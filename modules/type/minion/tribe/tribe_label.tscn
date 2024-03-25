@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://bfv0hx76s3jv8"]
+
+[node name="TribeLabel" type="Label3D"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0.198024, 1.84092)
+visible = false
+text = "Tribe"
+font_size = 34
+width = 1000.0

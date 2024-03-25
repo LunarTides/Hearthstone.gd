@@ -17,7 +17,6 @@ var packet_types: Array[StringName] = [
 	&"Create Card",
 	&"Draw Cards",
 	&"End Turn",
-	&"Hero Power",
 	&"Play",
 	&"Reveal",
 	&"Set Drag To Play Target",
@@ -145,7 +144,6 @@ func __send(packet_type: StringName, player_id: int, info: Array) -> StringName:
 	
 	# Broadcast the packet to all clients & server
 	_accept.rpc(packet_type, sender_peer_id, player_id, info)
-	
 	return &"None"
 
 
@@ -244,7 +242,7 @@ func _accept_draw_cards_packet(
 			return
 		
 		if not card:
-			# TODO: Fatigue
+			# TODO: Fatigue.
 			return
 		
 		# Create card node.
@@ -264,7 +262,6 @@ func _accept_end_turn_packet(
 	Game.current_player = player
 	Game.turn += 1
 	
-	# TODO: Show the player's mana
 	player.empty_mana = min(player.empty_mana + 1, player.max_mana)
 	player.mana = player.empty_mana
 	
@@ -274,25 +271,6 @@ func _accept_end_turn_packet(
 		DisplayServer.window_request_attention()
 	
 	Game.turn_ended.emit(true, sender_player, sender_peer_id)
-
-
-func _accept_hero_power_packet(
-	player: Player,
-	sender_peer_id: int,
-) -> void:
-	var hero_power: Card = player.hero.hero_power
-
-	Game.hero_power.emit(false, player, sender_peer_id)
-
-	hero_power.refunded = false
-	hero_power.trigger_ability(&"Hero Power", false)
-	if hero_power.refunded:
-		return
-
-	player.has_used_hero_power_this_turn = true
-	player.mana -= hero_power.cost
-
-	Game.hero_power.emit(true, player, sender_peer_id)
 
 
 func _accept_play_packet(
@@ -312,44 +290,16 @@ func _accept_play_packet(
 	if not await Modules.request(Modules.Hook.CARD_PLAY_BEFORE, [card, board_index, position]):
 		return
 	
-	await card.tween_to(0.3, position, Vector3.ZERO, Vector3.ONE)
-	
 	player.mana -= card.cost
 	player.armor += card.armor
 	
+	await card.tween_to(0.3, position, Vector3.ZERO, Vector3.ONE)
+	
 	card.refunded = false
 	
-	if card.types.has(&"Minion"):
-		if card.abilities.has(&"Battlecry"):
-			card.trigger_ability(&"Battlecry", false)
-			await card._wait_for_ability(&"Battlecry")
-			
-			if card.refunded:
-				card._refund()
-				return
-		
-		# Summon after ability for refunding.
-		player.summon_card(card, board_index, false)
-	
-	if card.types.has(&"Spell"):
-		card.trigger_ability(&"Cast", false)
-		await card._wait_for_ability(&"Cast")
-		
-		if card.refunded:
-			card._refund()
-			return
-		
-		card.location = &"None"
-	
-	if card.types.has(&"Hero"):
-		card.trigger_ability(&"Battlecry", false)
-		await card._wait_for_ability(&"Battlecry")
-		
-		if card.refunded:
-			card._refund()
-			return
-		
-		card.location = &"Hero"
+	if not await Modules.request(Modules.Hook.CARD_PLAY, [card, board_index, position]):
+		card._refund()
+		return
 	
 	Game.card_played.emit(true, card, board_index, player, sender_peer_id)
 

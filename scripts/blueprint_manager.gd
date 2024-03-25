@@ -27,8 +27,6 @@ func _process(delta: float) -> void:
 	if not card is Card:
 		return
 	
-	Card._update_card(card, blueprint)
-	
 	# /////////////// Suggest ID ///////////////
 	if has_suggested_id:
 		return
@@ -45,7 +43,7 @@ func _process(delta: float) -> void:
 	var current_id: int = 0
 	for bp: Blueprint in blueprints:
 		if bp.id == 0:
-			if (bp.texture != blueprint.texture or bp.card_name != blueprint.card_name):
+			if bp.card_name != blueprint.card_name:
 				push_error("[BLUEPRINT MANAGER] '%s' does not to have an ID." % bp.card_name)
 			continue
 		elif bp.id == current_id:

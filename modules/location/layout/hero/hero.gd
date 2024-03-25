@@ -7,10 +7,14 @@ func _name() -> StringName:
 
 
 func _dependencies() -> Array[StringName]:
-	return [&"Layout"]
+	return [
+		&"Layout",
+	]
 
 
 func _load() -> void:
+	register_hooks(handler)
+	
 	LayoutModule.register_layout(&"Hero", layout_hero)
 
 
@@ -20,6 +24,13 @@ func _unload() -> void:
 
 
 #region Public Functions
+func handler(what: Modules.Hook, info: Array) -> bool:
+	if what == Modules.Hook.CARD_UPDATE:
+		return card_update_hook.callv(info)
+	
+	return true
+
+
 func layout_hero(card: Card) -> Dictionary:
 	var new_position: Vector3 = card.position
 	
@@ -33,4 +44,16 @@ func layout_hero(card: Card) -> Dictionary:
 		"rotation": card.rotation,
 		"scale": Vector3.ONE,
 	}
+
+
+#region Hooks
+func card_update_hook(card: Card) -> bool:
+	if not card.location == &"Hero" or not TypeHeroModule.is_hero(card):
+		return true
+	
+	card.health = card.player.health
+	card.armor = card.player.armor
+	
+	return true
+#endregion
 #endregion

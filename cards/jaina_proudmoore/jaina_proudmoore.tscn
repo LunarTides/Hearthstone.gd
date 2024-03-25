@@ -8,11 +8,11 @@
 script = ExtResource("1_scrip")
 card_name = "Jaina Proudmoore"
 texture = ExtResource("2_ykg1a")
-types = Array[StringName]([&"Hero"])
 classes = Array[StringName]([&"Mage"])
 tags = Array[StringName]([&"Starting Hero"])
 modules = {
-"rarities": [&"Free"]
+"rarities": [&"Free"],
+"types": [&"Hero"]
 }
 id = 4
 hero_power_id = 5

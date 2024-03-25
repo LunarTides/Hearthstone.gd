@@ -34,9 +34,8 @@ enum {
 ## How much the card should cost, usually in [code]mana[/code].
 @export var cost: int
 
-# TODO: Continue documenting
+# TODO: Continue documenting.
 @export var texture: Texture2D
-@export var types: Array[StringName]
 @export var classes: Array[StringName]
 @export var tags: Array[StringName]
 @export var modules: Dictionary
@@ -47,22 +46,10 @@ enum {
 #endregion
 
 
-#region Minion
-@export_category("Minion")
-@export var tribes: Array[StringName]
-#endregion
-
-
 #region Minion / Weapon
 @export_category("Minion / Weapon")
 @export var attack: int
 @export var health: int
-#endregion
-
-
-#region Spell
-@export_category("Spell")
-@export var spell_schools: Array[StringName]
 #endregion
 
 
@@ -86,43 +73,6 @@ enum {
 
 #region Public Variables
 #region Enum-likes
-static var all_types: Array[StringName] = [
-	&"None",
-	&"Minion",
-	&"Spell",
-	&"Weapon",
-	&"Hero",
-	&"Location",
-	&"Hero_power",
-]
-
-static var all_tribes: Array[StringName] = [
-	&"None",
-	&"Beast",
-	&"Demon",
-	&"Dragon",
-	&"Elemental",
-	&"Mech",
-	&"Murloc",
-	&"Naga",
-	&"Pirate",
-	&"Quilboar",
-	&"Totem",
-	&"Undead",
-	&"All",
-]
-
-static var all_spell_schools: Array[StringName] = [
-	&"None",
-	&"Arcane",
-	&"Fel",
-	&"Fire",
-	&"Frost",
-	&"Holy",
-	&"Nature",
-	&"Shadow",
-]
-
 static var all_tags: Array[StringName] = [
 	&"Drag To Play",
 	&"Starting Hero",
@@ -247,6 +197,7 @@ static func create_from_id(id: int, player: Player) -> Blueprint:
 		
 		if blueprint.id == id:
 			blueprint.setup_blueprint(player)
+			Modules.request(Modules.Hook.BLUEPRINT_CREATE, [blueprint])
 			return blueprint
 	
 	return null
@@ -261,5 +212,8 @@ static func create_from_path(path: String, player: Player) -> Blueprint:
 static func create_from_packed_scene(packed_scene: PackedScene, player: Player) -> Blueprint:
 	var blueprint: Blueprint = packed_scene.instantiate()
 	blueprint.setup_blueprint(player)
+	
+	Modules.request(Modules.Hook.BLUEPRINT_CREATE, [blueprint])
+	
 	return blueprint
 #endregion

@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bgkiqtjpa7mj6"
-path.s3tc="res://.godot/imported/attack.png-b20cbdf46c3efff40a8ee01ff2eec59a.s3tc.ctex"
+uid="uid://n8eelcwdwq15"
+path.s3tc="res://.godot/imported/armor.png-4c3b092ceff9ef64e2410be185d0f6a7.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://assets/models/attack.png"
-dest_files=["res://.godot/imported/attack.png-b20cbdf46c3efff40a8ee01ff2eec59a.s3tc.ctex"]
+source_file="res://modules/armor/armor.png"
+dest_files=["res://.godot/imported/armor.png-4c3b092ceff9ef64e2410be185d0f6a7.s3tc.ctex"]
 
 [params]
 

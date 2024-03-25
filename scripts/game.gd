@@ -19,9 +19,6 @@ signal cards_drawn(after: bool, amount: int, player: Player, sender_peer_id: int
 ## Emits when the any player's turn ends.
 signal turn_ended(after: bool, player: Player, sender_peer_id: int)
 
-## Emits whenever a hero power gets used.
-signal hero_power(after: bool, player: Player, sender_peer_id: int)
-
 ## Emits whenever a card gets killed.
 signal card_killed(after: bool, card: Card, player: Player, sender_peer_id: int)
 

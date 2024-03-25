@@ -8,7 +8,9 @@ func _name() -> StringName:
 
 
 func _dependencies() -> Array[StringName]:
-	return [&"Keyword"]
+	return [
+		&"Keyword",
+	]
 
 
 func _load() -> void:

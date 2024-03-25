@@ -1,6 +1,6 @@
 class_name Player
 extends Resource
-# TODO: Make more descriptive
+# TODO: Make more descriptive.
 ## Player.
 ## @experimental
 
@@ -95,10 +95,6 @@ var has_used_hero_power_this_turn: bool = false
 #region Public Functions
 ## Sends a packet for the player to play a card. Returns if a packet was sent / success.
 func play_card(card: Card, board_index: int, send_packet: bool = true) -> bool:
-	if card.types.has(&"Minion") and board.size() >= Settings.server.max_board_space:
-		Game.feedback("You don't have enough space on the board.", Game.FeedbackType.ERROR)
-		return false
-	
 	if not Game.is_players_turn:
 		Game.feedback("It is not your turn.", Game.FeedbackType.ERROR)
 		return false
@@ -129,7 +125,7 @@ func summon_card(card: Card, board_index: int, send_packet: bool = true) -> bool
 	
 	if not await Modules.request(Modules.Hook.CARD_SUMMON, [self, card, board_index, send_packet]):
 		return false
-		
+	
 	Packet.send_if(send_packet, &"Summon", id, [card.location, card.index, board_index], true)
 	return true
 

@@ -7,7 +7,9 @@ func _name() -> StringName:
 
 
 func _dependencies() -> Array[StringName]:
-	return [&"Layout"]
+	return [
+		&"Layout",
+	]
 
 
 func _load() -> void:
@@ -25,7 +27,7 @@ func layout_hand(card: Card) -> Dictionary:
 	var new_rotation: Vector3 = card.rotation
 	var new_scale: Vector3 = card.scale
 	
-	# TODO: Dont hardcode this
+	# TODO: Dont hardcode this.
 	var player_weight: int = 1 if card.player == Game.player else -1
 	
 	# Integer division, but it's not a problem.

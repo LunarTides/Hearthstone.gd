@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://dtyl71dkiuane"]
+
+[node name="HealthLabel" type="Label3D"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 1.407, 0.351036, 1.87182)
+visible = false
+text = "0"
+font_size = 113

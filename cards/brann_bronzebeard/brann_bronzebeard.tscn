@@ -11,14 +11,14 @@ text = "Your Battlecries trigger
 twice."
 cost = 3
 texture = ExtResource("2_1w15u")
-types = Array[StringName]([&"Minion"])
 classes = Array[StringName]([&"Neutral"])
 modules = {
-"rarities": [&"Legendary"]
+"rarities": [&"Legendary"],
+"tribes": [&"None"],
+"types": [&"Minion"]
 }
 collectible = true
 id = 3
-tribes = Array[StringName]([&"None"])
 attack = 2
 health = 4
 card = NodePath("Card")

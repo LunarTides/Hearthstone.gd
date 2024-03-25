@@ -11,54 +11,6 @@ signal released(position: Vector3)
 #endregion
 
 
-#region Exported Variables
-## The texture / image of the card.
-@export var texture_sprite: Sprite3D
-
-## The cover of the card.
-@export var cover: MeshInstance3D
-
-## Particles to emit when the card gets attacked.
-@export var attack_particles: GPUParticles3D
-
-## A timer used to update the card every 0.1 seconds.
-@export var update_timer: Timer
-
-@export_category("Common")
-## The name label of the card.
-@export var name_label: Label3D
-
-## The cost label of the card.
-@export var cost_label: Label3D
-
-## The text label of the card.
-@export var text_label: Label3D
-
-@export_category("Minion / Weapon")
-
-## The attack label of the card.
-@export var attack_label: Label3D
-
-## The health label of the card.
-@export var health_label: Label3D
-
-@export_category("Minion")
-
-## The tribe label of the card.
-@export var tribe_label: Label3D
-
-@export_category("Spell")
-
-## The spell school label of the card.
-@export var spell_school_label: Label3D
-
-@export_category("Hero")
-
-## The armor label of the card.
-@export var armor_label: Label3D
-#endregion
-
-
 #region Public Variables
 ## The player that owns this card.
 var player: Player
@@ -137,6 +89,7 @@ var is_hidden: bool:
 		
 		return true
 	set(new_is_hidden):
+		# TODO: Rename new_is_hidden -> value
 		is_hidden = new_is_hidden
 		
 		# Only change the essentials.
@@ -148,13 +101,7 @@ var is_hidden: bool:
 		cost_label.visible = not is_hidden
 		text_label.visible = not is_hidden
 		
-		if is_hidden:
-			# Hide all the non-essentials in here.
-			attack_label.hide()
-			health_label.hide()
-			tribe_label.hide()
-			spell_school_label.hide()
-			armor_label.hide()
+		await Modules.request(Modules.Hook.CARD_CHANGE_HIDDEN, [self, new_is_hidden])
 
 ## Whether or not this card has attacked this turn. Gets set to true every [signal Game.turn_ended] emission.
 var has_attacked_this_turn: bool = false
@@ -204,19 +151,11 @@ var id: int
 #endregion
 
 
-#region Minion
-var tribes: Array[StringName]
-#endregion
-
-
 #region Minion / Weapon
+# TODO: Add weapon cards.
 var attack: int
 var health: int
 #endregion
-
-
-#region Spell
-var spell_schools: Array[StringName]
 #endregion
 
 
@@ -229,6 +168,7 @@ var hero_power_id: int
 
 
 #region Location
+# TODO: Add location cards.
 # TODO: Add mesh for the durability: https://hearthstone.wiki.gg/wiki/Location
 var durability: int
 var cooldown: int
@@ -246,6 +186,27 @@ var _should_hover: bool = true
 #region Onready Variables
 ## The mesh of the card.
 @onready var mesh: Node3D = $Mesh
+
+## The texture / image of the card.
+@onready var texture_sprite: Sprite3D = $Texture
+
+## The cover of the card.
+@onready var cover: MeshInstance3D = $Cover
+
+## Particles to emit when the card gets attacked.
+@onready var attack_particles: GPUParticles3D = $AttackParticles
+
+## A timer used to update the card every 0.1 seconds.
+@onready var update_timer: Timer = $UpdateTimer
+
+## The name label of the card.
+@onready var name_label: Label3D = $NameLabel
+
+## The cost label of the card.
+@onready var cost_label: Label3D = $CostLabel
+
+## The text label of the card.
+@onready var text_label: Label3D = $TextLabel
 
 @onready var _old_position: Vector3 = position
 #endregion
@@ -367,6 +328,13 @@ func summon(board_index: int, send_packet: bool = true) -> bool:
 	return await player.summon_card(self, board_index, send_packet)
 
 
+## Removes this card from play. This card will still exist, and can be referenced,
+## but the card can no longer be looked up, and any abilities will be removed.
+func destroy() -> void:
+	abilities.clear()
+	location = &"None"
+
+
 ## Sets up the card to do an effect (particles, animations, etc...) in [param callback].[br]
 ## You should probably run this in [method LayoutModule.stabilize_layout_while].
 func do_effects(callback: Callable) -> void:
@@ -446,78 +414,14 @@ static func get_from_index(player: Player, location: StringName, index: int) -> 
 		_:
 			#assert(false, "The card doesn't exist at this location.")
 			return null
-
-
-# This is in a static function to work in editor scripts.
-static func _update_card(card: Card, blueprint: Blueprint) -> void:
-	var lookup: Variant = card
-	
-	if Engine.is_editor_hint():
-		lookup = blueprint
-	elif card.is_hidden:
-		return
-	
-	card.texture_sprite.texture = lookup.texture
-	card.name_label.text = lookup.card_name
-	card.cost_label.text = str(lookup.cost)
-	card.text_label.text = lookup.text
-	card.attack_label.text = str(lookup.attack)
-	card.health_label.text = str(lookup.health)
-	card.armor_label.text = str(lookup.armor)
-	
-	# Tribes
-	card.tribe_label.text = " / ".join(lookup.tribes)
-	
-	# Spell schools
-	card.spell_school_label.text = " / ".join(lookup.spell_schools)
-	
-	# Show non-essential labels
-	if lookup.types.has(&"Minion"):
-		card.tribe_label.show()
-	if lookup.types.has(&"Spell"):
-		card.spell_school_label.show()
-	
-	# Cost
-	#card.get_node("Mesh/Crystal").visible = lookup.cost > 0
-	#card.cost_label.visible = lookup.cost > 0
-	
-	# Attack
-	var attack_visible: bool = lookup.attack > 0 or blueprint.attack > 0
-	card.get_node("Mesh/Attack").visible = attack_visible
-	card.attack_label.visible = attack_visible
-	
-	# Health
-	var health_visible: bool = lookup.health > 0 or blueprint.health > 0 or lookup.tags.has(&"Starting Hero")
-	card.get_node("Mesh/Health").visible = health_visible
-	card.get_node("Mesh/HealthFrame").visible = health_visible
-	card.health_label.visible = health_visible
-	
-	# Armor
-	var armor_visible: bool = lookup.armor > 0 or blueprint.armor > 0 or lookup.tags.has(&"Starting Hero")
-	card.get_node("Mesh/Armor").visible = armor_visible
-	card.armor_label.visible = armor_visible
-	
-	if health_visible:
-		card.get_node("Mesh/Armor").position.x = 0
-		card.armor_label.position.x = -1.3
-	else:
-		card.get_node("Mesh/Armor").position.x = 2.6
-		card.armor_label.position.x = 1.3
-	
-	# Tribe / Spell School
-	var tribe_visible: bool = (
-		(lookup.tribes.size() > 0 and lookup.tribes[0] != &"None") or
-		(lookup.spell_schools.size() > 0 and lookup.spell_schools[0] != &"None") 
-	)
-	
-	card.get_node("Mesh/TribeOrSpellSchool").visible = tribe_visible
-	card.tribe_label.visible = tribe_visible
-	card.spell_school_label.visible = tribe_visible
 #endregion
 
 
 #region Private Functions
-func _wait_for_ability(target_ability: StringName) -> void:
+func _wait_for_ability(target_ability: StringName) -> bool:
+	if not abilities.has(target_ability):
+		return false
+	
 	while true:
 		var info: Array = await Game.card_ability_triggered
 		
@@ -527,6 +431,8 @@ func _wait_for_ability(target_ability: StringName) -> void:
 		
 		if after and card == self and ability == target_ability:
 			break
+	
+	return true
 
 
 func _update() -> void:
@@ -543,15 +449,18 @@ func _update() -> void:
 	
 	show()
 	
-	Card._update_card(self, blueprint)
+	texture_sprite.texture = blueprint.texture
+	name_label.text = blueprint.card_name
+	cost_label.text = str(blueprint.cost)
+	text_label.text = blueprint.text
 	
-	if location == &"Hero":
-		armor_label.text = str(player.armor)
-		health_label.text = str(player.health)
+	# Cost
+	#card.get_node("Mesh/Crystal").visible = lookup.cost > 0
+	#card.cost_label.visible = lookup.cost > 0
 	
 	Modules.request(Modules.Hook.CARD_UPDATE, [self])
 	
-	# TODO: Should this be done here?
+	# TODO: Move this code to another function.
 	if health <= 0 and location == &"Board" and not is_dying and should_die:
 		is_dying = true
 		Game.card_killed.emit(false, self, player, multiplayer.get_unique_id())
