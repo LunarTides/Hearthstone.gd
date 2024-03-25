@@ -143,24 +143,18 @@ func request(what: StringName, visual: bool, info: Array = []) -> bool:
 	if visual:
 		await get_tree().create_timer(1.0 + _visual_queue.size()).timeout
 	
-	#print_verbose("[Modules] Requested %s with the following info: %s" % [what, info])
 	await Modules.wait_in_queue(_visual_queue if visual else _gameplay_queue)
 	
 	requested.emit(what, info)
 	
-	#print_verbose("[Modules] Waiting for response...")
+	# CRITICAL: This takes ~6000-565415 usec every time. This adds up quickly.
 	var modules_result: Dictionary = await Modules.wait_for_response()
-	#print_verbose("[Modules] Modules Responded to %s. Parsing response..." % what)
 	
 	if modules_result.is_empty():
-		# No CSCs in modules.
-		#print_verbose("[Modules] No Modules Responded. Passing...")
 		return false
 	
 	var modules_response: bool = modules_result.result
 	var modules_amount: int = modules_result.amount
-	
-	#print_verbose("[Modules] %d Modules Responded. Result: %s\n" % [modules_amount, modules_response])
 	
 	return modules_response
 
@@ -193,32 +187,22 @@ func wait_in_queue(queue: Array) -> void:
 	if queue.size() == 1:
 		# Don't add to queue if the module system is idle.
 		if _processing:
-			#print_verbose("[Modules] Queue is empty, but we are already processing a request. Waiting...")
-			
 			await stopped_processing
 			await get_tree().process_frame
-			
-			#print_verbose("[Modules] Stopped processing previous request. Processing...")
-		#else:
-			#print_verbose("[Modules] Queue is empty. Processing immediately...")
 		
 		queue.pop_front()
 		
 		return
 	
-	#print_verbose("[Modules] `%d` waiting in queue..." % id)
-	
 	while true:
 		await wait_for_response()
 		
 		if Game.instance_num == 1:
-			print_verbose("%d %s" % [_gameplay_queue.size(), _visual_queue.size()])
+			print_verbose("%d %d" % [_gameplay_queue.size(), _visual_queue.size()])
 		
 		# Prioritize gameplay queue.
 		if queue[0] == id and (Game.get_or_null(_gameplay_queue, 0) == id or _gameplay_queue.size() == 0):
 			break
-	
-	#print_verbose("[Modules] Queue over for `%d`." % id)
 	
 	# Same rationale as in `_register_hook`.
 	await get_tree().process_frame

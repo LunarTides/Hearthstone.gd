@@ -372,11 +372,14 @@ func do_effects(callback: Callable) -> void:
 		await get_tree().create_timer(1.0).timeout
 		return
 	
-	var tween: Tween = create_tween().set_ease(Tween.EASE_OUT)
-	tween.tween_property(self, "scale", Vector3.ONE, 0.1)
-	await tween.finished
-	
-	await callback.call()
+	# CRITICAL: Remove layout module dependancy. May move this into a seperate module.
+	await LayoutModule.stabilize_layout_while(self, func() -> void:
+		var tween: Tween = create_tween().set_ease(Tween.EASE_OUT)
+		tween.tween_property(self, "scale", Vector3.ONE, 0.1)
+		await tween.finished
+		
+		await callback.call()
+	)
 
 
 ## Tweens the card to the specified parameters over the course of [param duration] seconds.
@@ -387,7 +390,7 @@ func tween_to(duration: float, new_position: Vector3, new_rotation: Vector3 = ro
 		scale = new_scale
 		return
 	
-	await Modules.request(&"Card Starting Tweening To", true, [self, duration, new_position, new_rotation, new_scale])
+	Modules.request(&"Card Starting Tweening To", true, [self, duration, new_position, new_rotation, new_scale])
 	
 	var tween: Tween = create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BOUNCE).set_parallel()
 	tween.tween_property(self, "position", new_position, duration)
@@ -541,7 +544,7 @@ func _update() -> void:
 		armor_label.text = str(player.armor)
 		health_label.text = str(player.health)
 	
-	await Modules.request(&"Update Card", true, [self])
+	Modules.request(&"Update Card", true, [self])
 	
 	# TODO: Should this be done here?
 	if health <= 0 and location == &"Board" and not is_dying and should_die:
@@ -596,7 +599,7 @@ func _start_hover() -> void:
 	
 	is_hovering = true
 	
-	await Modules.request(&"Card Start Hover", true, [self])
+	Modules.request(&"Card Start Hover", true, [self])
 	
 	# Animate
 	var player_weight: int = 1 if player == Game.player else -1
@@ -627,7 +630,7 @@ func _stop_hover() -> void:
 		_hover_tween.kill()
 	
 	is_hovering = false
-	await Modules.request(&"Card Stop Hover", true, [self])
+	Modules.request(&"Card Stop Hover", true, [self])
 
 
 func _start_dragging() -> void:
@@ -746,7 +749,7 @@ func _make_way_for(card: Card) -> void:
 	if not visible:
 		return
 	
-	await Modules.request(&"Card Start Making Way", true, [self, card])
+	Modules.request(&"Card Start Making Way", true, [self, card])
 	
 	var bias: int = 1 if global_position.x > card.global_position.x else -1
 	var new_position_x: float = _old_position.x + 2 * bias
@@ -761,7 +764,7 @@ func _make_way_for(card: Card) -> void:
 
 
 func _stop_making_way() -> void:
-	await Modules.request(&"Card Stop Making Way", true, [self])
+	Modules.request(&"Card Stop Making Way", true, [self])
 
 
 func _refund() -> void:
