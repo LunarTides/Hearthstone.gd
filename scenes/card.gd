@@ -323,7 +323,7 @@ func trigger_ability(ability: StringName, send_packet: bool = true) -> bool:
 	if not abilities.has(ability):
 		return false
 	
-	if not await Modules.request(&"Trigger Ability", false, [self, ability, send_packet]):
+	if not await Modules.request(Modules.Hook.CARD_ABILITY_TRIGGER, false, [self, ability, send_packet]):
 		return false
 	
 	# Wait 1 frame so that `await wait_for_ability` can get called before the ability gets triggered.
@@ -339,7 +339,7 @@ func add_ability(ability: StringName, callback: Callable) -> void:
 	if not abilities.has(ability):
 		abilities[ability] = []
 	
-	if not await Modules.request(&"Add Ability", false, [self, ability]):
+	if not await Modules.request(Modules.Hook.CARD_ABILITY_ADD, false, [self, ability]):
 		return
 	
 	abilities[ability].append(callback)
@@ -351,7 +351,7 @@ func attack_target(target: Variant, send_packet: bool = true) -> bool:
 		Game.feedback("That target is not valid.", Game.FeedbackType.ERROR)
 		return false
 	
-	if not await Modules.request(&"Attack", false, [self, target, send_packet]):
+	if not await Modules.request(Modules.Hook.ATTACK, false, [self, target, send_packet]):
 		return false
 	
 	if target is Card:
@@ -390,7 +390,7 @@ func tween_to(duration: float, new_position: Vector3, new_rotation: Vector3 = ro
 		scale = new_scale
 		return
 	
-	Modules.request(&"Card Starting Tweening To", true, [self, duration, new_position, new_rotation, new_scale])
+	Modules.request(Modules.Hook.CARD_TWEEN_START, true, [self, duration, new_position, new_rotation, new_scale])
 	
 	var tween: Tween = create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BOUNCE).set_parallel()
 	tween.tween_property(self, "position", new_position, duration)
@@ -544,7 +544,7 @@ func _update() -> void:
 		armor_label.text = str(player.armor)
 		health_label.text = str(player.health)
 	
-	Modules.request(&"Update Card", true, [self])
+	Modules.request(Modules.Hook.CARD_UPDATE, true, [self])
 	
 	# TODO: Should this be done here?
 	if health <= 0 and location == &"Board" and not is_dying and should_die:
@@ -578,7 +578,7 @@ func _update() -> void:
 		scale = old_scale
 		
 		Game.card_killed.emit(true, self, player, multiplayer.get_unique_id())
-		await Modules.request(&"Card Killed", false, [self])
+		await Modules.request(Modules.Hook.CARD_KILL, false, [self])
 		return
 
 
@@ -599,7 +599,7 @@ func _start_hover() -> void:
 	
 	is_hovering = true
 	
-	Modules.request(&"Card Start Hover", true, [self])
+	Modules.request(Modules.Hook.CARD_HOVER_START, true, [self])
 	
 	# Animate
 	var player_weight: int = 1 if player == Game.player else -1
@@ -630,7 +630,7 @@ func _stop_hover() -> void:
 		_hover_tween.kill()
 	
 	is_hovering = false
-	Modules.request(&"Card Stop Hover", true, [self])
+	Modules.request(Modules.Hook.CARD_HOVER_STOP, true, [self])
 
 
 func _start_dragging() -> void:
@@ -723,7 +723,7 @@ func _start_attacking() -> void:
 		Game.feedback("This card has already attacked this turn.", Game.FeedbackType.ERROR)
 		return
 	
-	if not await Modules.request(&"Start Attacking", false, [self]):
+	if not await Modules.request(Modules.Hook.START_ATTACKING, false, [self]):
 		return
 	
 	var target: Variant = await Target.prompt(position, self, Target.CAN_SELECT_CARDS | Target.CAN_SELECT_HEROES | Target.CAN_SELECT_ENEMY_TARGETS)
@@ -749,7 +749,7 @@ func _make_way_for(card: Card) -> void:
 	if not visible:
 		return
 	
-	Modules.request(&"Card Start Making Way", true, [self, card])
+	Modules.request(Modules.Hook.CARD_MAKE_WAY_START, true, [self, card])
 	
 	var bias: int = 1 if global_position.x > card.global_position.x else -1
 	var new_position_x: float = _old_position.x + 2 * bias
@@ -764,7 +764,7 @@ func _make_way_for(card: Card) -> void:
 
 
 func _stop_making_way() -> void:
-	Modules.request(&"Card Stop Making Way", true, [self])
+	Modules.request(Modules.Hook.CARD_MAKE_WAY_STOP, true, [self])
 
 
 func _refund() -> void:

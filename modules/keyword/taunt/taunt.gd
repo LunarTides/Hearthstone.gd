@@ -14,10 +14,10 @@ func _ready() -> void:
 
 
 #region Public Functions
-func handler(what: StringName, info: Array) -> bool:
-	if what == &"Anticheat":
+func handler(what: Modules.Hook, info: Array) -> bool:
+	if what == Modules.Hook.ANTICHEAT:
 		return anticheat_hook.callv(info)
-	elif what == &"Attack":
+	elif what == Modules.Hook.ATTACK:
 		return attack_hook.callv(info)
 	
 	return true
