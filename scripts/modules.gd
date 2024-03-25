@@ -5,7 +5,7 @@ extends Node
 
 #region Signals
 # TODO: Add documentation.
-signal requested(what: StringName, info: Array)
+signal requested(what: Hook, info: Array)
 
 ## Emits when all modules have responded to a signal. Use [method wait_for_response] instead of [code]await[/code]-ing this.
 signal responded(result: Dictionary)
@@ -15,6 +15,35 @@ signal module_unloaded(module: StringName)
 
 ## Emits when the modules have stopped processing a request. Used internally.
 signal stopped_processing
+#endregion
+
+
+#region Enums
+enum Hook {
+	ANTICHEAT,
+	ATTACK,
+	BLUEPRINT_CREATE,
+	CARD_ABILITY_ADD,
+	CARD_ABILITY_TRIGGER,
+	CARD_ADD_TO_DECK,
+	CARD_ADD_TO_HAND,
+	CARD_HOVER_START,
+	CARD_HOVER_STOP,
+	CARD_KILL,
+	CARD_MAKE_WAY_START,
+	CARD_MAKE_WAY_STOP,
+	CARD_PLAY,
+	CARD_PLAY_BEFORE,
+	CARD_SUMMON,
+	CARD_TWEEN_START,
+	CARD_UPDATE,
+	DAMAGE,
+	DRAW_CARDS,
+	END_TURN,
+	PLAYER_DIE,
+	SELECT_TARGET,
+	START_ATTACKING,
+}
 #endregion
 
 
@@ -139,7 +168,7 @@ func register_hooks(module_name: StringName, callable: Callable) -> void:
 
 
 ## Requests the modules to respond to a request.
-func request(what: StringName, visual: bool, info: Array = []) -> bool:
+func request(what: Hook, visual: bool, info: Array = []) -> bool:
 	if visual:
 		await get_tree().create_timer(1.0 + _visual_queue.size()).timeout
 	

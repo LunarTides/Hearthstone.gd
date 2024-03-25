@@ -33,8 +33,8 @@ func _ready() -> void:
 
 
 #region Public Functions
-func handler(what: StringName, info: Array) -> bool:
-	if what == &"Update Card":
+func handler(what: Modules.Hook, info: Array) -> bool:
+	if what == Modules.Hook.CARD_UPDATE:
 		return update_card_hook.callv(info)
 	
 	return true

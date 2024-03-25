@@ -18,22 +18,22 @@ func _ready() -> void:
 
 
 #region Public Functions
-func handler(what: StringName, info: Array) -> bool:
-	if what == &"Update Card":
+func handler(what: Modules.Hook, info: Array) -> bool:
+	if what == Modules.Hook.CARD_UPDATE:
 		return update_card_hook.callv(info)
-	elif what == &"Card Start Hover":
+	elif what == Modules.Hook.CARD_HOVER_START:
 		return start_hover.callv(info)
-	elif what == &"Card Stop Hover":
+	elif what == Modules.Hook.CARD_HOVER_STOP:
 		return stop_hover.callv(info)
-	elif what == &"Card Killed":
+	elif what == Modules.Hook.CARD_KILL:
 		return card_killed.callv(info)
-	elif what == &"Card Start Tweening To":
+	elif what == Modules.Hook.CARD_TWEEN_START:
 		return card_tween_to.callv(info)
-	elif what == &"Card Start Making Way":
+	elif what == Modules.Hook.CARD_MAKE_WAY_START:
 		return make_way.callv(info)
-	elif what == &"Card Stop Making Way":
+	elif what == Modules.Hook.CARD_MAKE_WAY_STOP:
 		return stop_making_way.callv(info)
-	elif what == &"Card Play Before":
+	elif what == Modules.Hook.CARD_PLAY_BEFORE:
 		return play_card_before.callv(info)
 	
 	return true
