@@ -23,6 +23,7 @@ func _dependencies() -> Array[StringName]:
 
 func _load() -> void:
 	register_hooks(handler)
+	register_card_mesh(RARITY_MESH)
 		
 	register_rarity(&"Free", Color.WHITE)
 	register_rarity(&"Common", Color.GRAY)
@@ -65,17 +66,9 @@ func update_card_hook(card: Card) -> bool:
 		assert(false, "'%s' (%d) doesn't have a rarity." % [card.name, card.id])
 		return false
 	
-	var rarity_node: MeshInstance3D = card.mesh.get_node_or_null("Rarity")
-	
+	var rarity_node: MeshInstance3D = card.mesh.get_node_or_null("Rarity/Rarity")
 	if not rarity_node:
-		var root_node: Node3D = RARITY_MESH.instantiate()
-		card.mesh.add_child(root_node)
-		
-		rarity_node = root_node.get_child(0)
-		rarity_node.reparent(card.mesh)
-		rarity_node.position = Vector3(0, 0.2, 0.6)
-		
-		root_node.queue_free()
+		return true
 	
 	rarity_node.visible = card.modules.rarities.size() > 0 and not card.modules.rarities.has(&"Free")
 	

@@ -21,13 +21,13 @@ card_name = "The Coin"
 text = "Gain 1 Mana Crystal
 this turn only."
 texture = ExtResource("2_rv7d8")
-types = Array[StringName]([&"Spell"])
 classes = Array[StringName]([&"Neutral"])
 modules = {
-"rarities": [&"Free"]
+"rarities": [&"Free"],
+"spell_schools": [&"None"],
+"types": [&"Spell"]
 }
 id = 2
-spell_schools = Array[StringName]([&"None"])
 card = NodePath("Card")
 
 [node name="Card" parent="." instance=ExtResource("3_cjwpy")]

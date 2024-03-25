@@ -9,13 +9,14 @@ script = ExtResource("1_dgkpx")
 card_name = "Sheep"
 cost = 1
 texture = ExtResource("2_bd6tv")
-types = Array[StringName]([&"Minion"])
 classes = Array[StringName]([&"Neutral"])
 modules = {
-"rarities": [&"Free"]
+"keywords": [],
+"rarities": [&"Free"],
+"tribes": [&"Beast"],
+"types": [&"Minion"]
 }
 id = 1
-tribes = Array[StringName]([&"Beast"])
 attack = 1
 health = 1
 card = NodePath("Card")

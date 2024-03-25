@@ -13,7 +13,9 @@ func _name() -> StringName:
 
 
 func _dependencies() -> Array[StringName]:
-	return [&"Location"]
+	return [
+		&"Location",
+	]
 
 
 func _load() -> void:

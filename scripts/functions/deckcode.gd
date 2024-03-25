@@ -81,7 +81,7 @@ func validate(deckcode: String) -> bool:
 #region Private Functions
 func _validate_deck(deckcode: String, hero: Blueprint, cards: Array[Card]) -> bool:
 	if deckcode == "4/1:30/1":
-		# TODO: Uncomment
+		# TODO: Uncomment when a valid deck is possible.
 		#return OS.is_debug_build()
 		return true
 	

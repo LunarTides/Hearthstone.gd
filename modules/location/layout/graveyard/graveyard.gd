@@ -7,7 +7,9 @@ func _name() -> StringName:
 
 
 func _dependencies() -> Array[StringName]:
-	return [&"Layout"]
+	return [
+		&"Layout",
+	]
 
 
 func _load() -> void:

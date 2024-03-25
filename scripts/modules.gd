@@ -1,6 +1,7 @@
 extends Node
 ## @experimental
 ## Class for dealing with Modules.
+# TODO: Resolve review comments in GH-4 & GH-7.
 
 
 #region Signals
@@ -28,6 +29,7 @@ enum Hook {
 	CARD_ABILITY_TRIGGER,
 	CARD_ADD_TO_DECK,
 	CARD_ADD_TO_HAND,
+	CARD_CHANGE_HIDDEN,
 	CARD_HOVER_START,
 	CARD_HOVER_STOP,
 	CARD_KILL,
@@ -79,6 +81,7 @@ var _queue: Array[int]
 
 
 #region Public Functions
+# TODO: Add documentation to all functions.
 func load_all() -> void:
 	for module_name: StringName in _enabled_modules.keys():
 		load_module(module_name)
@@ -113,6 +116,12 @@ func unload_module(module_name: StringName) -> void:
 	for module: Dictionary in _registered_modules.values():
 		if module.dependencies.has(module_name):
 			unload_module(module.name)
+
+
+## Checks if the [param module_name] is a valid loaded and enabled module.
+## Try to not rely on other modules if you can help it.
+func has_module(module_name: StringName) -> bool:
+	return _enabled_modules.has(module_name)
 
 
 func disable(module_name: StringName) -> void:
@@ -165,10 +174,11 @@ func request(what: Hook, info: Array = []) -> bool:
 	
 	var result: bool = true
 	for module: Dictionary in _enabled_modules.values():
-		if not module.has("hook_handler"):
+		if not module.has("hook_handlers"):
 			continue
 		
-		result = result and module.hook_handler.call(what, info)
+		for hook_handler: Callable in module.hook_handlers:
+			result = result and await hook_handler.call(what, info)
 	
 	responded.emit(what, info, result)
 	return result
@@ -230,6 +240,47 @@ func _register(module_name: StringName, dependencies: Array[StringName], on_load
 	}
 
 
+func _register_card_mesh(module_name: StringName, mesh: PackedScene) -> void:
+	_register_hooks(module_name, func(what: Hook, info: Array) -> bool:
+		if what == Hook.BLUEPRINT_CREATE:
+			var blueprint: Blueprint = info[0]
+			var card: Card = blueprint.card
+			
+			var root_node: Node3D = mesh.instantiate()
+			root_node.name = root_node.name.to_pascal_case()
+			card.mesh.add_child(root_node)
+			#root_node.hide()
+		
+		return true
+	)
+	
+	module_unloaded.connect(func(module: StringName) -> void:
+		if module != module_name:
+			return
+		
+		for card: Card in Card.get_all():
+			var mesh_node: MeshInstance3D = card.get_node_or_null("Mesh/%s" % mesh.instantiate().name.to_pascal_case())
+			
+			if mesh_node:
+				mesh_node.queue_free()
+	)
+
+
 func _register_hooks(module_name: StringName, callable: Callable) -> void:
-	_registered_modules[module_name].hook_handler = callable
+	if not _registered_modules[module_name].has("hook_handlers"):
+		_registered_modules[module_name].hook_handlers = [callable]
+		return
+	
+	_registered_modules[module_name].hook_handlers.append(callable)
+
+
+## Registers a packet.
+## Packets created by modules will get unregistered when the module gets unloaded automatically.
+func _register_packet(module_name: StringName, packet_name: StringName) -> void:
+	Packet.packet_types.append(packet_name)
+	
+	module_unloaded.connect(func(module: StringName) -> void:
+		if module == module_name:
+			Packet.packet_types.erase(packet_name)
+	)
 #endregion

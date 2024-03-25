@@ -283,8 +283,6 @@ func create_blueprint_from_id(id: int, player_id: int, location: StringName, ind
 	var blueprint: Blueprint = Blueprint.create_from_id(id, player)
 	blueprint.card.add_to_location(location, index)
 	
-	await Modules.request(Modules.Hook.BLUEPRINT_CREATE, [blueprint])
-	
 	return blueprint
 
 
