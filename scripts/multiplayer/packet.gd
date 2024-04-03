@@ -158,25 +158,31 @@ func _accept(packet_type: StringName, sender_peer_id: int, player_id: int, info:
 	history.append([sender_peer_id, packet_type, player_id, info])
 	
 	var method_name: String = "_accept_" + packet_type.to_snake_case() + "_packet"
-	var method: Callable = self[method_name]
 	
-	assert(method, method_name + " doesn't exist.")
-	method.call(player, sender_peer_id, info)
+	# Check if there exists a method for that packet type in core. If not, it might still exist in a module.
+	if get_method_list().any(func(dict: Dictionary) -> bool: return dict.name == method_name):
+		var method: Callable = self[method_name]
+		method.bindv(info).call(player, sender_peer_id)
+	
+	Modules.request(Modules.Hook.ACCEPT_PACKET, false, [packet_type, player, sender_peer_id, info])
 
 
 # Here are the functions that gets called on the clients + server when a packet gets sent. Handled in _accept_packet
-func _accept_attack_packet(player: Player, sender_peer_id: int, info: Array) -> void:
-	var attack_mode: StringName = info[0]
+func _accept_attack_packet(
+	player: Player,
+	sender_peer_id: int,
 	
-	var attacker_location: StringName = info[1]
-	var attacker_index: int = info[2]
+	attack_mode: StringName,
 	
-	var target_location: StringName = info[3]
-	var target_index: int = info[4]
+	attacker_location: StringName,
+	attacker_index: int,
 	
-	var attacker_player_id: int = info[5]
-	var target_player_id: int = info[6]
+	target_location: StringName,
+	target_index: int,
 	
+	attacker_player_id: int,
+	target_player_id: int,
+) -> void:
 	var attacker_card: Card = Card.get_from_index(player, attacker_location, attacker_index)
 	var target_card: Card = Card.get_from_index(player.opponent, target_location, target_index)
 	
@@ -208,20 +214,26 @@ func _accept_attack_packet(player: Player, sender_peer_id: int, info: Array) -> 
 		Game.attacked.emit(true, attacker_card, target_card, sender_peer_id)
 
 
-func _accept_create_card_packet(player: Player, sender_peer_id: int, info: Array) -> void:
-	var id: int = info[0]
-	var location: StringName = info[1]
-	var location_index: int = info[2]
+func _accept_create_card_packet(
+	player: Player,
+	sender_peer_id: int,
 	
+	id: int,
+	location: StringName,
+	location_index: int,
+) -> void:
 	var card: Card = Blueprint.create_from_id(id, player).card
 	card.add_to_location(location, location_index)
 	
 	Game.card_created.emit(true, card, player, sender_peer_id)
 
 
-func _accept_draw_cards_packet(player: Player, sender_peer_id: int, info: Array) -> void:
-	var amount: int = info[0]
+func _accept_draw_cards_packet(
+	player: Player,
+	sender_peer_id: int,
 	
+	amount: int,
+) -> void:
 	Game.cards_drawn.emit(false, amount, player, sender_peer_id)
 	
 	for _i: int in amount:
@@ -241,7 +253,10 @@ func _accept_draw_cards_packet(player: Player, sender_peer_id: int, info: Array)
 	Game.cards_drawn.emit(true, amount, player, sender_peer_id)
 
 
-func _accept_end_turn_packet(sender_player: Player, sender_peer_id: int, info: Array) -> void:
+func _accept_end_turn_packet(
+	sender_player: Player,
+	sender_peer_id: int,
+) -> void:
 	var player: Player = sender_player.opponent
 	
 	Game.turn_ended.emit(false, sender_player, sender_peer_id)
@@ -261,29 +276,34 @@ func _accept_end_turn_packet(sender_player: Player, sender_peer_id: int, info: A
 	Game.turn_ended.emit(true, sender_player, sender_peer_id)
 
 
-func _accept_hero_power_packet(player: Player, sender_peer_id: int, info: Array) -> void:
+func _accept_hero_power_packet(
+	player: Player,
+	sender_peer_id: int,
+) -> void:
 	var hero_power: Card = player.hero.hero_power
-	
+
 	Game.hero_power.emit(false, player, sender_peer_id)
-	
+
 	hero_power.refunded = false
-	
-	_accept_trigger_ability_packet(player, sender_peer_id, [hero_power.location, hero_power.index, &"Hero Power"])
+	hero_power.trigger_ability(&"Hero Power", false)
 	if hero_power.refunded:
 		return
-	
+
 	player.has_used_hero_power_this_turn = true
 	player.mana -= hero_power.cost
-	
+
 	Game.hero_power.emit(true, player, sender_peer_id)
 
 
-func _accept_play_packet(player: Player, sender_peer_id: int, info: Array) -> void:
-	var location: StringName = info[0]
-	var location_index: int = info[1]
-	var board_index: int = info[2]
-	var position: Vector3i = info[3]
+func _accept_play_packet(
+	player: Player,
+	sender_peer_id: int,
 	
+	location: StringName,
+	location_index: int,
+	board_index: int,
+	position: Vector3i,
+) -> void:
 	var card: Card = Card.get_from_index(player, location, location_index)
 	Game.card_played.emit(false, card, board_index, player, sender_peer_id)
 	
@@ -309,7 +329,7 @@ func _accept_play_packet(player: Player, sender_peer_id: int, info: Array) -> vo
 				return
 		
 		# Summon after ability for refunding.
-		player.summon_card(card, board_index, false, true)
+		player.summon_card(card, board_index, false)
 	
 	if card.types.has(&"Spell"):
 		card.trigger_ability(&"Cast", false)
@@ -334,10 +354,13 @@ func _accept_play_packet(player: Player, sender_peer_id: int, info: Array) -> vo
 	Game.card_played.emit(true, card, board_index, player, sender_peer_id)
 
 
-func _accept_reveal_packet(player: Player, sender_peer_id: int, info: Array) -> void:
-	var location: StringName = info[0]
-	var location_index: int = info[1]
+func _accept_reveal_packet(
+	player: Player,
+	sender_peer_id: int,
 	
+	location: StringName,
+	location_index: int,
+) -> void:
 	var card: Card = Card.get_from_index(player, location, location_index)
 	Game.card_revealed.emit(false, card, player, sender_peer_id)
 	
@@ -346,16 +369,19 @@ func _accept_reveal_packet(player: Player, sender_peer_id: int, info: Array) -> 
 	Game.card_revealed.emit(true, card, player, sender_peer_id)
 
 
-func _accept_set_drag_to_play_target_packet(player: Player, sender_peer_id: int, info: Array) -> void:
-	var target_mode: StringName = info[0]
+func _accept_set_drag_to_play_target_packet(
+	player: Player,
+	sender_peer_id: int,
 	
-	var location: StringName = info[1]
-	var location_index: int = info[2]
+	target_mode: StringName,
 	
-	var target_alignment: int = info[3]
-	var target_location: StringName = info[4]
-	var target_index: int = info[5]
-
+	location: StringName,
+	location_index: int,
+	
+	target_alignment: int,
+	target_location: StringName,
+	target_index: int,
+) -> void:
 	var card: Card = Card.get_from_index(player, location, location_index)
 	var target_player: Player = Player.get_from_id(target_alignment)
 	
@@ -366,11 +392,14 @@ func _accept_set_drag_to_play_target_packet(player: Player, sender_peer_id: int,
 		card.drag_to_play_target = target_player
 
 
-func _accept_summon_packet(player: Player, sender_peer_id: int, info: Array) -> void:
-	var location: StringName = info[0]
-	var location_index: int = info[1]
-	var board_index: int = info[2]
+func _accept_summon_packet(
+	player: Player,
+	sender_peer_id: int,
 	
+	location: StringName,
+	location_index: int,
+	board_index: int,
+) -> void:
 	var card: Card = Card.get_from_index(player, location, location_index)
 	Game.card_summoned.emit(false, card, board_index, player, sender_peer_id)
 	
@@ -380,11 +409,14 @@ func _accept_summon_packet(player: Player, sender_peer_id: int, info: Array) -> 
 	Game.card_summoned.emit(true, card, board_index, player, sender_peer_id)
 
 
-func _accept_trigger_ability_packet(player: Player, sender_peer_id: int, info: Array) -> void:
-	var location: StringName = info[0]
-	var location_index: int = info[1]
-	var ability: StringName = info[2]
+func _accept_trigger_ability_packet(
+	player: Player,
+	sender_peer_id: int,
 	
+	location: StringName,
+	location_index: int,
+	ability: StringName,
+) -> void:
 	var card: Card = Card.get_from_index(player, location, location_index)
 	
 	Game.card_ability_triggered.emit(false, card, ability, player, sender_peer_id)

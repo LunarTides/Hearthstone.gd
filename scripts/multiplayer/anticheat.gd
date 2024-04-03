@@ -34,18 +34,28 @@ func run(packet_type: StringName, sender_peer_id: int, actor_player: Player, inf
 	
 	
 	var method_name: String = "_run_" + packet_type.to_snake_case() + "_packet"
-	var method: Callable = self[method_name]
 	
-	assert(method, "No anticheat logic for '%s'" % packet_type)
-	var core_anticheat_response: bool = method.call(sender_peer_id, sender_player, actor_player, info)
-	
-	print_verbose("\n[AC] Core Response: %s" % core_anticheat_response)
-	
-	if not core_anticheat_response:
-		return false
+	# Check if there exists a method for that packet type in core. If not, it might still exist in a module.
+	if get_method_list().any(func(dict: Dictionary) -> bool: return dict.name == method_name):
+		var method: Callable = self[method_name]
+		var core_anticheat_response: bool = method.bindv(info).call(sender_peer_id, sender_player, actor_player)
+		
+		print_verbose("\n[AC] Core Response: %s" % core_anticheat_response)
+		
+		if not core_anticheat_response:
+			return false
+	else:
+		print_verbose("\n[AC] Core cannot handle packet (%s), passing to modules..." % packet_type)
 	
 	# Passed the core anticheat. Let the modules do their anticheat.
-	return await Modules.request(Modules.Hook.ANTICHEAT, false, [packet_type, sender_peer_id, sender_player, actor_player, info])
+	var modules_anticheat_response: bool = await Modules.request(
+		Modules.Hook.ANTICHEAT,
+		false,
+		[packet_type, sender_peer_id, sender_player, actor_player, info],
+	)
+
+	print_verbose("[AC] Modules Reponse: %s" % modules_anticheat_response)
+	return modules_anticheat_response
 
 
 #region Helper Functions
@@ -124,22 +134,42 @@ func in_packet_history(info: Array, history_range: int, only_use_server_packets:
 #region Private Functions
 #region Packet Specific Anticheat
 # Attack
-func _run_attack_packet(sender_peer_id: int, sender_player: Player, actor_player: Player, info: Array) -> bool:
+func _run_attack_packet(
+	sender_peer_id: int,
+	sender_player: Player,
+	actor_player: Player,
+	
+	attack_mode: StringName,
+	
+	attacker_location: StringName,
+	attacker_index: int,
+	
+	target_location: StringName,
+	target_index: int,
+	
+	attacker_player_id: int,
+	target_player_id: int,
+) -> bool:
 	# The info needs to be correct.
-	if not info_check(info, [TYPE_STRING_NAME, TYPE_STRING_NAME, TYPE_INT, TYPE_STRING_NAME, TYPE_INT, TYPE_INT, TYPE_INT]):
-		feedback("Invalid ATTACK info.", sender_peer_id)
+	if not info_check([
+		attack_mode,
+		attacker_location,
+		attacker_index,
+		target_location,
+		target_index,
+		attacker_player_id,
+		target_player_id,
+	], [
+		TYPE_STRING_NAME,
+		TYPE_STRING_NAME,
+		TYPE_INT,
+		TYPE_STRING_NAME,
+		TYPE_INT,
+		TYPE_INT,
+		TYPE_INT,
+	]):
+		feedback("Invalid attack info.", sender_peer_id)
 		return false
-	
-	var attack_mode: StringName = info[0]
-	
-	var attacker_location: StringName = info[1]
-	var attacker_index: int = info[2]
-	
-	var target_location: StringName = info[3]
-	var target_index: int = info[4]
-	
-	var attacker_player_id: int = info[5]
-	var target_player_id: int = info[6]
 	
 	var attacker_card: Card = Card.get_from_index(actor_player, attacker_location, attacker_index)
 	var target_card: Card = Card.get_from_index(actor_player.opponent, target_location, target_index)
@@ -204,15 +234,19 @@ func _run_attack_packet(sender_peer_id: int, sender_player: Player, actor_player
 
 
 # Create Card
-func _run_create_card_packet(sender_peer_id: int, sender_player: Player, actor_player: Player, info: Array) -> bool:
-	# The info needs to be correct.
-	if not info_check(info, [TYPE_INT, TYPE_STRING_NAME, TYPE_INT]):
-		feedback("Invalid CREATE_CARD info.", sender_peer_id)
-		return false
+func _run_create_card_packet(
+	sender_peer_id: int,
+	sender_player: Player,
+	actor_player: Player,
 	
-	var id: int = info[0]
-	var location: StringName = info[1]
-	var location_index: int = info[2]
+	id: int,
+	location: StringName,
+	location_index: int,
+) -> bool:
+	# The info needs to be correct.
+	if not info_check([id, location, location_index], [TYPE_INT, TYPE_STRING_NAME, TYPE_INT]):
+		feedback("Invalid create card info.", sender_peer_id)
+		return false
 	
 	# Id needs to be valid.
 	if check(Blueprint.create_from_id(id, Game.player) == null, 1):
@@ -239,13 +273,17 @@ func _run_create_card_packet(sender_peer_id: int, sender_player: Player, actor_p
 
 
 # Draw Cards
-func _run_draw_cards_packet(sender_peer_id: int, sender_player: Player, actor_player: Player, info: Array) -> bool:
-	# The info needs to be correct.
-	if not info_check(info, [TYPE_INT]):
-		feedback("Invalid DRAW_CARDS info.", sender_peer_id)
-		return false
+func _run_draw_cards_packet(
+	sender_peer_id: int,
+	sender_player: Player,
+	actor_player: Player,
 	
-	var amount: int = info[0]
+	amount: int,
+) -> bool:
+	# The info needs to be correct.
+	if not info_check([amount], [TYPE_INT]):
+		feedback("Invalid draw cards info.", sender_peer_id)
+		return false
 	
 	# Only the server can do this.
 	if check(true, 2):
@@ -256,10 +294,14 @@ func _run_draw_cards_packet(sender_peer_id: int, sender_player: Player, actor_pl
 
 
 # End Turn
-func _run_end_turn_packet(sender_peer_id: int, sender_player: Player, actor_player: Player, info: Array) -> bool:
+func _run_end_turn_packet(
+	sender_peer_id: int,
+	sender_player: Player,
+	actor_player: Player
+) -> bool:
 	# The info needs to be correct.
-	if not info_check(info, []):
-		feedback("Invalid END_TURN info.", sender_peer_id)
+	if not info_check([], []):
+		feedback("Invalid end turn info.", sender_peer_id)
 		return false
 	
 	# The player whose turn it is should be the same player as the one who sent the packet.
@@ -276,10 +318,10 @@ func _run_end_turn_packet(sender_peer_id: int, sender_player: Player, actor_play
 
 
 # Hero Power
-func _run_hero_power_packet(sender_peer_id: int, sender_player: Player, actor_player: Player, info: Array) -> bool:
+func _run_hero_power_packet(sender_peer_id: int, sender_player: Player, actor_player: Player) -> bool:
 	# The info needs to be correct.
-	if not info_check(info, []):
-		feedback("Invalid HERO_POWER info.", sender_peer_id)
+	if not info_check([], []):
+		feedback("Invalid hero power info.", sender_peer_id)
 		return false
 	
 	var hero_power: Card = actor_player.hero.hero_power
@@ -303,16 +345,30 @@ func _run_hero_power_packet(sender_peer_id: int, sender_player: Player, actor_pl
 
 
 # Play
-func _run_play_packet(sender_peer_id: int, sender_player: Player, actor_player: Player, info: Array) -> bool:
-	# The info needs to be correct.
-	if not info_check(info, [TYPE_STRING_NAME, TYPE_INT, TYPE_INT, TYPE_VECTOR3I]):
-		feedback("Invalid PLAY info.", sender_peer_id)
-		return false
+func _run_play_packet(
+	sender_peer_id: int,
+	sender_player: Player,
+	actor_player: Player,
 	
-	var location: StringName = info[0]
-	var location_index: int = info[1]
-	var board_index: int = info[2]
-	var position: Vector3i = info[3]
+	location: StringName,
+	location_index: int,
+	board_index: int,
+	position: Vector3i,
+) -> bool:
+	# The info needs to be correct.
+	if not info_check([
+		location,
+		location_index,
+		board_index,
+		position,
+	], [
+		TYPE_STRING_NAME,
+		TYPE_INT,
+		TYPE_INT,
+		TYPE_VECTOR3I,
+	]):
+		feedback("Invalid play info.", sender_peer_id)
+		return false
 	
 	var card: Card = Card.get_from_index(sender_player, location, location_index)
 	
@@ -351,14 +407,18 @@ func _run_play_packet(sender_peer_id: int, sender_player: Player, actor_player: 
 
 
 # Reveal
-func _run_reveal_packet(sender_peer_id: int, sender_player: Player, actor_player: Player, info: Array) -> bool:
-	# The info needs to be correct.
-	if not info_check(info, [TYPE_STRING_NAME, TYPE_INT]):
-		feedback("Invalid REVEAL info.", sender_peer_id)
-		return false
+func _run_reveal_packet(
+	sender_peer_id: int,
+	sender_player: Player,
+	actor_player: Player,
 	
-	var location: StringName = info[0]
-	var index: int = info[1]
+	location: StringName,
+	index: int,
+) -> bool:
+	# The info needs to be correct.
+	if not info_check([location, index], [TYPE_STRING_NAME, TYPE_INT]):
+		feedback("Invalid reveal info.", sender_peer_id)
+		return false
 	
 	# The card should exist.
 	if check_card(sender_player, location, index, sender_peer_id):
@@ -373,21 +433,41 @@ func _run_reveal_packet(sender_peer_id: int, sender_player: Player, actor_player
 
 
 # Set Drag To Play
-func _run_set_drag_to_play_target_packet(sender_peer_id: int, sender_player: Player, actor_player: Player, info: Array) -> bool:
+func _run_set_drag_to_play_target_packet(
+	sender_peer_id: int,
+	sender_player: Player,
+	actor_player: Player,
+	
+	target_mode: StringName,
+	
+	location: StringName,
+	location_index: int,
+	
+	target_alignment: int,
+	target_location: StringName,
+	target_index: int,
+) -> bool:
 	# The info needs to be correct.
-	if not info_check(info, [TYPE_STRING_NAME, TYPE_STRING_NAME, TYPE_INT, TYPE_INT, TYPE_STRING_NAME, TYPE_INT]):
-		feedback("Invalid SET_DRAG_TO_PLAY info.", sender_peer_id)
+	if not info_check([
+		target_mode,
+	
+		location,
+		location_index,
+		
+		target_alignment,
+		target_location,
+		target_index,
+	], [
+		TYPE_STRING_NAME,
+		TYPE_STRING_NAME,
+		TYPE_INT,
+		TYPE_INT,
+		TYPE_STRING_NAME,
+		TYPE_INT,
+	]):
+		feedback("Invalid set drag to play info.", sender_peer_id)
 		return false
 	
-	var target_mode: StringName = info[0]
-	
-	var location: StringName = info[1]
-	var location_index: int = info[2]
-	
-	var target_alignment: int = info[3]
-	var target_location: StringName = info[4]
-	var target_index: int = info[5]
-
 	var card: Card = Card.get_from_index(actor_player, location, location_index)
 	var target_player: Player = Player.get_from_id(target_alignment)
 	
@@ -415,17 +495,21 @@ func _run_set_drag_to_play_target_packet(sender_peer_id: int, sender_player: Pla
 
 
 # Summon
-func _run_summon_packet(sender_peer_id: int, sender_player: Player, actor_player: Player, info: Array) -> bool:
+func _run_summon_packet(
+	sender_peer_id: int,
+	sender_player: Player,
+	actor_player: Player,
+	
+	location: StringName,
+	location_index: int,
+	board_index: int,
+) -> bool:
 	# The info needs to be correct.
-	if not info_check(info, [TYPE_STRING_NAME, TYPE_INT, TYPE_INT]):
-		feedback("Invalid SUMMON info.", sender_peer_id)
+	if not info_check([location, location_index, board_index], [TYPE_STRING_NAME, TYPE_INT, TYPE_INT]):
+		feedback("Invalid summon info.", sender_peer_id)
 		return false
 	
-	var location: StringName = info[0]
-	var location_index: int = info[1]
-	var board_index: int = info[2]
-	
-	var card: Card = Card.get_from_index(sender_player, location, location_index)
+	var card: Card = Card.get_from_index(actor_player, location, location_index)
 	
 	# The card should exist.
 	if check_card(sender_player, location, location_index, sender_peer_id):
@@ -465,15 +549,19 @@ func _run_summon_packet(sender_peer_id: int, sender_player: Player, actor_player
 
 
 # Trigger Ability
-func _run_trigger_ability_packet(sender_peer_id: int, sender_player: Player, actor_player: Player, info: Array) -> bool:
-	# The info needs to be correct.
-	if not info_check(info, [TYPE_STRING_NAME, TYPE_INT, TYPE_STRING_NAME]):
-		feedback("Invalid TRIGGER_ABILITY info.", sender_peer_id)
-		return false
+func _run_trigger_ability_packet(
+	sender_peer_id: int,
+	sender_player: Player,
+	actor_player: Player,
 	
-	var location: StringName = info[0]
-	var location_index: int = info[1]
-	var ability: StringName = info[2]
+	location: StringName,
+	location_index: int,
+	ability: StringName,
+) -> bool:
+	# The info needs to be correct.
+	if not info_check([location, location_index, ability], [TYPE_STRING_NAME, TYPE_INT, TYPE_STRING_NAME]):
+		feedback("Invalid trigger ability info.", sender_peer_id)
+		return false
 	
 	var card: Card = Card.get_from_index(actor_player, location, location_index)
 	

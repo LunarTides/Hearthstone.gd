@@ -21,7 +21,24 @@ func handler(what: Modules.Hook, info: Array) -> bool:
 	return true
 
 
-func anticheat_hook(packet_type: StringName, sender_peer_id: int, sender_player: Player, actor_player: Player, info: Array) -> bool:
-	Anticheat.feedback("CHANGE ME", sender_peer_id)
+func play_anticheat(
+	sender_peer_id: int,
+	sender_player: Player,
+	actor_player: Player,
+	
+	location: StringName,
+	location_index: int,
+	board_index: int,
+	position: Vector3i,
+) -> bool:
 	return false
+
+
+#region Hooks
+func anticheat_hook(packet_type: StringName, sender_peer_id: int, sender_player: Player, actor_player: Player, info: Array) -> bool:
+	if packet_type == &"Play":
+		return play_anticheat.bindv(info).call(sender_peer_id, sender_player, actor_player)
+	
+	return true
+#endregion
 #endregion

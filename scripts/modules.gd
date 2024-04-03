@@ -20,6 +20,7 @@ signal stopped_processing
 
 #region Enums
 enum Hook {
+	ACCEPT_PACKET,
 	ANTICHEAT,
 	ATTACK,
 	BLUEPRINT_CREATE,

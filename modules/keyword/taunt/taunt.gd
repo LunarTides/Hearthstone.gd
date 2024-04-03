@@ -22,14 +22,19 @@ func handler(what: Modules.Hook, info: Array) -> bool:
 	
 	return true
 
-
-func anticheat_hook(packet_type: StringName, sender_peer_id: int, sender_player: Player, actor_player: Player, info: Array) -> bool:
-	if packet_type != &"Attack":
-		return true
+func anticheat_attack(
+	sender_peer_id: int,
+	sender_player: Player,
+	actor_player: Player,
 	
-	var target_location: StringName = info[3]
-	var target_index: int = info[4]
-	
+	attack_mode: StringName,
+	attacker_location: StringName,
+	attacker_index: int,
+	target_location: StringName,
+	target_index: int,
+	attacker_player_id: int,
+	target_player_id: int,
+) -> bool:
 	var target_card: Card = Card.get_from_index(actor_player.opponent, target_location, target_index)
 	
 	return _check_for_taunt(target_card)
@@ -37,6 +42,15 @@ func anticheat_hook(packet_type: StringName, sender_peer_id: int, sender_player:
 
 func attack_hook(attacker: Card, target: Variant, send_packet: bool) -> bool:
 	return _check_for_taunt(target)
+
+
+#region Hooks
+func anticheat_hook(packet_type: StringName, sender_peer_id: int, sender_player: Player, actor_player: Player, info: Array) -> bool:
+	if packet_type == &"Attack":
+		return anticheat_attack.bindv(info).call(sender_peer_id, sender_player, actor_player)
+	
+	return true
+#endregion
 #endregion
 
 
