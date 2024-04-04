@@ -1,0 +1,72 @@
+{
+  "collapse-filter": false,
+  "search": "",
+  "showTags": false,
+  "showAttachments": false,
+  "hideUnresolved": false,
+  "showOrphans": true,
+  "collapse-color-groups": true,
+  "colorGroups": [
+    {
+      "query": "path:Assets  ",
+      "color": {
+        "a": 1,
+        "rgb": 1179392
+      }
+    },
+    {
+      "query": "path:Modules  ",
+      "color": {
+        "a": 1,
+        "rgb": 4300659
+      }
+    },
+    {
+      "query": "path:Scenes  ",
+      "color": {
+        "a": 1,
+        "rgb": 16711680
+      }
+    },
+    {
+      "query": "path:Scripts/Multiplayer  ",
+      "color": {
+        "a": 1,
+        "rgb": 0
+      }
+    },
+    {
+      "query": "path:Scripts  ",
+      "color": {
+        "a": 1,
+        "rgb": 16514816
+      }
+    },
+    {
+      "query": "file:Hearthstone.gd",
+      "color": {
+        "a": 1,
+        "rgb": 3682465
+      }
+    },
+    {
+      "query": "file:Cards",
+      "color": {
+        "a": 1,
+        "rgb": 15597823
+      }
+    }
+  ],
+  "collapse-display": true,
+  "showArrow": true,
+  "textFadeMultiplier": 0,
+  "nodeSizeMultiplier": 2.21822916666667,
+  "lineSizeMultiplier": 2.60104166666667,
+  "collapse-forces": false,
+  "centerStrength": 0.635416666666667,
+  "repelStrength": 12.7083333333333,
+  "linkStrength": 1,
+  "linkDistance": 184,
+  "scale": 0.6599664978811827,
+  "close": false
+}
