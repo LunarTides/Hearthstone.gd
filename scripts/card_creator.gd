@@ -43,4 +43,7 @@ card = NodePath("Card")
 	
 	scene.close()
 	
-	print("Card Created at `res://cards/rename_me/`. Please wait for the Godot File Explorer to update...")
+	# Scan to show the card folder immediately.
+	EditorInterface.get_resource_filesystem().scan()
+	
+	print("Card Created at `res://cards/rename_me/`.")
