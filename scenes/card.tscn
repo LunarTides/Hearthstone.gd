@@ -119,7 +119,7 @@ draw_pass_1 = SubResource("BoxMesh_i3iba")
 wait_time = 0.1
 autostart = true
 
-[node name="Viewer" type="Node" parent="."]
+[node name="BlueprintManager" type="Node" parent="."]
 script = ExtResource("5_7rqca")
 
 [connection signal="input_event" from="." to="." method="_on_input_event"]

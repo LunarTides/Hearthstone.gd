@@ -35,6 +35,7 @@ enum Hook {
 	CARD_MAKE_WAY_STOP,
 	CARD_PLAY,
 	CARD_PLAY_BEFORE,
+	CARD_PLAY_CHECK,
 	CARD_SUMMON,
 	CARD_TWEEN_START,
 	CARD_UPDATE,
@@ -227,9 +228,6 @@ func wait_in_queue(queue: Array) -> void:
 	while true:
 		await wait_for_response()
 		
-		if Game.instance_num == 1:
-			print_verbose("%d %d" % [_gameplay_queue.size(), _visual_queue.size()])
-		
 		# Prioritize gameplay queue.
 		if queue[0] == id and (Game.get_or_null(_gameplay_queue, 0) == id or _gameplay_queue.size() == 0):
 			break
@@ -253,7 +251,7 @@ func _register_hooks(callable: Callable) -> void:
 	_processing = true
 	
 	# Call the callback function with the result of the signal.
-	var callable_result: bool = callable.callv(info)
+	var callable_result: bool = await callable.callv(info)
 	
 	# Handle response from the callback.
 	_modules_responded += 1

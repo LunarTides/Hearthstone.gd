@@ -107,7 +107,7 @@ func play_card(card: Card, board_index: int, send_packet: bool = true) -> bool:
 		Game.feedback("You don't have enough mana.", Game.FeedbackType.ERROR)
 		return false
 	
-	if not await Modules.request(Modules.Hook.CARD_PLAY, false, [self, card, board_index, send_packet]):
+	if not await Modules.request(Modules.Hook.CARD_PLAY_CHECK, false, [self, card, board_index, send_packet]):
 		return false
 	
 	if card.location == &"Hero Power":

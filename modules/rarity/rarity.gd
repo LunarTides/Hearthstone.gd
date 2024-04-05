@@ -33,6 +33,16 @@ func _ready() -> void:
 
 
 #region Public Functions
+func register_rarity(rarity: StringName, color: Color) -> void:
+	rarities.append(rarity)
+	rarity_colors[rarity] = color
+
+
+func unregister_rarity(rarity: StringName) -> void:
+	rarities.erase(rarity)
+	rarity_colors.erase(rarity)
+
+
 func handler(what: Modules.Hook, info: Array) -> bool:
 	if what == Modules.Hook.CARD_UPDATE:
 		return update_card_hook.callv(info)
@@ -40,6 +50,7 @@ func handler(what: Modules.Hook, info: Array) -> bool:
 	return true
 
 
+#region Hooks
 func update_card_hook(card: Card) -> bool:
 	# FIXME: For some reason, this hook doesn't get called on all cards.
 	#print(card.player.id, card.location, card.index)
@@ -70,15 +81,5 @@ func update_card_hook(card: Card) -> bool:
 	rarity_node.set_surface_override_material(0, rarity_material)
 	
 	return true
-
-
-func register_rarity(rarity: StringName, color: Color) -> void:
-	rarities.append(rarity)
-	rarity_colors[rarity] = color
-
-
-func unregister_rarity(rarity: StringName) -> void:
-	rarities.erase(rarity)
-	rarity_colors.erase(rarity)
 #endregion
-
+#endregion

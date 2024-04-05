@@ -32,6 +32,7 @@ func _process(delta: float) -> void:
 	# /////////////// Suggest ID ///////////////
 	if has_suggested_id:
 		return
+	has_suggested_id = true
 	
 	var blueprints: Array = Blueprint.get_all()
 	blueprints.sort_custom(func(a: Blueprint, b: Blueprint) -> bool:
@@ -43,26 +44,25 @@ func _process(delta: float) -> void:
 	
 	var current_id: int = 0
 	for bp: Blueprint in blueprints:
-		current_id += 1
-		
-		if bp.id == current_id:
-			continue
-		
 		if bp.id == 0:
 			if (bp.texture != blueprint.texture or bp.card_name != blueprint.card_name):
 				push_error("[BLUEPRINT MANAGER] '%s' does not to have an ID." % bp.card_name)
-			current_id -= 1
-		elif bp.id == current_id - 1:
+			continue
+		elif bp.id == current_id:
 			push_error("[BLUEPRINT MANAGER] There are more than one Blueprint with an ID of: %d. One of them is '%s'. THE GAME WILL BREAK." % [bp.id, bp.card_name])
-			current_id -= 1
+			continue
 		
-		if bp.id == current_id + 1:
+		current_id += 1
+		
+		if bp.id != current_id:
 			push_warning("[BLUEPRINT MANAGER] A Blueprint with an ID of '%d' is missing." % current_id)
+			
+			# Increment the counter to account for the missing id.
+			current_id += bp.id - current_id
 	
 	if blueprint.id == 0:
 		push_warning("[BLUEPRINT MANAGER] '%s' is missing an ID. Assigned it the following ID: '%d'." % [blueprint.card_name if blueprint.card_name else "Unnamed Blueprint", current_id + 1])
 		blueprint.id = current_id + 1
-	
-	has_suggested_id = true
+		EditorInterface.save_scene()
 	# # //////////////////////////////////////////
 #endregion

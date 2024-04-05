@@ -47,7 +47,7 @@ var client: Dictionary = {
 	# DEBUG
 	"card_bounds_x": -3.05,
 	"card_bounds_y": -0.5,
-	"card_bounds_z": 13,
+	"card_bounds_z": 13.0,
 	"card_rotation_y_multiplier": 10.0,
 	"card_distance_x": 1.81,
 }

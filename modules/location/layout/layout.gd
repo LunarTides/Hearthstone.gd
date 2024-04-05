@@ -18,76 +18,6 @@ func _ready() -> void:
 
 
 #region Public Functions
-func handler(what: Modules.Hook, info: Array) -> bool:
-	if what == Modules.Hook.CARD_UPDATE:
-		return update_card_hook.callv(info)
-	elif what == Modules.Hook.CARD_HOVER_START:
-		return start_hover.callv(info)
-	elif what == Modules.Hook.CARD_HOVER_STOP:
-		return stop_hover.callv(info)
-	elif what == Modules.Hook.CARD_KILL:
-		return card_killed.callv(info)
-	elif what == Modules.Hook.CARD_TWEEN_START:
-		return card_tween_to.callv(info)
-	elif what == Modules.Hook.CARD_MAKE_WAY_START:
-		return make_way.callv(info)
-	elif what == Modules.Hook.CARD_MAKE_WAY_STOP:
-		return stop_making_way.callv(info)
-	elif what == Modules.Hook.CARD_PLAY_BEFORE:
-		return play_card_before.callv(info)
-	
-	return true
-
-
-func start_hover(card: Card) -> bool:
-	if _layout_tweens.has(card.get_rid()):
-		_layout_tweens[card.get_rid()].kill()
-	
-	return true
-
-
-func stop_hover(card: Card) -> bool:
-	layout(card)
-	return true
-
-
-func card_killed(card: Card) -> bool:
-	_should_layouts[card.get_rid()] = true
-	return true
-
-
-func card_tween_to(card: Card, duration: float, new_position: Vector3, new_rotation: Vector3, new_scale: Vector3) -> bool:
-	_should_layouts[card.get_rid()] = false
-	return true
-
-
-func make_way(card: Card, other: Card) -> bool:
-	_should_layouts[card.get_rid()] = false
-	return true
-
-
-func stop_making_way(card: Card) -> bool:
-	_should_layouts[card.get_rid()] = true
-	layout(card)
-	return true
-
-
-func play_card_before(card: Card) -> bool:
-	_should_layouts[card.get_rid()] = true
-	return true
-
-
-func update_card_hook(card: Card) -> bool:
-	# Don't wait since there is no reason to.
-	layout(card)
-	
-	# TODO: Make this better.
-	if card.health <= 0 and card.location == &"Board" and not card.is_dying and card.should_die:
-		_should_layouts[card.get_rid()] = false
-	
-	return true
-
-
 func layout(card: Card, instant: bool = false) -> bool:
 	if not card.visible:
 		return false
@@ -167,4 +97,76 @@ func layout_all() -> void:
 func layout_all_owned_by(player: Player) -> void:
 	for card: Card in Card.get_all_owned_by(player):
 		layout(card)
+
+
+func handler(what: Modules.Hook, info: Array) -> bool:
+	if what == Modules.Hook.CARD_HOVER_START:
+		return card_hover_start_hook.callv(info)
+	elif what == Modules.Hook.CARD_HOVER_STOP:
+		return card_hover_stop_hook.callv(info)
+	elif what == Modules.Hook.CARD_KILL:
+		return card_kill_hook.callv(info)
+	elif what == Modules.Hook.CARD_MAKE_WAY_START:
+		return card_make_way_start_hook.callv(info)
+	elif what == Modules.Hook.CARD_MAKE_WAY_STOP:
+		return card_make_way_stop_hook.callv(info)
+	elif what == Modules.Hook.CARD_PLAY_BEFORE:
+		return card_play_before_hook.callv(info)
+	elif what == Modules.Hook.CARD_TWEEN_START:
+		return card_tween_start_hook.callv(info)
+	elif what == Modules.Hook.CARD_UPDATE:
+		return update_card_hook.callv(info)
+	
+	return true
+
+
+#region Hooks
+func card_hover_start_hook(card: Card) -> bool:
+	if _layout_tweens.has(card.get_rid()):
+		_layout_tweens[card.get_rid()].kill()
+	
+	return true
+
+
+func card_hover_stop_hook(card: Card) -> bool:
+	layout(card)
+	return true
+
+
+func card_kill_hook(card: Card) -> bool:
+	_should_layouts[card.get_rid()] = true
+	return true
+
+
+func card_make_way_start_hook(card: Card, other: Card) -> bool:
+	_should_layouts[card.get_rid()] = false
+	return true
+
+
+func card_make_way_stop_hook(card: Card) -> bool:
+	_should_layouts[card.get_rid()] = true
+	layout(card)
+	return true
+
+
+func card_play_before_hook(card: Card, board_index: int, position: Vector3i) -> bool:
+	_should_layouts[card.get_rid()] = true
+	return true
+
+
+func card_tween_start_hook(card: Card, duration: float, new_position: Vector3, new_rotation: Vector3, new_scale: Vector3) -> bool:
+	_should_layouts[card.get_rid()] = false
+	return true
+
+
+func update_card_hook(card: Card) -> bool:
+	# Don't wait since there is no reason to.
+	layout(card)
+	
+	# TODO: Make this better.
+	if card.health <= 0 and card.location == &"Board" and not card.is_dying and card.should_die:
+		_should_layouts[card.get_rid()] = false
+	
+	return true
+#endregion
 #endregion

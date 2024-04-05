@@ -309,7 +309,7 @@ func _accept_play_packet(
 	
 	card.override_is_hidden = Game.NullableBool.FALSE
 	
-	if not await Modules.request(Modules.Hook.CARD_PLAY_BEFORE, false, [card]):
+	if not await Modules.request(Modules.Hook.CARD_PLAY_BEFORE, false, [card, board_index, position]):
 		return
 	
 	await card.tween_to(0.3, position, Vector3.ZERO, Vector3.ONE)

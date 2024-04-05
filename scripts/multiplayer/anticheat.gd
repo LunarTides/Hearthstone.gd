@@ -53,7 +53,7 @@ func run(packet_type: StringName, sender_peer_id: int, actor_player: Player, inf
 		false,
 		[packet_type, sender_peer_id, sender_player, actor_player, info],
 	)
-
+	
 	print_verbose("[AC] Modules Reponse: %s" % modules_anticheat_response)
 	return modules_anticheat_response
 
@@ -370,10 +370,10 @@ func _run_play_packet(
 		feedback("Invalid play info.", sender_peer_id)
 		return false
 	
-	var card: Card = Card.get_from_index(sender_player, location, location_index)
+	var card: Card = Card.get_from_index(actor_player, location, location_index)
 	
 	# The card should exist.
-	if check_card(sender_player, location, location_index, sender_peer_id):
+	if check_card(actor_player, location, location_index, sender_peer_id):
 		return false
 	
 	# The player should afford the card.
@@ -421,7 +421,7 @@ func _run_reveal_packet(
 		return false
 	
 	# The card should exist.
-	if check_card(sender_player, location, index, sender_peer_id):
+	if check_card(actor_player, location, index, sender_peer_id):
 		return false
 	
 	# The player whose card gets revealed should be the same player as the one who sent the packet
@@ -512,7 +512,7 @@ func _run_summon_packet(
 	var card: Card = Card.get_from_index(actor_player, location, location_index)
 	
 	# The card should exist.
-	if check_card(sender_player, location, location_index, sender_peer_id):
+	if check_card(actor_player, location, location_index, sender_peer_id):
 		return false
 		
 	# The player should have enough space on their board.
