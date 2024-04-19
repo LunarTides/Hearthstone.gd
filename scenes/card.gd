@@ -229,7 +229,7 @@ var hero_power_id: int
 
 
 #region Location
-## TODO: Add mesh for the durability: https://hearthstone.wiki.gg/wiki/Location
+# TODO: Add mesh for the durability: https://hearthstone.wiki.gg/wiki/Location
 var durability: int
 var cooldown: int
 #endregion
