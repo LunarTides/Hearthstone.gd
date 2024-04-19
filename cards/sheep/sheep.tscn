@@ -12,8 +12,7 @@ texture = ExtResource("2_bd6tv")
 types = Array[StringName]([&"Minion"])
 classes = Array[StringName]([&"Neutral"])
 modules = {
-"keywords": [&"Taunt"],
-"rarities": [&"Legendary"]
+"rarities": [&"Free"]
 }
 id = 1
 tribes = Array[StringName]([&"Beast"])

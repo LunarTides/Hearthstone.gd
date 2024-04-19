@@ -52,11 +52,8 @@ func handler(what: Modules.Hook, info: Array) -> bool:
 
 #region Hooks
 func update_card_hook(card: Card) -> bool:
-	# FIXME: For some reason, this hook doesn't get called on all cards.
-	#print(card.player.id, card.location, card.index)
-	
 	# Rarity Color
-	if not card.modules.get("rarities"):
+	if not card.modules.has("rarities"):
 		assert(false, "'%s' (%d) doesn't have a rarity." % [card.name, card.id])
 		return false
 	
