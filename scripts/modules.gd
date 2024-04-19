@@ -8,7 +8,7 @@ extends Node
 signal requested(what: Hook, info: Array)
 
 ## Emits when all modules have responded to a signal. Use [method wait_for_response] instead of [code]await[/code]-ing this.
-signal responded(result: Dictionary)
+signal responded(what: Hook, info: Array, result: bool)
 
 signal module_loaded(module: StringName)
 signal module_unloaded(module: StringName)
@@ -59,19 +59,20 @@ var _processing: bool = false
 var _result: bool = true
 var _modules_responded: int = 0
 
-var _registered_modules: Array[Array]
-var _loaded_modules: Array[StringName]
-var _disabled_modules: Array[StringName]
-var _enabled_modules: Array[StringName]:
+var _registered_modules: Dictionary
+var _loaded_modules: Dictionary
+var _disabled_modules: Dictionary
+var _enabled_modules: Dictionary:
 	get:
 		@warning_ignore("unassigned_variable")
-		var enabled: Array[StringName]
+		var enabled: Dictionary
 		
-		enabled.assign(_registered_modules.filter(func(obj: Array) -> bool:
-			return not _disabled_modules.has(obj[0])
-		).map(func(obj: Array) -> StringName:
-			return obj[0]
-		))
+		var keys: Array[StringName] = _registered_modules.keys().filter(func(module_name: StringName) -> bool:
+			return not _disabled_modules.has(module_name)
+		)
+		
+		for key: StringName in keys:
+			enabled[key] = _registered_modules[key]
 		
 		return enabled
 
@@ -82,7 +83,7 @@ var _visual_queue: Array[int]
 
 #region Public Functions
 func register(module_name: StringName, dependencies: Array[StringName], on_loaded: Callable, on_unloaded: Callable) -> void:
-	_registered_modules.append([module_name, dependencies])
+	_registered_modules[module_name] = { "name": module_name, "dependencies": dependencies }
 	
 	module_loaded.connect(func(_module_name: StringName) -> void:
 		if _module_name == module_name:
@@ -96,12 +97,12 @@ func register(module_name: StringName, dependencies: Array[StringName], on_loade
 
 
 func load_all() -> void:
-	for module_name: StringName in _enabled_modules:
-		load_module(module_name)
+	for module: Dictionary in _enabled_modules:
+		load_module(module.name)
 
 
 func load_module(module_name: StringName) -> void:
-	_loaded_modules.append(module_name)
+	_loaded_modules[module_name] = _registered_modules[module_name]
 	module_loaded.emit(module_name)
 
 
@@ -110,23 +111,17 @@ func unload_module(module_name: StringName) -> void:
 	module_unloaded.emit(module_name)
 	
 	# Unload this module's dependencies.
-	for obj: Array in _registered_modules:
-		var _module_name: StringName = obj[0]
-		var dependencies: Array[StringName] = obj[1]
-		
-		if dependencies.has(module_name):
-			unload_module(_module_name)
+	for module: Dictionary in _registered_modules.values():
+		if module.dependencies.has(module_name):
+			unload_module(module.name)
 
 
 func disable(module_name: StringName) -> void:
-	_disabled_modules.append(module_name)
+	_disabled_modules[module_name] = _registered_modules[module_name]
 	
-	for obj: Array in _registered_modules:
-		var _module_name: StringName = obj[0]
-		var dependencies: Array[StringName] = obj[1]
-		
-		if dependencies.has(module_name):
-			disable(_module_name)
+	for module: Dictionary in _registered_modules.values():
+		if module.dependencies.has(module_name):
+			disable(module.name)
 
 
 func enable(module_name: StringName) -> void:
@@ -165,36 +160,33 @@ func save_config() -> void:
 ## Registers a hook. Calls [param callable] whenever something happens.
 func register_hooks(module_name: StringName, callable: Callable) -> void:
 	# Keep on connecting.
-	while _loaded_modules.has(module_name):
-		await _register_hooks(callable)
+	_registered_modules[module_name].hook_handler = callable
 
 
 ## Requests the modules to respond to a request.
 func request(what: Hook, visual: bool, info: Array = []) -> bool:
-	if visual:
-		await get_tree().create_timer(1.0 + _visual_queue.size()).timeout
-	
+	#if visual:
+		#await get_tree().create_timer(1.0 + _visual_queue.size()).timeout
+	#
 	await Modules.wait_in_queue(_visual_queue if visual else _gameplay_queue)
-	
 	requested.emit(what, info)
 	
-	# CRITICAL: This takes ~6000-565415 usec every time. This adds up quickly.
-	var modules_result: Dictionary = await Modules.wait_for_response()
+	var result: bool = true
+	for module: Dictionary in _enabled_modules.values():
+		if not module.has("hook_handler"):
+			continue
+		
+		result = result and module.hook_handler.call(what, info)
 	
-	if modules_result.is_empty():
-		return false
-	
-	var modules_response: bool = modules_result.result
-	var modules_amount: int = modules_result.amount
-	
-	return modules_response
+	responded.emit(what, info, result)
+	return result
 
 
 ## Waits for the modules to respond to a request. Use [code]await[/code] on this.[br]
 ## Returns [code]{"result: bool, "amount": int}[/code].
-func wait_for_response() -> Dictionary:
+func wait_for_response() -> Array:
 	if _enabled_modules.size() <= 0:
-		return {}
+		return []
 	
 	return await responded
 
@@ -206,7 +198,7 @@ func wait_for_response() -> Dictionary:
 ## 
 ## my_signal.emit()
 ## 
-## var result: Dictionary = await Modules.wait_for_response(my_signal)
+## var result: Array = await Modules.wait_for_response(my_signal)
 ## [/codeblock]
 ##
 ## [b]Note: Use [method request] instead in a real scenario.[/b]
@@ -237,39 +229,4 @@ func wait_in_queue(queue: Array) -> void:
 	
 	# Remove from queue.
 	queue.pop_front()
-#endregion
-
-
-#region Private Functions
-func _register_hooks(callable: Callable) -> void:
-	# Wait for the signal.
-	_processing = false
-	stopped_processing.emit()
-	
-	var info: Variant = await requested
-	
-	_processing = true
-	
-	# Call the callback function with the result of the signal.
-	var callable_result: bool = await callable.callv(info)
-	
-	# Handle response from the callback.
-	_modules_responded += 1
-	_result = _result and callable_result
-	
-	if _modules_responded == _enabled_modules.size():
-		# All modules have responded
-		
-		# HACK: Wait 1 frame so that the `wait_for_response` method has a chance of being called
-		#       before the response gets emitted.
-		await get_tree().process_frame
-		
-		responded.emit({
-			"result": _result,
-			"amount": _modules_responded,
-		})
-		
-		# Reset.
-		_modules_responded = 0
-		_result = true
 #endregion
