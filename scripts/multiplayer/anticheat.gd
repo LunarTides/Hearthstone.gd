@@ -50,7 +50,6 @@ func run(packet_type: StringName, sender_peer_id: int, actor_player: Player, inf
 	# Passed the core anticheat. Let the modules do their anticheat.
 	var modules_anticheat_response: bool = await Modules.request(
 		Modules.Hook.ANTICHEAT,
-		false,
 		[packet_type, sender_peer_id, sender_player, actor_player, info],
 	)
 	

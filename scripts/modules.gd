@@ -56,8 +56,6 @@ const CONFIG_FILE_PATH: String = "./modules.cfg"
 
 #region Private Variables
 var _processing: bool = false
-var _result: bool = true
-var _modules_responded: int = 0
 
 var _registered_modules: Dictionary
 var _loaded_modules: Dictionary
@@ -67,7 +65,7 @@ var _enabled_modules: Dictionary:
 		@warning_ignore("unassigned_variable")
 		var enabled: Dictionary
 		
-		var keys: Array[StringName] = _registered_modules.keys().filter(func(module_name: StringName) -> bool:
+		var keys: Array = _registered_modules.keys().filter(func(module_name: StringName) -> bool:
 			return not _disabled_modules.has(module_name)
 		)
 		
@@ -76,38 +74,48 @@ var _enabled_modules: Dictionary:
 		
 		return enabled
 
-var _gameplay_queue: Array[int]
-var _visual_queue: Array[int]
+var _queue: Array[int]
 #endregion
 
 
 #region Public Functions
 func register(module_name: StringName, dependencies: Array[StringName], on_loaded: Callable, on_unloaded: Callable) -> void:
-	_registered_modules[module_name] = { "name": module_name, "dependencies": dependencies }
-	
-	module_loaded.connect(func(_module_name: StringName) -> void:
-		if _module_name == module_name:
-			on_loaded.call()
-	)
-	
-	module_unloaded.connect(func(_module_name: StringName) -> void:
-		if _module_name == module_name:
-			on_unloaded.call()
-	)
+	_registered_modules[module_name] = {
+		"name": module_name,
+		"dependencies": dependencies,
+		"on_loaded": on_loaded,
+		"on_unloaded": on_unloaded,
+	}
 
 
 func load_all() -> void:
-	for module: Dictionary in _enabled_modules:
-		load_module(module.name)
+	for module_name: StringName in _enabled_modules.keys():
+		load_module(module_name)
 
 
 func load_module(module_name: StringName) -> void:
+	if module_name in _disabled_modules.keys():
+		push_error("Trying to load a disabled module. (%s)" % module_name)
+		return
+	
 	_loaded_modules[module_name] = _registered_modules[module_name]
+	_loaded_modules[module_name].on_loaded.call()
+	
 	module_loaded.emit(module_name)
 
 
 func unload_module(module_name: StringName) -> void:
+	if module_name in _disabled_modules.keys():
+		push_error("Trying to unload a disabled module (%s)." % module_name)
+		return
+	
+	if not module_name in _loaded_modules.keys():
+		push_error("Trying to unload a not loaded module (%s)." % module_name)
+		return
+	
+	_loaded_modules[module_name].on_unloaded.call()
 	_loaded_modules.erase(module_name)
+	
 	module_unloaded.emit(module_name)
 	
 	# Unload this module's dependencies.
@@ -117,6 +125,10 @@ func unload_module(module_name: StringName) -> void:
 
 
 func disable(module_name: StringName) -> void:
+	if module_name in _disabled_modules.keys():
+		push_error("Trying to disable a disabled module (%s)." % module_name)
+		return
+	
 	_disabled_modules[module_name] = _registered_modules[module_name]
 	
 	for module: Dictionary in _registered_modules.values():
@@ -137,9 +149,7 @@ func load_config() -> void:
 		
 		save_config()
 	
-	config.load(CONFIG_FILE_PATH)
-	
-	var disabled_modules: Array[StringName] = config.get_value("Modules", "disabled", [])
+	var disabled_modules: Array = config.get_value("Modules", "disabled", [])
 	for module_name: StringName in disabled_modules:
 		disable(module_name)
 	
@@ -151,8 +161,8 @@ func save_config() -> void:
 		#return
 	
 	var config: ConfigFile = ConfigFile.new()
-	config.set_value("Modules", "enabled", _enabled_modules)
-	config.set_value("Modules", "disabled", _disabled_modules)
+	config.set_value("Modules", "enabled", _enabled_modules.keys())
+	config.set_value("Modules", "disabled", _disabled_modules.keys())
 	
 	config.save(CONFIG_FILE_PATH)
 
@@ -164,11 +174,8 @@ func register_hooks(module_name: StringName, callable: Callable) -> void:
 
 
 ## Requests the modules to respond to a request.
-func request(what: Hook, visual: bool, info: Array = []) -> bool:
-	#if visual:
-		#await get_tree().create_timer(1.0 + _visual_queue.size()).timeout
-	#
-	await Modules.wait_in_queue(_visual_queue if visual else _gameplay_queue)
+func request(what: Hook, info: Array = []) -> bool:
+	await Modules.wait_in_queue()
 	requested.emit(what, info)
 	
 	var result: bool = true
@@ -202,31 +209,27 @@ func wait_for_response() -> Array:
 ## [/codeblock]
 ##
 ## [b]Note: Use [method request] instead in a real scenario.[/b]
-func wait_in_queue(queue: Array) -> void:
+func wait_in_queue() -> void:
 	# Add to queue.
 	var id: int = ResourceUID.create_id()
-	queue.append(id)
 	
-	if queue.size() == 1:
+	if _queue.is_empty():
 		# Don't add to queue if the module system is idle.
 		if _processing:
 			await stopped_processing
 			await get_tree().process_frame
-		
-		queue.pop_front()
-		
 		return
+	
+	_queue.append(id)
 	
 	while true:
 		await wait_for_response()
 		
-		# Prioritize gameplay queue.
-		if queue[0] == id and (Game.get_or_null(_gameplay_queue, 0) == id or _gameplay_queue.size() == 0):
+		if _queue[0] == id:
 			break
 	
-	# Same rationale as in `_register_hook`.
 	await get_tree().process_frame
 	
 	# Remove from queue.
-	queue.pop_front()
+	_queue.pop_front()
 #endregion
