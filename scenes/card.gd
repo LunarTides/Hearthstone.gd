@@ -362,6 +362,11 @@ func attack_target(target: Variant, send_packet: bool = true) -> bool:
 	return true
 
 
+## Sends a packet for the player to summon this card. Returns if a packet was sent / success.
+func summon(board_index: int, send_packet: bool = true) -> bool:
+	return await player.summon_card(self, board_index, send_packet)
+
+
 ## Sets up the card to do an effect (particles, animations, etc...) in [param callback].[br]
 ## You should probably run this in [method LayoutModule.stabilize_layout_while].
 func do_effects(callback: Callable) -> void:

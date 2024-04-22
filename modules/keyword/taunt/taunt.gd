@@ -1,13 +1,19 @@
 extends Node
+# This module is extra commented since it is the easiest module to learn from, so this module will be linked a lot.
 
 
 #region Internal Functions
 func _ready() -> void:
+	# Register the Taunt module. It depends on the Keyword module, since it directly interfaces with it.
 	Modules.register(&"Taunt", [&"Keyword"], func() -> void:
+		# Let the handler function process hooks.
 		Modules.register_hooks(&"Taunt", self.handler)
 		
+		# Directly use the keyword module to register a new keyword.
+		# You should only do this if you depend on the module, since the module can have been disabled.
 		KeywordModule.register_keyword(&"Taunt")
 	, func() -> void:
+		# Unregister the keyword. We don't have to unregister the hooks since that is handled automatically.
 		KeywordModule.unregister_keyword(&"Taunt")
 	)
 #endregion
@@ -15,9 +21,12 @@ func _ready() -> void:
 
 #region Public Functions
 func check_for_taunt(target: Variant) -> bool:
+	# The target could be a Player or a Card.
 	var target_owner: Player = target if target is Player else target.player
 	
+	# If any card on the target's side of the board has taunt...
 	if Card.get_all_owned_by(target_owner).any(func(card: Card) -> bool: return card.modules.has("keywords") and card.modules.keywords.has(&"Taunt") and card.location == &"Board"):
+		# If the target also has taunt, allow the attack.
 		if target is Card and target.modules.keywords and target.modules.keywords.has(&"Taunt"):
 			return true
 		
@@ -50,12 +59,14 @@ func anticheat_attack(
 ) -> bool:
 	var target_card: Card = Card.get_from_index(actor_player.opponent, target_location, target_index)
 	
+	# If there is a taunt in the way, return false.
 	return check_for_taunt(target_card)
 
 
 #region Hooks
 func anticheat_hook(packet_type: StringName, sender_peer_id: int, sender_player: Player, actor_player: Player, info: Array) -> bool:
 	if packet_type == &"Attack":
+		# If this is this anticheat call is for the Attack packet, call `anticheat_attack`.
 		return anticheat_attack.bindv(info).call(sender_peer_id, sender_player, actor_player)
 	
 	return true
