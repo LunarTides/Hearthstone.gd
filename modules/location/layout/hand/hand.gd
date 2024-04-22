@@ -1,13 +1,21 @@
-extends Node
+extends Module
 
 
-#region Internal Functions
-func _ready() -> void:
-	Modules.register(&"LayoutHand", [&"Layout"], func() -> void:
-		LayoutModule.register_layout(&"Hand", self.layout_hand)
-	, func() -> void:
-		LayoutModule.unregister_layout(&"Hand")
-	)
+#region Module Functions
+func _name() -> StringName:
+	return &"LayoutHand"
+
+
+func _dependencies() -> Array[StringName]:
+	return [&"Layout"]
+
+
+func _load() -> void:
+	LayoutModule.register_layout(&"Hand", layout_hand)
+
+
+func _unload() -> void:
+	LayoutModule.unregister_layout(&"Hand")
 #endregion
 
 

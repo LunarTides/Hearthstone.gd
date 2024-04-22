@@ -1,15 +1,23 @@
-extends Node
+extends Module
 
 
-#region Internal Functions
-func _ready() -> void:
-	Modules.register(&"MODULE NAME", [], func() -> void:
-		# Load module.
-		Modules.register_hooks(&"MODULE NAME", self.handler)
-	, func() -> void:
-		# Unload module. No need to unregister hooks.
-		pass
-	)
+#region Module Functions
+func _name() -> StringName:
+	return &"Change This"
+
+
+func _dependencies() -> Array[StringName]:
+	return []
+
+
+func _load() -> void:
+	# Load module.
+	register_hooks(handler)
+
+
+func _unload() -> void:
+	# Unload module. No need to unregister hooks.
+	pass
 #endregion
 
 

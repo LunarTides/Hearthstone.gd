@@ -79,15 +79,6 @@ var _queue: Array[int]
 
 
 #region Public Functions
-func register(module_name: StringName, dependencies: Array[StringName], on_loaded: Callable, on_unloaded: Callable) -> void:
-	_registered_modules[module_name] = {
-		"name": module_name,
-		"dependencies": dependencies,
-		"on_loaded": on_loaded,
-		"on_unloaded": on_unloaded,
-	}
-
-
 func load_all() -> void:
 	for module_name: StringName in _enabled_modules.keys():
 		load_module(module_name)
@@ -167,12 +158,6 @@ func save_config() -> void:
 	config.save(CONFIG_FILE_PATH)
 
 
-## Registers a hook. Calls [param callable] whenever something happens.
-func register_hooks(module_name: StringName, callable: Callable) -> void:
-	# Keep on connecting.
-	_registered_modules[module_name].hook_handler = callable
-
-
 ## Requests the modules to respond to a request.
 func request(what: Hook, info: Array = []) -> bool:
 	await Modules.wait_in_queue()
@@ -232,4 +217,19 @@ func wait_in_queue() -> void:
 	
 	# Remove from queue.
 	_queue.pop_front()
+#endregion
+
+
+#region Private Functions
+func _register(module_name: StringName, dependencies: Array[StringName], on_loaded: Callable, on_unloaded: Callable) -> void:
+	_registered_modules[module_name] = {
+		"name": module_name,
+		"dependencies": dependencies,
+		"on_loaded": on_loaded,
+		"on_unloaded": on_unloaded,
+	}
+
+
+func _register_hooks(module_name: StringName, callable: Callable) -> void:
+	_registered_modules[module_name].hook_handler = callable
 #endregion

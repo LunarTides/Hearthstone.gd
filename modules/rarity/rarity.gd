@@ -1,4 +1,4 @@
-extends Node
+extends Module
 
 
 #region Constants
@@ -12,23 +12,31 @@ var rarity_colors: Dictionary = {}
 #endregion
 
 
-#region Internal Functions
-func _ready() -> void:
-	Modules.register(&"Rarity", [], func() -> void:
-		Modules.register_hooks(&"Rarity", self.handler)
+#region Module Functions
+func _name() -> StringName:
+	return &"Rarity"
+
+
+func _dependencies() -> Array[StringName]:
+	return []
+
+
+func _load() -> void:
+	register_hooks(handler)
 		
-		register_rarity(&"Free", Color.WHITE)
-		register_rarity(&"Common", Color.GRAY)
-		register_rarity(&"Rare", Color.BLUE)
-		register_rarity(&"Epic", Color.PURPLE)
-		register_rarity(&"Legendary", Color.GOLD)
-	, func() -> void:
-		unregister_rarity(&"Free")
-		unregister_rarity(&"Common")
-		unregister_rarity(&"Rare")
-		unregister_rarity(&"Epic")
-		unregister_rarity(&"Legendary")
-	)
+	register_rarity(&"Free", Color.WHITE)
+	register_rarity(&"Common", Color.GRAY)
+	register_rarity(&"Rare", Color.BLUE)
+	register_rarity(&"Epic", Color.PURPLE)
+	register_rarity(&"Legendary", Color.GOLD)
+
+
+func _unload() -> void:
+	unregister_rarity(&"Free")
+	unregister_rarity(&"Common")
+	unregister_rarity(&"Rare")
+	unregister_rarity(&"Epic")
+	unregister_rarity(&"Legendary")
 #endregion
 
 

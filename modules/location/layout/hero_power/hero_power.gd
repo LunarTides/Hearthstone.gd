@@ -1,13 +1,21 @@
-extends Node
+extends Module
 
 
-#region Internal Functions
-func _ready() -> void:
-	Modules.register(&"LayoutHeroPower", [&"Layout"], func() -> void:
-		LayoutModule.register_layout(&"Hero Power", self.layout_hero_power)
-	, func() -> void:
-		LayoutModule.unregister_layout(&"Hero Power")
-	)
+#region Module Functions
+func _name() -> StringName:
+	return &"LayoutHeroPower"
+
+
+func _dependencies() -> Array[StringName]:
+	return [&"Layout"]
+
+
+func _load() -> void:
+	LayoutModule.register_layout(&"Hero Power", layout_hero_power)
+
+
+func _unload() -> void:
+	LayoutModule.unregister_layout(&"Hero Power")
 #endregion
 
 

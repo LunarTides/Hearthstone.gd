@@ -1,4 +1,4 @@
-extends Node
+extends Module
 
 
 #region Public Variables
@@ -6,13 +6,21 @@ var keywords: Array[StringName] = []
 #endregion
 
 
-#region Internal Functions
-func _ready() -> void:
-	Modules.register(&"Keyword", [], func() -> void:
-		pass
-	, func() -> void:
-		pass
-	)
+#region Module Functions
+func _name() -> StringName:
+	return &"Keyword"
+
+
+func _dependencies() -> Array[StringName]:
+	return []
+
+
+func _load() -> void:
+	pass
+
+
+func _unload() -> void:
+	pass
 #endregion
 
 

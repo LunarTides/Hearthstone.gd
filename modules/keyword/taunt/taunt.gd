@@ -1,21 +1,29 @@
-extends Node
+extends Module
 # This module is extra commented since it is the easiest module to learn from, so this module will be linked a lot.
 
 
-#region Internal Functions
-func _ready() -> void:
-	# Register the Taunt module. It depends on the Keyword module, since it directly interfaces with it.
-	Modules.register(&"Taunt", [&"Keyword"], func() -> void:
-		# Let the handler function process hooks.
-		Modules.register_hooks(&"Taunt", self.handler)
-		
-		# Directly use the keyword module to register a new keyword.
-		# You should only do this if you depend on the module, since the module can have been disabled.
-		KeywordModule.register_keyword(&"Taunt")
-	, func() -> void:
-		# Unregister the keyword. We don't have to unregister the hooks since that is handled automatically.
-		KeywordModule.unregister_keyword(&"Taunt")
-	)
+#region Module Functions
+func _name() -> StringName:
+	return &"Taunt"
+
+
+func _dependencies() -> Array[StringName]:
+	return [&"Keyword"]
+
+
+func _load() -> void:
+	# Let the handler function process hooks.
+	register_hooks(handler)
+	
+	# Directly use the keyword module to register a new keyword.
+	# You should only do this if you depend on the module, since the module can have been disabled.
+	# The module name is not necessarily the same as the keyword name, so don't use NAME here.
+	KeywordModule.register_keyword(&"Taunt")
+
+
+func _unload() -> void:
+	# Unregister the keyword. We don't have to unregister the hooks since that is handled automatically.
+	KeywordModule.unregister_keyword(&"Taunt")
 #endregion
 
 

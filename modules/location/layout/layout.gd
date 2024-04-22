@@ -1,4 +1,4 @@
-extends Node
+extends Module
 
 
 var _layouts: Dictionary
@@ -7,13 +7,21 @@ var _layout_tweens: Dictionary
 var _should_layouts: Dictionary
 
 
-#region Internal Functions
-func _ready() -> void:
-	Modules.register(&"Layout", [&"Location"], func() -> void:
-		Modules.register_hooks(&"Layout", self.handler)
-	, func() -> void:
-		pass
-	)
+#region Module Functions
+func _name() -> StringName:
+	return &"Layout"
+
+
+func _dependencies() -> Array[StringName]:
+	return [&"Location"]
+
+
+func _load() -> void:
+	register_hooks(handler)
+
+
+func _unload() -> void:
+	pass
 #endregion
 
 
