@@ -341,10 +341,12 @@ func get_or_null(array: Array, index: int) -> Variant:
 
 #region Private Functions
 func _attack_attacker_is_player_and_target_is_player(attacker: Player, target: Player) -> void:
+	# TODO: Implement.
 	pass
 
 
 func _attack_attacker_is_player_and_target_is_card(attacker: Player, target: Card) -> void:
+	# TODO: Implement.
 	pass
 
 
