@@ -164,7 +164,7 @@ func _accept(packet_type: StringName, sender_peer_id: int, player_id: int, info:
 		var method: Callable = self[method_name]
 		method.bindv(info).call(player, sender_peer_id)
 	
-	Modules.request(Modules.Hook.ACCEPT_PACKET, false, [packet_type, player, sender_peer_id, info])
+	Modules.request(Modules.Hook.ACCEPT_PACKET, [packet_type, player, sender_peer_id, info])
 
 
 # Here are the functions that gets called on the clients + server when a packet gets sent. Handled in _accept_packet
@@ -309,7 +309,7 @@ func _accept_play_packet(
 	
 	card.override_is_hidden = Game.NullableBool.FALSE
 	
-	if not await Modules.request(Modules.Hook.CARD_PLAY_BEFORE, false, [card, board_index, position]):
+	if not await Modules.request(Modules.Hook.CARD_PLAY_BEFORE, [card, board_index, position]):
 		return
 	
 	await card.tween_to(0.3, position, Vector3.ZERO, Vector3.ONE)

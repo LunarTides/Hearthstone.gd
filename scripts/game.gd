@@ -273,7 +273,7 @@ func end_turn() -> bool:
 		feedback("It is not your turn.", FeedbackType.ERROR)
 		return false
 	
-	if not await Modules.request(Modules.Hook.END_TURN, false, [current_player]):
+	if not await Modules.request(Modules.Hook.END_TURN, [current_player]):
 		return false
 	
 	Packet.send(&"End Turn", current_player.id, [], true)
@@ -341,10 +341,12 @@ func get_or_null(array: Array, index: int) -> Variant:
 
 #region Private Functions
 func _attack_attacker_is_player_and_target_is_player(attacker: Player, target: Player) -> void:
+	# TODO: Implement.
 	pass
 
 
 func _attack_attacker_is_player_and_target_is_card(attacker: Player, target: Card) -> void:
+	# TODO: Implement.
 	pass
 
 

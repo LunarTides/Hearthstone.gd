@@ -22,7 +22,7 @@ func layout(card: Card, instant: bool = false) -> bool:
 	if not card.visible:
 		return false
 	
-	if card.is_hovering or _should_layouts.get(card.get_rid()) == false:
+	if card.is_hovering or _should_layouts.get(card.get_rid(), true) == false:
 		_layout_tweens[card.get_rid()].kill()
 		return false
 	
@@ -155,7 +155,8 @@ func card_play_before_hook(card: Card, board_index: int, position: Vector3i) -> 
 
 
 func card_tween_start_hook(card: Card, duration: float, new_position: Vector3, new_rotation: Vector3, new_scale: Vector3) -> bool:
-	_should_layouts[card.get_rid()] = false
+	# This code breaks cards on the board. What does it do?
+	#_should_layouts[card.get_rid()] = false
 	return true
 
 
