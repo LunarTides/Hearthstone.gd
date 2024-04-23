@@ -112,6 +112,7 @@ emitting = false
 amount = 500
 one_shot = true
 explosiveness = 1.0
+local_coords = true
 process_material = SubResource("ParticleProcessMaterial_hfjn2")
 draw_pass_1 = SubResource("BoxMesh_i3iba")
 

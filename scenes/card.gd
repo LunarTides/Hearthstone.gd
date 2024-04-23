@@ -665,10 +665,6 @@ func _start_dragging() -> void:
 			return
 		
 		if target is Card:
-			if target.location == &"Hero Power":
-				Game.feedback("Invalid Target.", Game.FeedbackType.ERROR)
-				return
-			
 			Packet.send(&"Set Drag To Play Target", player.id, [
 				&"Card",
 				location,

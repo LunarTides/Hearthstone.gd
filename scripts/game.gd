@@ -409,6 +409,7 @@ func _attack_attacker_is_card_and_target_is_card(attacker: Card, target: Card) -
 				do_damage.call()
 				
 				target.attack_particles.restart()
+				attacker.attack_particles.restart()
 			)
 			tween.tween_property(attacker, "global_position", _old_position, 0.5).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUINT)
 			

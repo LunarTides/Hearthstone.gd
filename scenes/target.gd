@@ -83,7 +83,8 @@ func _input_event(camera: Camera3D, event: InputEvent, pos: Vector3, normal: Vec
 				return _remove()
 			
 			if not await Modules.request(Modules.Hook.SELECT_TARGET, [self, flags, collider]):
-				return
+				target_selected.emit(null)
+				return _remove()
 			
 			player_selected.emit(player)
 			target_selected.emit(player)
@@ -93,8 +94,14 @@ func _input_event(camera: Camera3D, event: InputEvent, pos: Vector3, normal: Vec
 				target_selected.emit(null)
 				return _remove()
 			
+			if collider.location == &"Hero Power":
+				Game.feedback("You cannot select hero powers.", Game.FeedbackType.ERROR)
+				target_selected.emit(null)
+				return _remove()
+			
 			if not await Modules.request(Modules.Hook.SELECT_TARGET, [self, flags, collider]):
-				return
+				target_selected.emit(null)
+				return _remove()
 			
 			card_selected.emit(collider)
 			target_selected.emit(collider)

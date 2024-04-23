@@ -65,10 +65,13 @@ func anticheat_attack(
 	attacker_player_id: int,
 	target_player_id: int,
 ) -> bool:
-	var target_card: Card = Card.get_from_index(actor_player.opponent, target_location, target_index)
+	var target: Variant = Card.get_from_index(actor_player.opponent, target_location, target_index)
+	
+	if not target:
+		target = Player.get_from_id(target_player_id)
 	
 	# If there is a taunt in the way, return false.
-	return check_for_taunt(target_card)
+	return check_for_taunt(target)
 
 
 #region Hooks
