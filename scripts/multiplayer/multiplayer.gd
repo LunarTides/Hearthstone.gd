@@ -242,6 +242,12 @@ func change_scene_to_file(file: StringName) -> void:
 	get_tree().change_scene_to_file(file)
 
 
+## Sets the random seed of the client.
+@rpc("authority", "call_local", "reliable")
+func seed_random(random_seed: int) -> void:
+	seed(random_seed)
+
+
 ## Sends the server config options to the client.
 @rpc("authority", "call_remote", "reliable")
 func send_config(max_board_space: int, max_hand_size: int, max_deck_size: int, min_deck_size: int) -> void:

@@ -210,6 +210,11 @@ func start_game() -> void:
 	if not multiplayer.is_server():
 		return
 	
+	# Create a random seed.
+	# The seed function takes in a `uint32_t`. (Source: https://github.com/godotengine/godot/blob/a4fbe4c01f5d4e47bd047b091a65fef9f7eb2cca/core/math/math_funcs.cpp#L44)
+	var seed: int = randi_range(0, 4_294_967_295)
+	Multiplayer.seed_random.rpc(seed)
+	
 	var id: int = randi_range(0, Settings.server.max_players - 1)
 	
 	var i: int = 0
