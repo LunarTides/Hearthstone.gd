@@ -323,8 +323,9 @@ func start_game(deckcode: String, opponent_deckcode_size: int) -> void:
 	Game.opponent.deckcode = ""
 	
 	for i: int in opponent_deckcode_size:
+		# The placeholder card has an id of 6.
 		var placeholder: Blueprint = Blueprint.create_from_id(6, Game.opponent)
-		placeholder.card.add_to_location(&"Board", i)
+		placeholder.card.add_to_location(&"Deck", i)
 	
 	var deck: Dictionary = Deckcode.import(deckcode, Game.player, is_server)
 	

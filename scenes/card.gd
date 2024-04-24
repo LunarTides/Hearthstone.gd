@@ -89,6 +89,9 @@ var is_hidden: bool:
 		
 		return true
 	set(new_is_hidden):
+		# TODO: This is just for testing. Remove before merging to main.
+		return false
+		
 		# TODO: Rename new_is_hidden -> value
 		is_hidden = new_is_hidden
 		
