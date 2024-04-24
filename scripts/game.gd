@@ -283,11 +283,12 @@ func start_game() -> void:
 	
 	for k: int in 2:
 		var player: Player = Player.get_from_id(k)
+		var opponents_deck: Dictionary = deckcodes[player.opponent.peer_id]
 		
 		if k == 0:
-			Multiplayer.start_game.rpc_id(player.peer_id, player.deckcode, deckcodes[player2.peer_id].cards.size())
+			Multiplayer.start_game.rpc_id(player.peer_id, player.deckcode, opponents_deck.cards.size(), opponents_deck.hero_id)
 		else:
-			Multiplayer.start_game.rpc_id(player.peer_id, player2.deckcode, deckcodes[player1.peer_id].cards.size())
+			Multiplayer.start_game.rpc_id(player.peer_id, player2.deckcode, opponents_deck.cards.size(), opponents_deck.hero_id)
 	
 	# HACK: Wait until the 2nd player has 4 cards to spawn the coin.
 	while player2.hand.size() < 4:

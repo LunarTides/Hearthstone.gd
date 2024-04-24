@@ -281,7 +281,13 @@ func send_deckcode(deckcode: String) -> void:
 		kick(sender_peer_id, true)
 		return
 	
-	_deckcodes[sender_peer_id] = {"deckcode": deckcode, "hero": deck_info.hero, "cards": deck_info.cards}
+	_deckcodes[sender_peer_id] = {
+		"deckcode": deckcode,
+		"hero": deck_info.hero,
+		"hero_id": deck_info.hero_id,
+		"cards": deck_info.cards,
+	}
+	
 	server_response.rpc_id(sender_peer_id, true)
 
 
@@ -314,7 +320,7 @@ func feedback(text: String) -> void:
 
 ## Sends all the information needed to start the game to the clients.
 @rpc("authority", "call_local", "reliable")
-func start_game(deckcode: String, opponent_deckcode_size: int) -> void:
+func start_game(deckcode: String, opponent_deckcode_size: int, opponent_hero_id: int) -> void:
 	Game.current_player = Game.player1
 	Game.player1.empty_mana = 1
 	Game.player1.mana = 1
@@ -331,6 +337,14 @@ func start_game(deckcode: String, opponent_deckcode_size: int) -> void:
 	
 	Game.player.hero_class = deck.hero.classes[0]
 	Game.player.deck = deck.cards
+	
+	var opponents_hero: Blueprint = Blueprint.create_from_id(opponent_hero_id, Game.opponent)
+	opponents_hero.card.location = &"Hero"
+	
+	var opponents_hero_power: Blueprint = Blueprint.create_from_id(opponents_hero.hero_power_id, Game.opponent)
+	opponents_hero_power.card.location = &"Hero Power"
+	
+	opponents_hero.card.hero_power = opponents_hero_power.card
 	
 	Game.player.draw_cards(3 if Game.player.id == 0 else 4, false)
 	Game.opponent.draw_cards(3 if Game.player.id == 0 else 4, false)

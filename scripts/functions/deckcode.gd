@@ -2,7 +2,7 @@ extends Node
 
 
 #region Public Functions
-## Loads and decodes the specified [param deckcode]. Returns [code]{"hero": Blueprint, "cards": Array[Card]}[/code]
+## Loads and decodes the specified [param deckcode]. Returns [code]{"hero": Blueprint, "hero_id: int, "cards": Array[Card]}[/code]
 func import(deckcode: String, player: Player, validate: bool = true) -> Dictionary:
 	# Reference:
 	# 4/1:30/1 - 30 Sheeps, Mage
@@ -69,7 +69,7 @@ func import(deckcode: String, player: Player, validate: bool = true) -> Dictiona
 		
 		hero.card.hero_power = hero_power.card
 	
-	return {"hero": hero, "cards": cards}
+	return {"hero": hero, "hero_id": hero_id, "cards": cards}
 
 
 ## Returns [code]true[/code] if [param deckcode] is a valid deckcode.
