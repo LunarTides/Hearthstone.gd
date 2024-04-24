@@ -261,13 +261,33 @@ func start_game() -> void:
 	
 	await wait_for_node("/root/Main")
 	
+	Game.current_player = Game.player1
+	Game.player1.empty_mana = 1
+	Game.player1.mana = 1
+	
+	Game.player1.deckcode = deckcodes[player1.peer_id].deckcode
+	Game.player2.deckcode = deckcodes[player2.peer_id].deckcode
+	
+	for k: int in 2:
+		var deckcode: String = Game.player1.deckcode if k == 0 else Game.player2.deckcode
+		
+		var player: Player = Player.get_from_id(k)
+		var deck: Dictionary = Deckcode.import(deckcode, player, Multiplayer.is_server)
+		
+		player.hero_class = deck.hero.classes[0]
+		player.deck = deck.cards
+		
+		player.draw_cards(3 if player.id == 0 else 4, false)
+	
+	Game.game_started.emit()
+	
 	for k: int in 2:
 		var player: Player = Player.get_from_id(k)
 		
 		if k == 0:
-			Multiplayer.start_game.rpc_id(player.peer_id, deckcodes[player1.peer_id].deckcode, deckcodes[player2.peer_id].cards.size())
+			Multiplayer.start_game.rpc_id(player.peer_id, player.deckcode, deckcodes[player2.peer_id].cards.size())
 		else:
-			Multiplayer.start_game.rpc_id(player.peer_id, deckcodes[player2.peer_id].deckcode, deckcodes[player1.peer_id].cards.size())
+			Multiplayer.start_game.rpc_id(player.peer_id, player2.deckcode, deckcodes[player1.peer_id].cards.size())
 	
 	# HACK: Wait until the 2nd player has 4 cards to spawn the coin.
 	while player2.hand.size() < 4:
