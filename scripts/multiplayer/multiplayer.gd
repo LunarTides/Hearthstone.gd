@@ -271,14 +271,17 @@ func send_config(max_board_space: int, max_hand_size: int, max_deck_size: int, m
 @rpc("any_peer", "call_remote", "reliable")
 func send_deckcode(deckcode: String) -> void:
 	var sender_peer_id: int = multiplayer.get_remote_sender_id()
+	var player: Player = Player.get_from_peer_id(sender_peer_id)
 	deckcode = deckcode if deckcode else "4/1:30/1"
 	
-	if not Deckcode.validate(deckcode):
+	var deck_info: Dictionary = Deckcode.import(deckcode, player)
+	
+	if not deck_info.has("cards"):
 		server_response.rpc_id(sender_peer_id, false, "Invalid deckcode")
 		kick(sender_peer_id, true)
 		return
 	
-	_deckcodes[sender_peer_id] = deckcode
+	_deckcodes[sender_peer_id] = {"deckcode": deckcode, "hero": deck_info.hero, "cards": deck_info.cards}
 	server_response.rpc_id(sender_peer_id, true)
 
 
@@ -311,24 +314,25 @@ func feedback(text: String) -> void:
 
 ## Sends all the information needed to start the game to the clients.
 @rpc("authority", "call_local", "reliable")
-func start_game(deckcode1: String, deckcode2: String) -> void:
+func start_game(deckcode: String, opponent_deckcode_size: int) -> void:
 	Game.current_player = Game.player1
 	Game.player1.empty_mana = 1
 	Game.player1.mana = 1
 	
-	Game.player1.deckcode = deckcode1
-	Game.player2.deckcode = deckcode2
+	Game.player.deckcode = deckcode
+	Game.opponent.deckcode = ""
 	
-	for i: int in 2:
-		var deckcode: String = Game.player1.deckcode if i == 0 else Game.player2.deckcode
-		
-		var player: Player = Player.get_from_id(i)
-		var deck: Dictionary = Deckcode.import(deckcode, player, is_server)
-		
-		player.hero_class = deck.hero.classes[0]
-		player.deck = deck.cards
-		
-		player.draw_cards(3 if player.id == 0 else 4, false)
+	for i: int in opponent_deckcode_size:
+		var placeholder: Blueprint = Blueprint.create_from_id(6, Game.opponent)
+		placeholder.card.add_to_location(&"Board", i)
+	
+	var deck: Dictionary = Deckcode.import(deckcode, Game.player, is_server)
+	
+	Game.player.hero_class = deck.hero.classes[0]
+	Game.player.deck = deck.cards
+	
+	Game.player.draw_cards(3 if Game.player.id == 0 else 4, false)
+	Game.opponent.draw_cards(3 if Game.player.id == 0 else 4, false)
 	
 	Game.game_started.emit()
 #endregion
