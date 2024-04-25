@@ -114,7 +114,7 @@ func play_card(card: Card, board_index: int, send_packet: bool = true) -> bool:
 		Packet.send_if(send_packet, &"Hero Power", id, [], true)
 		return true
 	
-	Packet.send_if(send_packet, &"Play", id, [card.location, card.index, board_index, Vector3i(card.position.round())], true)
+	Packet.send_if(send_packet, &"Play", id, [card.uuid, board_index, Vector3i(card.position.round())], true)
 	return true
 
 
@@ -126,7 +126,7 @@ func summon_card(card: Card, board_index: int, send_packet: bool = true) -> bool
 	if not await Modules.request(Modules.Hook.CARD_SUMMON, [self, card, board_index, send_packet]):
 		return false
 	
-	Packet.send_if(send_packet, &"Summon", id, [card.location, card.index, board_index], true)
+	Packet.send_if(send_packet, &"Summon", id, [card.uuid, board_index], true)
 	return true
 
 

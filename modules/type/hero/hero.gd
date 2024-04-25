@@ -45,12 +45,11 @@ func accept_play_packet(
 	player: Player,
 	sender_peer_id: int,
 	
-	location: StringName,
-	location_index: int,
+	card_uuid: int,
 	board_index: int,
 	position: Vector3i,
 ) -> bool:
-	var card: Card = Card.get_from_index(player, location, location_index)
+	var card: Card = Card.get_from_uuid(card_uuid)
 	
 	if not is_hero(card):
 		return true

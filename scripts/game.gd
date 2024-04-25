@@ -128,6 +128,8 @@ var board_node: BoardNode:
 		return get_tree().root.get_node("Main/Board") as BoardNode
 
 var instance_num: int = -1
+
+var uuid_seed: int
 #endregion
 
 
@@ -210,11 +212,6 @@ func start_game() -> void:
 	if not multiplayer.is_server():
 		return
 	
-	# Create a random seed.
-	# The seed function takes in a `uint32_t`. (Source: https://github.com/godotengine/godot/blob/a4fbe4c01f5d4e47bd047b091a65fef9f7eb2cca/core/math/math_funcs.cpp#L44)
-	var seed: int = randi_range(0, 4_294_967_295)
-	Multiplayer.seed_random.rpc(seed)
-	
 	var id: int = randi_range(0, Settings.server.max_players - 1)
 	
 	var i: int = 0
@@ -241,6 +238,10 @@ func start_game() -> void:
 		print("Client %s assigned id: %s" % [peer, player_id])
 		
 		i += 1
+	
+	uuid_seed = randi_range(0, 4294967295)
+	print("Sending uuid seed (%d)..." % uuid_seed)
+	Multiplayer.send_uuid_seed(uuid_seed)
 	
 	print("Sending config...")
 	Multiplayer.send_config.rpc(

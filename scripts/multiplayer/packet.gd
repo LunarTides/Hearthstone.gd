@@ -172,17 +172,14 @@ func _accept_attack_packet(
 	
 	attack_mode: StringName,
 	
-	attacker_location: StringName,
-	attacker_index: int,
-	
-	target_location: StringName,
-	target_index: int,
+	attacker_uuid: int,
+	target_uuid: int,
 	
 	attacker_player_id: int,
 	target_player_id: int,
 ) -> void:
-	var attacker_card: Card = Card.get_from_index(player, attacker_location, attacker_index)
-	var target_card: Card = Card.get_from_index(player.opponent, target_location, target_index)
+	var attacker_card: Card = Card.get_from_uuid(attacker_uuid)
+	var target_card: Card = Card.get_from_uuid(target_uuid)
 	
 	var attacker_player: Player = Player.get_from_id(attacker_player_id)
 	var target_player: Player = Player.get_from_id(target_player_id)
@@ -277,12 +274,11 @@ func _accept_play_packet(
 	player: Player,
 	sender_peer_id: int,
 	
-	location: StringName,
-	location_index: int,
+	card_uuid: int,
 	board_index: int,
 	position: Vector3i,
 ) -> void:
-	var card: Card = Card.get_from_index(player, location, location_index)
+	var card: Card = Card.get_from_uuid(card_uuid)
 	Game.card_played.emit(false, card, board_index, player, sender_peer_id)
 	
 	card.override_is_hidden = Game.NullableBool.FALSE
@@ -308,10 +304,9 @@ func _accept_reveal_packet(
 	player: Player,
 	sender_peer_id: int,
 	
-	location: StringName,
-	location_index: int,
+	card_uuid: int,
 ) -> void:
-	var card: Card = Card.get_from_index(player, location, location_index)
+	var card: Card = Card.get_from_uuid(card_uuid)
 	Game.card_revealed.emit(false, card, player, sender_peer_id)
 	
 	card.override_is_hidden = Game.NullableBool.FALSE
@@ -324,19 +319,16 @@ func _accept_set_drag_to_play_target_packet(
 	sender_peer_id: int,
 	
 	target_mode: StringName,
-	
-	location: StringName,
-	location_index: int,
+	card_uuid: int,
 	
 	target_alignment: int,
-	target_location: StringName,
-	target_index: int,
+	target_uuid: int,
 ) -> void:
-	var card: Card = Card.get_from_index(player, location, location_index)
+	var card: Card = Card.get_from_uuid(card_uuid)
 	var target_player: Player = Player.get_from_id(target_alignment)
 	
 	if target_mode == &"Card":
-		var target_card: Card = Card.get_from_index(target_player, target_location, target_index)
+		var target_card: Card = Card.get_from_uuid(target_uuid)
 		card.drag_to_play_target = target_card
 	else:
 		card.drag_to_play_target = target_player
@@ -346,11 +338,10 @@ func _accept_summon_packet(
 	player: Player,
 	sender_peer_id: int,
 	
-	location: StringName,
-	location_index: int,
+	card_uuid: int,
 	board_index: int,
 ) -> void:
-	var card: Card = Card.get_from_index(player, location, location_index)
+	var card: Card = Card.get_from_uuid(card_uuid)
 	Game.card_summoned.emit(false, card, board_index, player, sender_peer_id)
 	
 	card.add_to_location(&"Board", board_index)
@@ -363,11 +354,10 @@ func _accept_trigger_ability_packet(
 	player: Player,
 	sender_peer_id: int,
 	
-	location: StringName,
-	location_index: int,
+	card_uuid: int,
 	ability: StringName,
 ) -> void:
-	var card: Card = Card.get_from_index(player, location, location_index)
+	var card: Card = Card.get_from_uuid(card_uuid)
 	
 	Game.card_ability_triggered.emit(false, card, ability, player, sender_peer_id)
 	

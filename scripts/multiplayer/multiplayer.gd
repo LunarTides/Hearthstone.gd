@@ -244,8 +244,8 @@ func change_scene_to_file(file: StringName) -> void:
 
 ## Sets the random seed of the client.
 @rpc("authority", "call_local", "reliable")
-func seed_random(random_seed: int) -> void:
-	seed(random_seed)
+func send_uuid_seed(random_seed: int) -> void:
+	Game.uuid_seed = random_seed
 
 
 ## Sends the server config options to the client.

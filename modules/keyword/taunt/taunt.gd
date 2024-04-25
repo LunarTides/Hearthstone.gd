@@ -60,14 +60,12 @@ func anticheat_attack(
 	actor_player: Player,
 	
 	attack_mode: StringName,
-	attacker_location: StringName,
-	attacker_index: int,
-	target_location: StringName,
-	target_index: int,
+	attacker_uuid: int,
+	target_uuid: int,
 	attacker_player_id: int,
 	target_player_id: int,
 ) -> bool:
-	var target: Variant = Card.get_from_index(actor_player.opponent, target_location, target_index)
+	var target: Variant = Card.get_from_uuid(target_uuid)
 	
 	if not target:
 		target = Player.get_from_id(target_player_id)
