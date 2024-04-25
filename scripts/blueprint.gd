@@ -76,6 +76,7 @@ enum {
 static var all_tags: Array[StringName] = [
 	&"Drag To Play",
 	&"Starting Hero",
+	&"Starting Hero Power",
 ]
 
 static var all_abilities: Array[StringName] = [

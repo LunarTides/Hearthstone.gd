@@ -357,6 +357,27 @@ func _run_play_packet(
 	return true
 
 
+# Request Draw Cards
+func _run_request_draw_cards(
+	sender_peer_id: int,
+	sender_player: Player,
+	actor_player: Player,
+	
+	uuids: PackedInt64Array,
+) -> bool:
+	# The info needs to be correct.
+	if not info_check([uuids], [TYPE_PACKED_INT64_ARRAY]):
+		feedback("Invalid request draw cards info.", sender_peer_id)
+		return false
+	
+	# Only the server can do this.
+	if check(true, 2):
+		feedback("Only the server can do this.", sender_peer_id)
+		return false
+	
+	return true
+
+
 # Reveal
 func _run_reveal_packet(
 	sender_peer_id: int,

@@ -18,6 +18,7 @@ var packet_types: Array[StringName] = [
 	&"Draw Cards",
 	&"End Turn",
 	&"Play",
+	&"Request Draw Cards",
 	&"Reveal",
 	&"Set Drag To Play Target",
 	&"Summon",
@@ -227,12 +228,25 @@ func _accept_draw_cards_packet(
 	player: Player,
 	sender_peer_id: int,
 	
-	amount: int,
+	uuids: PackedInt64Array,
 ) -> void:
-	Game.cards_drawn.emit(false, amount, player, sender_peer_id)
+	if not await Modules.request(Modules.Hook.DRAW_CARDS, [self, uuids]):
+		return
 	
-	for _i: int in amount:
-		var card: Card = player.deck.pop_back()
+	Game.cards_drawn.emit(false, uuids, player, sender_peer_id)
+	
+	# TODO: Make this not depend on fireblast.
+	await Game.wait_for_node("/root/Fireblast")
+	
+	for uuid: int in uuids:
+		var card: Card = Card.get_from_uuid(uuid)
+		
+		# For some reason, the starting hero gets drawn if we don't do this???
+		if card.tags.has(&"Starting Hero") or card.tags.has(&"Starting Hero Power"):
+			continue
+		
+		if card.location == &"Deck":
+			card.remove_from_location()
 		
 		if player.hand.size() >= Settings.server.max_hand_size:
 			# TODO: Burn the card.
@@ -245,7 +259,7 @@ func _accept_draw_cards_packet(
 		# Create card node.
 		card.add_to_location(&"Hand", player.hand.size())
 	
-	Game.cards_drawn.emit(true, amount, player, sender_peer_id)
+	Game.cards_drawn.emit(true, uuids, player, sender_peer_id)
 
 
 func _accept_end_turn_packet(
@@ -262,7 +276,7 @@ func _accept_end_turn_packet(
 	player.empty_mana = min(player.empty_mana + 1, player.max_mana)
 	player.mana = player.empty_mana
 	
-	player.draw_cards(1, false)
+	player.draw_cards(1)
 	
 	if Game.is_players_turn and not Multiplayer.is_server:
 		DisplayServer.window_request_attention()
@@ -298,6 +312,21 @@ func _accept_play_packet(
 		return
 	
 	Game.card_played.emit(true, card, board_index, player, sender_peer_id)
+
+
+func _accept_request_draw_cards_packet(
+	player: Player,
+	sender_peer_id: int,
+	
+	amount: int,
+) -> void:
+	if not is_server:
+		return
+	
+	var cards: Array[Card] = player.deck.slice(-amount)
+	var uuids: PackedInt64Array = cards.map(func(card: Card) -> int: return card.uuid)
+	
+	Packet.send(&"Draw Cards", player.id, [uuids], true)
 
 
 func _accept_reveal_packet(

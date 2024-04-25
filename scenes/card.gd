@@ -589,7 +589,6 @@ func _start_dragging() -> void:
 				uuid,
 				target.id,
 				0,
-				0,
 			])
 		
 		player.play_card(self, player.board.size())

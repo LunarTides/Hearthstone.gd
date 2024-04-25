@@ -278,7 +278,7 @@ func start_game() -> void:
 		player.hero_class = deck.hero.classes[0]
 		player.deck = deck.cards
 		
-		player.draw_cards(3 if player.id == 0 else 4, false)
+		player.draw_cards(3 if player.id == 0 else 4)
 	
 	Game.game_started.emit()
 	

@@ -346,8 +346,8 @@ func start_game(deckcode: String, opponent_deckcode_size: int, opponent_hero_id:
 	
 	opponents_hero.card.hero_power = opponents_hero_power.card
 	
-	Game.player.draw_cards(3 if Game.player.id == 0 else 4, false)
-	Game.opponent.draw_cards(3 if Game.player.id == 0 else 4, false)
+	Game.player.draw_cards(3 if Game.player.id == 0 else 4)
+	Game.opponent.draw_cards(3 if Game.player.id == 0 else 4)
 	
 	Game.game_started.emit()
 #endregion
