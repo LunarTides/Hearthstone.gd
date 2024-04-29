@@ -353,6 +353,16 @@ func destroy() -> void:
 	location = &"None"
 
 
+func reveal_as(new_id: int) -> void:
+	var new_blueprint: Blueprint = Blueprint.create_from_id(new_id, player)
+	reparent(new_blueprint)
+	
+	blueprint.queue_free()
+	blueprint = new_blueprint
+	
+	update_blueprint()
+
+
 ## Sets up the card to do an effect (particles, animations, etc...) in [param callback].[br]
 ## You should probably run this in [method LayoutModule.stabilize_layout_while].
 func do_effects(callback: Callable) -> void:
@@ -456,6 +466,8 @@ func _update() -> void:
 	name_label.text = blueprint.card_name
 	cost_label.text = str(blueprint.cost)
 	text_label.text = blueprint.text
+	
+	name_label.text = str(uuid)
 	
 	# Cost
 	#card.get_node("Mesh/Crystal").visible = lookup.cost > 0

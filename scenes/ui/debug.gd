@@ -98,7 +98,7 @@ func _on_timer_timeout() -> void:
 	
 	if Packet.history.size() > 0:
 		var packet: Array = Packet.history[-1]
-		var packet_string: String = Packet.get_readable(packet[0], packet[1], packet[2], packet[3])
+		var packet_string: String = Packet.get_readable(packet[0], packet[1], -1, true, packet[2], packet[3])
 		
 		latest_packet_label.text = "Latest Packet: %s" % packet_string
 #endregion

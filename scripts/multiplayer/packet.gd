@@ -59,10 +59,12 @@ var history: Array[Array] = []
 
 #region Public Functions
 ## Returns a packet in a readable format. E.g. [Packet]: Server (Player: 1): [PLAY] [1, 0, 1]
-func get_readable(sender_peer_id: int, packet_type: StringName, player_id: int, info: Array) -> String:
-	return "[Packet]: %s (Player: %d): [%s] %s" % [
+func get_readable(sender_peer_id: int, packet_type: StringName, peer_id: int, peer_id_send_to_server: bool, player_id: int, info: Array) -> String:
+	return "[Packet]: %s -> %s (Actor: P%d%s): [%s] %s" % [
 		"Server" if sender_peer_id == 1 else str(sender_peer_id),
+		"P%d" % Player.get_from_peer_id(peer_id).id if peer_id != -1 else "All",
 		player_id,
+		", Server Ignore" if peer_id != -1 and not peer_id_send_to_server else "",
 		packet_type,
 		info
 	]
@@ -70,36 +72,39 @@ func get_readable(sender_peer_id: int, packet_type: StringName, player_id: int, 
 
 ## Sends a packet to the server that will be sent to all the clients.[br]
 ## This is used to sync every action.
-func send(packet_type: StringName, player_id: int, info: Array, suppress_warning: bool = false) -> void:
+func send(packet_type: StringName, player_id: int, info: Array, suppress_warning: bool = false, peer_id: int = -1, peer_id_send_to_server: bool = true) -> void:
 	# Only send the "Sending packet" message on non-debug builds since it spams the console with garbage.
 	if not OS.is_debug_build() and not is_server:
-		print("Sending packet: " + get_readable(multiplayer.get_unique_id(), packet_type, player_id, info))
+		print("Sending packet: " + get_readable(multiplayer.get_unique_id(), packet_type, peer_id, peer_id_send_to_server, player_id, info))
 	
 	if is_server and not suppress_warning:
 		push_warning("A packet is being sent from the server. These packets bypass the anticheat. Be careful.")
 	
-	_send.rpc_id(1, packet_type, player_id, info)
+	_send.rpc_id(1, packet_type, peer_id, peer_id_send_to_server, player_id, info)
 
 
 ## Sends a packet if [param condition] is [code]true[/code]. If not, only apply the packet locally.
-func send_if(condition: bool, packet_type: StringName, player_id: int, info: Array, suppress_warning: bool = false) -> void:
+func send_if(condition: bool, packet_type: StringName, player_id: int, info: Array, suppress_warning: bool = false, peer_id: int = -1) -> void:
 	if condition:
-		send(packet_type, player_id, info, suppress_warning)
+		send(packet_type, player_id, info, suppress_warning, peer_id)
 	else:
+		if peer_id != -1 and Game.player.peer_id != peer_id:
+			return
+		
 		_accept(packet_type, multiplayer.get_unique_id(), player_id, info)
 #endregion
 
 
 #region Private Functions
 @rpc("any_peer", "call_local", "reliable")
-func _send(packet_type: StringName, player_id: int, info: Array) -> void:
-	var result: StringName = await __send(packet_type, player_id, info)
+func _send(packet_type: StringName, peer_id: int, peer_id_send_to_server: int, player_id: int, info: Array) -> void:
+	var result: StringName = await __send(packet_type, peer_id, peer_id_send_to_server, player_id, info)
 	
 	if result != &"None":
 		push_warning("Packet dropped with code [%s] ^^^^" % result)
 
 
-func __send(packet_type: StringName, player_id: int, info: Array) -> StringName:
+func __send(packet_type: StringName, peer_id: int, peer_id_send_to_server: int, player_id: int, info: Array) -> StringName:
 	if not is_server:
 		return &"Is Client"
 	
@@ -108,7 +113,7 @@ func __send(packet_type: StringName, player_id: int, info: Array) -> StringName:
 	var sender_player: Player = Player.get_from_peer_id(sender_peer_id)
 	var actor_player: Player = Multiplayer.players.values().filter(func(player: Player) -> bool: return player.id == player_id)[0]
 	
-	print(get_readable(sender_peer_id, packet_type, player_id, info))
+	print(get_readable(sender_peer_id, packet_type, peer_id, peer_id_send_to_server, player_id, info))
 	
 	# Anticheat
 	if not await Anticheat.run(packet_type, sender_peer_id, actor_player, info):
@@ -144,7 +149,13 @@ func __send(packet_type: StringName, player_id: int, info: Array) -> StringName:
 		return &"Unknown"
 	
 	# Broadcast the packet to all clients & server
-	_accept.rpc(packet_type, sender_peer_id, player_id, info)
+	if peer_id != -1:
+		if peer_id_send_to_server:
+			_accept(packet_type, sender_peer_id, player_id, info)
+		_accept.rpc_id(peer_id, packet_type, sender_peer_id, player_id, info)
+	else:
+		_accept.rpc(packet_type, sender_peer_id, player_id, info)
+	
 	return &"None"
 
 
@@ -229,6 +240,7 @@ func _accept_draw_cards_packet(
 	sender_peer_id: int,
 	
 	uuids: PackedInt64Array,
+	ids: PackedInt64Array,
 ) -> void:
 	if not await Modules.request(Modules.Hook.DRAW_CARDS, [self, uuids]):
 		return
@@ -238,12 +250,21 @@ func _accept_draw_cards_packet(
 	# TODO: Make this not depend on fireblast.
 	await Game.wait_for_node("/root/Fireblast")
 	
-	for uuid: int in uuids:
+	for i: int in range(0, uuids.size()):
+		var uuid: int = uuids[i]
+		
 		var card: Card = Card.get_from_uuid(uuid)
 		
 		# For some reason, the starting hero gets drawn if we don't do this???
 		if card.tags.has(&"Starting Hero") or card.tags.has(&"Starting Hero Power"):
 			continue
+		
+		card.player = player
+		
+		if not ids.is_empty():
+			var id: int = ids[i]
+			
+			Packet.send_if(false, &"Reveal", player.id, [uuid, id], true, player.peer_id)
 		
 		if card.location == &"Deck":
 			card.remove_from_location()
@@ -325,8 +346,10 @@ func _accept_request_draw_cards_packet(
 	
 	var cards: Array[Card] = player.deck.slice(-amount)
 	var uuids: PackedInt64Array = cards.map(func(card: Card) -> int: return card.uuid)
+	var ids: PackedInt64Array = cards.map(func(card: Card) -> int: return card.id)
 	
-	Packet.send(&"Draw Cards", player.id, [uuids], true)
+	Packet.send(&"Draw Cards", player.id, [uuids, ids], true, player.peer_id, true)
+	Packet.send(&"Draw Cards", player.id, [uuids, PackedInt64Array()], true, player.opponent.peer_id, false)
 
 
 func _accept_reveal_packet(
@@ -334,10 +357,12 @@ func _accept_reveal_packet(
 	sender_peer_id: int,
 	
 	card_uuid: int,
+	card_id: int,
 ) -> void:
 	var card: Card = Card.get_from_uuid(card_uuid)
 	Game.card_revealed.emit(false, card, player, sender_peer_id)
 	
+	card.reveal_as(card_id)
 	card.override_is_hidden = Game.NullableBool.FALSE
 	
 	Game.card_revealed.emit(true, card, player, sender_peer_id)
