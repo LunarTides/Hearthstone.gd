@@ -128,6 +128,8 @@ var board_node: BoardNode:
 		return get_tree().root.get_node("Main/Board") as BoardNode
 
 var instance_num: int = -1
+
+var uuid_seed: int
 #endregion
 
 
@@ -210,11 +212,6 @@ func start_game() -> void:
 	if not multiplayer.is_server():
 		return
 	
-	# Create a random seed.
-	# The seed function takes in a `uint32_t`. (Source: https://github.com/godotengine/godot/blob/a4fbe4c01f5d4e47bd047b091a65fef9f7eb2cca/core/math/math_funcs.cpp#L44)
-	var seed: int = randi_range(0, 4_294_967_295)
-	Multiplayer.seed_random.rpc(seed)
-	
 	var id: int = randi_range(0, Settings.server.max_players - 1)
 	
 	var i: int = 0
@@ -242,6 +239,10 @@ func start_game() -> void:
 		
 		i += 1
 	
+	uuid_seed = randi_range(0, 4294967295)
+	print("Sending uuid seed (%d)..." % uuid_seed)
+	Multiplayer.send_uuid_seed(uuid_seed)
+	
 	print("Sending config...")
 	Multiplayer.send_config.rpc(
 		Settings.server.max_board_space,
@@ -260,7 +261,35 @@ func start_game() -> void:
 	var deckcodes: Dictionary = Multiplayer._deckcodes
 	
 	await wait_for_node("/root/Main")
-	Multiplayer.start_game.rpc(deckcodes[player1.peer_id], deckcodes[player2.peer_id])
+	
+	Game.current_player = Game.player1
+	Game.player1.empty_mana = 1
+	Game.player1.mana = 1
+	
+	Game.player1.deckcode = deckcodes[player1.peer_id].deckcode
+	Game.player2.deckcode = deckcodes[player2.peer_id].deckcode
+	
+	for k: int in 2:
+		var deckcode: String = Game.player1.deckcode if k == 0 else Game.player2.deckcode
+		
+		var player: Player = Player.get_from_id(k)
+		var deck: Dictionary = Deckcode.import(deckcode, player, Multiplayer.is_server)
+		
+		player.hero_class = deck.hero.classes[0]
+		player.deck = deck.cards
+		
+		player.draw_cards(3 if player.id == 0 else 4)
+	
+	Game.game_started.emit()
+	
+	for k: int in 2:
+		var player: Player = Player.get_from_id(k)
+		var opponents_deck: Dictionary = deckcodes[player.opponent.peer_id]
+		
+		if k == 0:
+			Multiplayer.start_game.rpc_id(player.peer_id, player.deckcode, opponents_deck.cards.size(), opponents_deck.hero_id)
+		else:
+			Multiplayer.start_game.rpc_id(player.peer_id, player2.deckcode, opponents_deck.cards.size(), opponents_deck.hero_id)
 	
 	# HACK: Wait until the 2nd player has 4 cards to spawn the coin.
 	while player2.hand.size() < 4:

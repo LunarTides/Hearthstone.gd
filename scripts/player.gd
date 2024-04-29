@@ -114,7 +114,7 @@ func play_card(card: Card, board_index: int, send_packet: bool = true) -> bool:
 		Packet.send_if(send_packet, &"Hero Power", id, [], true)
 		return true
 	
-	Packet.send_if(send_packet, &"Play", id, [card.location, card.index, board_index, Vector3i(card.position.round())], true)
+	Packet.send_if(send_packet, &"Play", id, [card.uuid, board_index, Vector3i(card.position.round())], true)
 	return true
 
 
@@ -126,7 +126,7 @@ func summon_card(card: Card, board_index: int, send_packet: bool = true) -> bool
 	if not await Modules.request(Modules.Hook.CARD_SUMMON, [self, card, board_index, send_packet]):
 		return false
 	
-	Packet.send_if(send_packet, &"Summon", id, [card.location, card.index, board_index], true)
+	Packet.send_if(send_packet, &"Summon", id, [card.uuid, board_index], true)
 	return true
 
 
@@ -159,12 +159,15 @@ func add_to_deck(card: Card, deck_index: int, send_packet: bool = true) -> bool:
 	return true
 
 
-## Sends a packet for the player to draw a card. Returns if a packet was sent / success.
-func draw_cards(amount: int, send_packet: bool = true) -> bool:
-	if not await Modules.request(Modules.Hook.DRAW_CARDS, [self, amount, send_packet]):
+## Sends a packet for the player to draw a card. ONLY THE SERVER CAN RUN THIS. THIS WILL NOT DO ANYTHING ON THE CLIENT. Returns if a packet was sent / success.
+func draw_cards(amount: int) -> bool:
+	if not Multiplayer.is_server:
 		return false
 	
-	Packet.send_if(send_packet, &"Draw Cards", id, [amount], true)
+	if not await Modules.request(Modules.Hook.DRAW_CARDS_CHECK, [self, amount]):
+		return false
+	
+	Packet.send(&"Request Draw Cards", id, [amount], true)
 	return true
 
 

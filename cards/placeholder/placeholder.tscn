@@ -1,0 +1,22 @@
+[gd_scene load_steps=4 format=3 uid="uid://dli1kbdf278s7"]
+
+[ext_resource type="Script" path="res://cards/placeholder/placeholder.gd" id="1_scrip"]
+[ext_resource type="PackedScene" uid="uid://ccmb7s7hsvhju" path="res://scenes/card.tscn" id="2_cardd"]
+[ext_resource type="Texture2D" uid="uid://d30626m6lrq4g" path="res://cards/texture_template.png" id="2_m06hh"]
+
+[node name="Placeholder" type="Node3D" node_paths=PackedStringArray("card")]
+script = ExtResource("1_scrip")
+card_name = "Placeholder"
+text = "You're not supposed
+to see this."
+texture = ExtResource("2_m06hh")
+classes = Array[StringName]([&"Neutral"])
+modules = {
+"rarities": [&"Free"],
+"spell_schools": [&"None"],
+"types": [&"Spell"]
+}
+id = 6
+card = NodePath("Card")
+
+[node name="Card" parent="." instance=ExtResource("2_cardd")]

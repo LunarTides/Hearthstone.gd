@@ -70,15 +70,11 @@ func check(condition: bool, min_level: int) -> bool:
 
 ## If the card gotten from [param player], [param location], [param index] doesn't exist, returns [code]true[/code].[br]
 ## Use this instead of [method check].
-func check_card(player: Player, location: StringName, index: int, sender_peer_id: int) -> bool:
-	var card: Card = Card.get_from_index(player, location, index)
+func check_card(uuid: int, sender_peer_id: int) -> bool:
+	var card: Card = Card.get_from_uuid(uuid)
 	
 	if check(not card, 1):
-		feedback("The specified card does not exist in Player %d's %s at %d." % [
-			player.id + 1,
-			location,
-			index,
-		], sender_peer_id)
+		feedback("The card with the specified uuid (%d) does not exist." % uuid, sender_peer_id)
 		return true
 	
 	return false
@@ -140,11 +136,8 @@ func _run_attack_packet(
 	
 	attack_mode: StringName,
 	
-	attacker_location: StringName,
-	attacker_index: int,
-	
-	target_location: StringName,
-	target_index: int,
+	attacker_uuid: int,
+	target_uuid: int,
 	
 	attacker_player_id: int,
 	target_player_id: int,
@@ -152,17 +145,13 @@ func _run_attack_packet(
 	# The info needs to be correct.
 	if not info_check([
 		attack_mode,
-		attacker_location,
-		attacker_index,
-		target_location,
-		target_index,
+		attacker_uuid,
+		target_uuid,
 		attacker_player_id,
 		target_player_id,
 	], [
 		TYPE_STRING_NAME,
-		TYPE_STRING_NAME,
 		TYPE_INT,
-		TYPE_STRING_NAME,
 		TYPE_INT,
 		TYPE_INT,
 		TYPE_INT,
@@ -170,8 +159,8 @@ func _run_attack_packet(
 		feedback("Invalid attack info.", sender_peer_id)
 		return false
 	
-	var attacker_card: Card = Card.get_from_index(actor_player, attacker_location, attacker_index)
-	var target_card: Card = Card.get_from_index(actor_player.opponent, target_location, target_index)
+	var attacker_card: Card = Card.get_from_uuid(attacker_uuid)
+	var target_card: Card = Card.get_from_uuid(target_uuid)
 	
 	var attacker_player: Player = Player.get_from_id(attacker_player_id)
 	var target_player: Player = Player.get_from_id(target_player_id)
@@ -194,7 +183,7 @@ func _run_attack_packet(
 	# Test the attacker card
 	if attack_mode == &"Card Vs Card" or attack_mode == &"Card Vs Player":
 		# The attacking card needs to exist.
-		if check_card(actor_player, attacker_location, attacker_index, sender_peer_id):
+		if check_card(attacker_uuid, sender_peer_id):
 			feedback("The attacking card was not found.", sender_peer_id)
 			return false
 		
@@ -216,7 +205,7 @@ func _run_attack_packet(
 	# Test the target card
 	if attack_mode == &"Card Vs Card" or attack_mode == &"Player Vs Card":
 		# The target card needs to exist.
-		if check_card(actor_player.opponent, target_location, target_index, sender_peer_id):
+		if check_card(target_uuid, sender_peer_id):
 			feedback("The target card was not found.", sender_peer_id)
 			return false
 		
@@ -322,19 +311,16 @@ func _run_play_packet(
 	sender_player: Player,
 	actor_player: Player,
 	
-	location: StringName,
-	location_index: int,
+	card_uuid: int,
 	board_index: int,
 	position: Vector3i,
 ) -> bool:
 	# The info needs to be correct.
 	if not info_check([
-		location,
-		location_index,
+		card_uuid,
 		board_index,
 		position,
 	], [
-		TYPE_STRING_NAME,
 		TYPE_INT,
 		TYPE_INT,
 		TYPE_VECTOR3I,
@@ -342,10 +328,10 @@ func _run_play_packet(
 		feedback("Invalid play info.", sender_peer_id)
 		return false
 	
-	var card: Card = Card.get_from_index(actor_player, location, location_index)
+	var card: Card = Card.get_from_uuid(card_uuid)
 	
 	# The card should exist.
-	if check_card(actor_player, location, location_index, sender_peer_id):
+	if check_card(card_uuid, sender_peer_id):
 		return false
 	
 	# The player should afford the card.
@@ -371,22 +357,42 @@ func _run_play_packet(
 	return true
 
 
+# Request Draw Cards
+func _run_request_draw_cards(
+	sender_peer_id: int,
+	sender_player: Player,
+	actor_player: Player,
+	
+	uuids: PackedInt64Array,
+) -> bool:
+	# The info needs to be correct.
+	if not info_check([uuids], [TYPE_PACKED_INT64_ARRAY]):
+		feedback("Invalid request draw cards info.", sender_peer_id)
+		return false
+	
+	# Only the server can do this.
+	if check(true, 2):
+		feedback("Only the server can do this.", sender_peer_id)
+		return false
+	
+	return true
+
+
 # Reveal
 func _run_reveal_packet(
 	sender_peer_id: int,
 	sender_player: Player,
 	actor_player: Player,
 	
-	location: StringName,
-	index: int,
+	card_uuid: int,
 ) -> bool:
 	# The info needs to be correct.
-	if not info_check([location, index], [TYPE_STRING_NAME, TYPE_INT]):
+	if not info_check([card_uuid], [TYPE_INT]):
 		feedback("Invalid reveal info.", sender_peer_id)
 		return false
 	
 	# The card should exist.
-	if check_card(actor_player, location, index, sender_peer_id):
+	if check_card(card_uuid, sender_peer_id):
 		return false
 	
 	# The player whose card gets revealed should be the same player as the one who sent the packet
@@ -404,40 +410,32 @@ func _run_set_drag_to_play_target_packet(
 	actor_player: Player,
 	
 	target_mode: StringName,
-	
-	location: StringName,
-	location_index: int,
+	card_uuid: int,
 	
 	target_alignment: int,
-	target_location: StringName,
-	target_index: int,
+	target_uuid: int,
 ) -> bool:
 	# The info needs to be correct.
 	if not info_check([
 		target_mode,
-	
-		location,
-		location_index,
+		card_uuid,
 		
 		target_alignment,
-		target_location,
-		target_index,
+		target_uuid,
 	], [
 		TYPE_STRING_NAME,
-		TYPE_STRING_NAME,
 		TYPE_INT,
 		TYPE_INT,
-		TYPE_STRING_NAME,
 		TYPE_INT,
 	]):
 		feedback("Invalid set drag to play info.", sender_peer_id)
 		return false
 	
-	var card: Card = Card.get_from_index(actor_player, location, location_index)
+	var card: Card = Card.get_from_uuid(card_uuid)
 	var target_player: Player = Player.get_from_id(target_alignment)
 	
 	# The card should exist.
-	if check_card(actor_player, location, location_index, sender_peer_id):
+	if check_card(card_uuid, sender_peer_id):
 		return false
 	
 	# The player who who owns the card should be the same player as the one who sent the packet.
@@ -446,10 +444,10 @@ func _run_set_drag_to_play_target_packet(
 		return false
 	
 	if target_mode == &"Card":
-		var target_card: Card = Card.get_from_index(target_player, target_location, target_index)
+		var target_card: Card = Card.get_from_uuid(target_uuid)
 		
 		# The card should exist.
-		if check_card(target_player, location, location_index, sender_peer_id):
+		if check_card(target_uuid, sender_peer_id):
 			return false
 	else:
 		if check(not target_player, 1):
@@ -465,19 +463,18 @@ func _run_summon_packet(
 	sender_player: Player,
 	actor_player: Player,
 	
-	location: StringName,
-	location_index: int,
+	card_uuid: int,
 	board_index: int,
 ) -> bool:
 	# The info needs to be correct.
-	if not info_check([location, location_index, board_index], [TYPE_STRING_NAME, TYPE_INT, TYPE_INT]):
+	if not info_check([card_uuid, board_index], [TYPE_INT, TYPE_INT]):
 		feedback("Invalid summon info.", sender_peer_id)
 		return false
 	
-	var card: Card = Card.get_from_index(actor_player, location, location_index)
+	var card: Card = Card.get_from_uuid(card_uuid)
 	
 	# The card should exist.
-	if check_card(actor_player, location, location_index, sender_peer_id):
+	if check_card(card_uuid, sender_peer_id):
 		return false
 		
 	# The player should have enough space on their board.
@@ -501,7 +498,7 @@ func _run_summon_packet(
 		return false
 	
 	# Check if the card is queued to be summoned.
-	if check(in_packet_history([location, location_index, board_index], 2, true), 3):
+	if check(in_packet_history([card_uuid, board_index], 2, true), 3):
 		feedback("That card does not have sufficent reason to be summoned.", sender_peer_id)
 		return false
 	
@@ -514,19 +511,18 @@ func _run_trigger_ability_packet(
 	sender_player: Player,
 	actor_player: Player,
 	
-	location: StringName,
-	location_index: int,
+	card_uuid: int,
 	ability: StringName,
 ) -> bool:
 	# The info needs to be correct.
-	if not info_check([location, location_index, ability], [TYPE_STRING_NAME, TYPE_INT, TYPE_STRING_NAME]):
+	if not info_check([card_uuid, ability], [TYPE_INT, TYPE_STRING_NAME]):
 		feedback("Invalid trigger ability info.", sender_peer_id)
 		return false
 	
-	var card: Card = Card.get_from_index(actor_player, location, location_index)
+	var card: Card = Card.get_from_uuid(card_uuid)
 	
 	# The card should exist.
-	if check_card(actor_player, location, location_index, sender_peer_id):
+	if check_card(card_uuid, sender_peer_id):
 		return false
 	
 	# The ability should exist.
@@ -545,7 +541,7 @@ func _run_trigger_ability_packet(
 		return false
 	
 	# Check if the card has already been triggered.
-	if check(in_packet_history([location, location_index, ability], 3, true), 3):
+	if check(in_packet_history([card_uuid, ability], 3, true), 3):
 		feedback("That card does not have sufficent reason to for its ability to be triggered.", sender_peer_id)
 		return false
 	

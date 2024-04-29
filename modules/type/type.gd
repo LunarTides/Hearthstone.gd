@@ -59,12 +59,11 @@ func play_anticheat(
 	sender_player: Player,
 	actor_player: Player,
 	
-	location: StringName,
-	location_index: int,
+	card_uuid: int,
 	board_index: int,
 	position: Vector3i,
 ) -> bool:
-	var card: Card = Card.get_from_index(sender_player, location, location_index)
+	var card: Card = Card.get_from_uuid(card_uuid)
 		
 	# The player should have enough space on their board.
 	if Anticheat.check(actor_player.board.size() >= Settings.server.max_board_space and is_summonable(card), 1):
@@ -79,11 +78,10 @@ func summon_anticheat(
 	sender_player: Player,
 	actor_player: Player,
 	
-	location: StringName,
-	location_index: int,
+	card_uuid: int,
 	board_index: int,
 ) -> bool:
-	var card: Card = Card.get_from_index(sender_player, location, location_index)
+	var card: Card = Card.get_from_uuid(card_uuid)
 	
 	# The card should be summonable
 	if Anticheat.check(not is_summonable(card), 2):

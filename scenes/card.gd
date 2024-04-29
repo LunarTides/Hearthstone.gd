@@ -89,6 +89,9 @@ var is_hidden: bool:
 		
 		return true
 	set(new_is_hidden):
+		# TODO: This is just for testing. Remove before merging to main.
+		return false
+		
 		# TODO: Rename new_is_hidden -> value
 		is_hidden = new_is_hidden
 		
@@ -135,6 +138,8 @@ var refunded: bool = false
 
 ## The target requested from the [code]DRAG_TO_PLAY[/code] tag. Use this in an ability.
 var drag_to_play_target: Variant
+
+var uuid: int
 
 #region Blueprint Fields
 #region Common
@@ -214,6 +219,19 @@ var _should_hover: bool = true
 
 #region Internal Functions
 func _ready() -> void:
+	uuid = rand_from_seed(Game.uuid_seed)[0]
+	
+	# Make sure that the uuid is unique.
+	var i: int = 0
+	while true:
+		var card: Card = Card.get_from_uuid(uuid)
+		
+		if card == null or card == self:
+			break
+		
+		i += 1
+		uuid = rand_from_seed(Game.uuid_seed + i)[0]
+	
 	Game.turn_ended.connect(func(after: bool, _player: Player, _sender_peer_id: int) -> void:
 		if not after:
 			return
@@ -290,7 +308,7 @@ func trigger_ability(ability: StringName, send_packet: bool = true) -> bool:
 	# Wait 1 frame so that `await wait_for_ability` can get called before the ability gets triggered.
 	await get_tree().process_frame
 	
-	Packet.send_if(send_packet, &"Trigger Ability", player.id, [location, index, ability])
+	Packet.send_if(send_packet, &"Trigger Ability", player.id, [uuid, ability])
 	
 	return true
 
@@ -316,9 +334,9 @@ func attack_target(target: Variant, send_packet: bool = true) -> bool:
 		return false
 	
 	if target is Card:
-		Packet.send_if(send_packet, &"Attack", player.id, [&"Card Vs Card", location, index, target.location, target.index, 0, 0])
+		Packet.send_if(send_packet, &"Attack", player.id, [&"Card Vs Card", uuid, target.uuid, 0, 0])
 	else:
-		Packet.send_if(send_packet, &"Attack", player.id, [&"Card Vs Player", location, index, StringName(), 0, 0, target.id])
+		Packet.send_if(send_packet, &"Attack", player.id, [&"Card Vs Player", uuid, 0, 0, 0, target.id])
 	
 	return true
 
@@ -333,6 +351,16 @@ func summon(board_index: int, send_packet: bool = true) -> bool:
 func destroy() -> void:
 	abilities.clear()
 	location = &"None"
+
+
+func reveal_as(new_id: int) -> void:
+	var new_blueprint: Blueprint = Blueprint.create_from_id(new_id, player)
+	reparent(new_blueprint)
+	
+	blueprint.queue_free()
+	blueprint = new_blueprint
+	
+	update_blueprint()
 
 
 ## Sets up the card to do an effect (particles, animations, etc...) in [param callback].[br]
@@ -385,7 +413,7 @@ static func get_all_owned_by(player: Player) -> Array[Card]:
 	return array
 
 
-## Gets all [CardNode]s currently in the game scene.
+## Returns all [Card]s currently in the game scene.
 static func get_all() -> Array[Card]:
 	var array: Array[Card] = []
 	var tree: SceneTree = Engine.get_main_loop()
@@ -396,24 +424,9 @@ static func get_all() -> Array[Card]:
 	return array
 
 
-## Gets the [param player]'s [Card] in [param location] at [param index].
-static func get_from_index(player: Player, location: StringName, index: int) -> Card:
-	match location:
-		&"Hand":
-			return Game.get_or_null(player.hand, index)
-		&"Deck":
-			return Game.get_or_null(player.deck, index)
-		&"Board":
-			return Game.get_or_null(player.board, index)
-		&"Graveyard":
-			return Game.get_or_null(player.graveyard, index)
-		&"Hero":
-			return player.hero
-		&"Hero Power":
-			return player.hero.hero_power
-		_:
-			#assert(false, "The card doesn't exist at this location.")
-			return null
+## Returns the card with the specified [param uuid].
+static func get_from_uuid(uuid: int) -> Card:
+	return Game.get_or_null(get_all().filter(func(card: Card) -> bool: return card.uuid == uuid), 0)
 #endregion
 
 
@@ -453,6 +466,8 @@ func _update() -> void:
 	name_label.text = blueprint.card_name
 	cost_label.text = str(blueprint.cost)
 	text_label.text = blueprint.text
+	
+	name_label.text = str(uuid)
 	
 	# Cost
 	#card.get_node("Mesh/Crystal").visible = lookup.cost > 0
@@ -576,19 +591,15 @@ func _start_dragging() -> void:
 		if target is Card:
 			Packet.send(&"Set Drag To Play Target", player.id, [
 				&"Card",
-				location,
-				index,
+				uuid,
 				target.player.id,
-				target.location,
-				target.index,
+				target.uuid,
 			])
 		else:
 			Packet.send(&"Set Drag To Play Target", player.id, [
 				&"Player",
-				location,
-				index,
+				uuid,
 				target.id,
-				StringName(),
 				0,
 			])
 		

@@ -12,7 +12,7 @@ Deal 1 damage."
 cost = 2
 texture = ExtResource("2_g4x2h")
 classes = Array[StringName]([&"Mage"])
-tags = Array[StringName]([&"Drag To Play"])
+tags = Array[StringName]([&"Drag To Play", &"Starting Hero Power"])
 modules = {
 "rarities": [&"Free"],
 "types": [&"Hero Power"]
