@@ -48,7 +48,7 @@ func is_hero_power(card: Card) -> bool:
 
 
 func accept_hero_power_packet(player: Player, sender_peer_id: int) -> bool:
-	var hero_power: Card = player.hero.hero_power
+	var hero_power: Card = player.hero.hero_power_card
 	
 	used.emit(false, player, sender_peer_id)
 	
@@ -100,7 +100,7 @@ func anticheat_hook(packet_type: StringName, sender_peer_id: int, sender_player:
 		Anticheat.feedback("Invalid hero power info.", sender_peer_id)
 		return false
 	
-	var hero_power: Card = actor_player.hero.hero_power
+	var hero_power: Card = actor_player.hero.hero_power_card
 	
 	# The player should not have already used the hero power this turn.
 	if Anticheat.check(actor_player.has_used_hero_power_this_turn, 1):

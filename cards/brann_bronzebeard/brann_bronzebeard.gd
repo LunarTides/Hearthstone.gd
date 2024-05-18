@@ -1,9 +1,9 @@
-extends Blueprint
+extends Card
 
 
 # Called when the card is created
 func setup() -> void:
-	card.add_ability(&"Battlecry", battlecry)
+	add_ability(&"Battlecry", battlecry)
 
 
 func battlecry() -> int:
@@ -18,7 +18,7 @@ func battlecry() -> int:
 	Game.card_played.connect(callback)
 	
 	Game.card_killed.connect(func(after: bool, killed_card: Card, player: Player, sender_peer_id: int) -> void:
-		if not after and killed_card == card:
+		if not after and killed_card == self:
 			Game.card_played.disconnect(callback)
 	)
 	

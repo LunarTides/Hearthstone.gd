@@ -248,7 +248,7 @@ func _run_create_card_packet(
 		return false
 	
 	# Id needs to be valid.
-	if check(Blueprint.create_from_id(id, Game.player) == null, 1):
+	if check(Card.create_from_id(id, Game.player) == null, 1):
 		feedback("Invalid id.", sender_peer_id)
 		return false
 	
@@ -530,7 +530,7 @@ func _run_trigger_ability_packet(
 		return false
 	
 	# The ability should exist.
-	if check(not ability in Blueprint.all_abilities, 1):
+	if check(not ability in Card.all_abilities, 1):
 		feedback("The specified ability (%s) does not exist." % ability, sender_peer_id)
 		return false
 	

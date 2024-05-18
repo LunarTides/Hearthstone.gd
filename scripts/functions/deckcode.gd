@@ -2,7 +2,7 @@ extends Node
 
 
 #region Public Functions
-## Loads and decodes the specified [param deckcode]. Returns [code]{"hero": Blueprint, "cards": Array[Card]}[/code]
+## Loads and decodes the specified [param deckcode]. Returns [code]{"hero": Card, "cards": Array[Card]}[/code]
 func import(deckcode: String, player: Player, validate: bool = true) -> Dictionary:
 	# Reference:
 	# 4/1:30/1 - 30 Sheeps, Mage
@@ -48,14 +48,14 @@ func import(deckcode: String, player: Player, validate: bool = true) -> Dictiona
 			i += 1
 		
 		for _i: int in copies:
-			var blueprint: Blueprint = Blueprint.create_from_id(id, player)
+			var card: Card = Card.create_from_id(id, player)
 			
 			if player:
-				blueprint.card.add_to_location(&"Deck", player.deck.size())
+				card.add_to_location(&"Deck", player.deck.size())
 			
-			cards.append(blueprint.card)
+			cards.append(card.card)
 	
-	var hero: Blueprint = Blueprint.create_from_id(hero_id, player)
+	var hero: Card = Card.create_from_id(hero_id, player)
 	
 	if validate and not _validate_deck(deckcode, hero, cards):
 		hero.queue_free()
@@ -64,7 +64,7 @@ func import(deckcode: String, player: Player, validate: bool = true) -> Dictiona
 	if player:
 		hero.card.location = &"Hero"
 		
-		var hero_power: Blueprint = Blueprint.create_from_id(hero.hero_power_id, player)
+		var hero_power: Card = Card.create_from_id(hero.hero_power_id, player)
 		hero_power.card.location = &"Hero Power"
 		
 		hero.card.hero_power = hero_power.card
@@ -79,7 +79,7 @@ func validate(deckcode: String) -> bool:
 
 
 #region Private Functions
-func _validate_deck(deckcode: String, hero: Blueprint, cards: Array[Card]) -> bool:
+func _validate_deck(deckcode: String, hero: Card, cards: Array[Card]) -> bool:
 	if deckcode == "4/1:30/1":
 		# TODO: Uncomment when a valid deck is possible.
 		#return OS.is_debug_build()

@@ -5,6 +5,14 @@ extends Area3D
 ## @experimental
 
 
+#region Enums
+enum {
+	REFUND,
+	SUCCESS,
+}
+#endregion
+
+
 #region Signals
 ## Emits when the node is released from a drag.
 signal released(position: Vector3)
@@ -14,12 +22,6 @@ signal released(position: Vector3)
 #region Public Variables
 ## The player that owns this card.
 var player: Player
-
-## The blueprint of this card.
-var blueprint: Blueprint:
-	set(new_blueprint):
-		blueprint = new_blueprint
-		update_blueprint()
 
 ## Whether or not the player is hovering over this card.
 var is_hovering: bool = false
@@ -128,7 +130,7 @@ var is_dying: bool = false
 var should_die: bool = true
 
 ## The card's hero power. Only set if this card is a [code]Hero[/code] and the [member hero_power_id] is set.
-var hero_power: Card
+var hero_power_card: Card
 
 ## Whether or not the card has been refunded. Don't set manually.
 var refunded: bool = false
@@ -136,43 +138,111 @@ var refunded: bool = false
 ## The target requested from the [code]DRAG_TO_PLAY[/code] tag. Use this in an ability.
 var drag_to_play_target: Variant
 
-#region Blueprint Fields
+#region Exported Variables
 #region Common
-var card_name: String
-var text: String
-var cost: int
-var texture: Texture2D
-var types: Array[StringName]
-var classes: Array[StringName]
-var tags: Array[StringName]
-var modules: Dictionary
-var collectible: bool
-var id: int
+@export_category("Common")
+
+## The card's name. This can be anything and doesn't have to be unique.
+@export var card_name: String: set = _set_export
+
+## The card's description. This will appear in the middle of the card and should describe what the card does.[br]
+## Avoid going into too much detail. Use proper grammar, spelling, and punctuation.
+## [codeblock]
+## # Bad
+## "every time someone play a minion triger it's battlecry abilty 2 times (actually only 1 additional time since the battlecry alredy happens when palying the card first) the exact interacions / combos with other cards are ..."
+## 
+## # Good
+## "Your Battlecries trigger twice."
+## [/codeblock]
+@export_multiline var text: String: set = _set_export
+
+## How much the card should cost, usually in [code]mana[/code].
+@export var cost: int: set = _set_export
+
+# TODO: Continue documenting.
+@export var texture: Texture2D: set = _set_export
+@export var classes: Array[StringName]: set = _set_export
+@export var tags: Array[StringName]: set = _set_export
+@export var modules: Dictionary: set = _set_export
+@export var collectible: bool: set = _set_export
+
+## This HAS to be unique per card definition (E.g. All sheeps have the same id but a sheep and the coin have different ids).
+@export var id: int: set = _set_export
 #endregion
 
 
 #region Minion / Weapon
-# TODO: Add weapon cards.
-var attack: int
-var health: int
-#endregion
+@export_category("Minion / Weapon")
+@export var attack: int: set = _set_export
+@export var health: int: set = _set_export
 #endregion
 
 
 #region Hero
-var armor: int
-
+@export_category("Hero")
+@export var armor: int: set = _set_export
 # TODO: Show the texure of the hero power in the bottom left corner of the card.
-var hero_power_id: int
+@export var hero_power_id: int: set = _set_export
 #endregion
 
 
 #region Location
+@export_category("Location")
 # TODO: Add location cards.
 # TODO: Add mesh for the durability: https://hearthstone.wiki.gg/wiki/Location
-var durability: int
-var cooldown: int
+@export var durability: int: set = _set_export
+@export var cooldown: int: set = _set_export
 #endregion
+
+
+#region Enum-likes
+static var all_tags: Array[StringName] = [
+	&"Drag To Play",
+	&"Starting Hero",
+]
+
+static var all_abilities: Array[StringName] = [
+	&"Adapt",
+	&"Battlecry",
+	&"Cast",
+	&"Combo",
+	&"Deathrattle",
+	&"Finale",
+	&"Frenzy",
+	&"Honorable Kill",
+	&"Infuse",
+	&"Inspire",
+	&"Invoke",
+	&"Outcast",
+	&"Overheal",
+	&"Overkill",
+	&"Passive",
+	&"Spellburst",
+	&"Start Of Game",
+	&"Hero Power",
+	&"Use",
+	&"Placeholder",
+	&"Condition",
+	&"Remove",
+	&"Tick",
+	&"Test",
+]
+
+static var all_cost_types: Array[StringName] = [
+	&"Mana",
+	&"Armor",
+	&"Health",
+]
+
+static var Location: Array[StringName] = [
+	&"None",
+	&"Hand",
+	&"Deck",
+	&"Board",
+	&"Graveyard",
+	&"Hero",
+	&"Hero Power",
+]
 #endregion
 #endregion
 
@@ -228,11 +298,11 @@ func _ready() -> void:
 	
 	# Use a timer to improve performance.
 	update_timer.timeout.connect(func() -> void:
-		if not card_name and blueprint:
-			update_blueprint()
-		
 		_update()
 	)
+	
+	if "setup" in self:
+		self["setup"].call()
 
 
 func _input(event: InputEvent) -> void:
@@ -258,14 +328,6 @@ func _exit_tree() -> void:
 
 
 #region Public Functions
-## Update the Blueprint fields like [member name] to the blueprint.
-func update_blueprint() -> void:
-	# Assign the blueprint properties to this card
-	for prop: Dictionary in blueprint.get_property_list():
-		if prop.usage & PROPERTY_USAGE_SCRIPT_VARIABLE != 0 and prop.name in self:
-			self[prop.name] = blueprint[prop.name]
-
-
 ## Removes the card from its [member location].
 func remove_from_location() -> void:
 	location_array.erase(self)
@@ -410,10 +472,80 @@ static func get_from_index(player: Player, location: StringName, index: int) -> 
 		&"Hero":
 			return player.hero
 		&"Hero Power":
-			return player.hero.hero_power
+			return player.hero.hero_power_card
 		_:
 			#assert(false, "The card doesn't exist at this location.")
 			return null
+
+
+## Gets all [Card]s registered in the game. This function is very slow, so don't use it often.
+static func get_all_registered() -> Array:
+	var files: Array[String] = Card.get_all_filenames()
+	
+	var cards: Array = files.map(func(file_path: String) -> Card: return load(file_path).instantiate())
+	return cards
+
+
+## Returns all filenames from the specified [param path].
+static func get_all_filenames_from_path(path: String) -> Array[String]:
+	var file_paths: Array[String] = []  
+	var dir: DirAccess = DirAccess.open(path)  
+	
+	dir.list_dir_begin()  
+	var file_name: String = dir.get_next()  
+
+	while file_name != "":  
+		var file_path: String = path + "/" + file_name  
+		if dir.current_is_dir():  
+			file_paths += Card.get_all_filenames_from_path(file_path)  
+		else:
+			if file_path.ends_with(".tscn.remap"):
+				file_path = file_path.replace(".remap", "")
+			file_paths.append(file_path)  
+		
+		file_name = dir.get_next()  
+	
+	return file_paths
+
+
+static func get_all_filenames() -> Array[String]:
+	return Card.get_all_filenames_from_path("res://cards").filter(func(file_path: String) -> bool:
+		return file_path.contains(".tscn")
+	)
+
+
+## Creates a [Card] from the specified [param id]. Returns [code]null[/code] if no such card exists.
+static func create_from_id(id: int, player: Player) -> Card:
+	var files: Array[String] = Card.get_all_filenames()
+	
+	for file_path: String in files:
+		var card: Card = load(file_path).instantiate()
+		
+		if card.id == id:
+			var tree: SceneTree = Engine.get_main_loop()
+			tree.current_scene.add_child(card)
+			
+			Modules.request(Modules.Hook.CARD_CREATE, [card])
+			return card
+	
+	return null
+
+
+## Creates a [Card] from the specified [param path].
+static func create_from_path(path: String, player: Player) -> Card:
+	return Card.create_from_packed_scene(load(path), player)
+
+
+## Creates a [Card] from the specified [param packed_scene].
+static func create_from_packed_scene(packed_scene: PackedScene, player: Player) -> Card:
+	var card: Card = packed_scene.instantiate()
+	
+	var tree: SceneTree = Engine.get_main_loop()
+	tree.current_scene.add_child(card)
+	
+	Modules.request(Modules.Hook.CARD_CREATE, [card])
+	
+	return card
 #endregion
 
 
@@ -448,11 +580,6 @@ func _update() -> void:
 		return
 	
 	show()
-	
-	texture_sprite.texture = blueprint.texture
-	name_label.text = blueprint.card_name
-	cost_label.text = str(blueprint.cost)
-	text_label.text = blueprint.text
 	
 	# Cost
 	#card.get_node("Mesh/Crystal").visible = lookup.cost > 0
@@ -675,6 +802,11 @@ func _make_way_for(card: Card) -> void:
 
 func _stop_making_way() -> void:
 	Modules.request(Modules.Hook.CARD_MAKE_WAY_STOP, [self])
+
+
+func _set_export(_value: Variant) -> void:
+	push_error("Trying to manually change an exported card field. Please add an enchantment instead.")
+	assert(false, "Trying to manually change an exported card field. Please add an enchantment instead.")
 
 
 func _refund() -> void:

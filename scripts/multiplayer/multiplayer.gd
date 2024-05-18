@@ -282,14 +282,14 @@ func send_deckcode(deckcode: String) -> void:
 	server_response.rpc_id(sender_peer_id, true)
 
 
-## Creates a [Blueprint] from [param id].
+## Creates a [Card] from [param id].
 @rpc("authority", "call_local", "reliable")
-func create_blueprint_from_id(id: int, player_id: int, location: StringName, index: int) -> Blueprint:
+func create_card_from_id(id: int, player_id: int, location: StringName, index: int) -> Card:
 	var player: Player = Player.get_from_id(player_id)
-	var blueprint: Blueprint = Blueprint.create_from_id(id, player)
-	blueprint.card.add_to_location(location, index)
+	var card: Card = Card.create_from_id(id, player)
+	card.add_to_location(location, index)
 	
-	return blueprint
+	return card
 
 
 ## Sends a response from the server to the client.[br]

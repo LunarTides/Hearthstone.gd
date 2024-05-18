@@ -220,7 +220,7 @@ func _accept_create_card_packet(
 	location: StringName,
 	location_index: int,
 ) -> void:
-	var card: Card = Blueprint.create_from_id(id, player).card
+	var card: Card = Card.create_from_id(id, player).card
 	card.add_to_location(location, location_index)
 	
 	Game.card_created.emit(true, card, player, sender_peer_id)
@@ -374,7 +374,7 @@ func _accept_trigger_ability_packet(
 	for ability_callback: Callable in card.abilities[ability]:
 		var success: int = await ability_callback.call()
 		
-		if success == Blueprint.REFUND:
+		if success == Card.REFUND:
 			card.refunded = true
 			break
 	

@@ -61,8 +61,8 @@ func _unload() -> void:
 
 #region Public Functions
 func handler(what: Modules.Hook, info: Array) -> bool:
-	if what == Modules.Hook.BLUEPRINT_CREATE:
-		return blueprint_create_hook.callv(info)
+	if what == Modules.Hook.CARD_CREATE:
+		return card_create_hook.callv(info)
 	elif what == Modules.Hook.CARD_CHANGE_HIDDEN:
 		return card_change_hidden_hook.callv(info)
 	elif what == Modules.Hook.CARD_UPDATE:
@@ -89,9 +89,9 @@ func unregister_tribe(tribe: StringName) -> void:
 
 
 #region Hooks
-func blueprint_create_hook(blueprint: Blueprint) -> bool:
+func card_create_hook(card: Card) -> bool:
 	var tribe_label: Label3D = TRIBE_LABEL.instantiate()
-	blueprint.card.add_child(tribe_label, true)
+	card.add_child(tribe_label, true)
 	
 	return true
 
