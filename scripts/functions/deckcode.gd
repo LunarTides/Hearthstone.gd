@@ -53,7 +53,7 @@ func import(deckcode: String, player: Player, validate: bool = true) -> Dictiona
 			if player:
 				card.add_to_location(&"Deck", player.deck.size())
 			
-			cards.append(card.card)
+			cards.append(card)
 	
 	var hero: Card = Card.create_from_id(hero_id, player)
 	
@@ -62,12 +62,12 @@ func import(deckcode: String, player: Player, validate: bool = true) -> Dictiona
 		return {}
 	
 	if player:
-		hero.card.location = &"Hero"
+		hero.location = &"Hero"
 		
 		var hero_power: Card = Card.create_from_id(hero.hero_power_id, player)
-		hero_power.card.location = &"Hero Power"
+		hero_power.location = &"Hero Power"
 		
-		hero.card.hero_power = hero_power.card
+		hero.hero_power_card = hero_power
 	
 	return {"hero": hero, "cards": cards}
 

@@ -51,8 +51,9 @@ func card_update_hook(card: Card) -> bool:
 	if not card.location == &"Hero" or not TypeHeroModule.is_hero(card):
 		return true
 	
-	card.health = card.player.health
-	card.armor = card.player.armor
+	# TODO: Figure out some other way to do this.
+	#card.health = card.player.health
+	#card.armor = card.player.armor
 	
 	return true
 #endregion

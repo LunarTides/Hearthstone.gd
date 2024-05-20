@@ -143,7 +143,14 @@ var drag_to_play_target: Variant
 @export_category("Common")
 
 ## The card's name. This can be anything and doesn't have to be unique.
-@export var card_name: String: set = _set_export
+@export var card_name: String:
+	set(value):
+		# For some stupid reason, Godot might trigger setters when instancing scenes with exported variables.
+		if _initializing:
+			card_name = value
+		else:
+			push_error("Trying to manually change an exported card field (card_name) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
+			assert(false, "Trying to manually change an exported card field (card_name) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
 
 ## The card's description. This will appear in the middle of the card and should describe what the card does.[br]
 ## Avoid going into too much detail. Use proper grammar, spelling, and punctuation.
@@ -154,35 +161,113 @@ var drag_to_play_target: Variant
 ## # Good
 ## "Your Battlecries trigger twice."
 ## [/codeblock]
-@export_multiline var text: String: set = _set_export
+@export_multiline var text: String:
+	set(value):
+		if _initializing:
+			text = value
+		else:
+			push_error("Trying to manually change an exported card field (text) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
+			assert(false, "Trying to manually change an exported card field (text) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
 
 ## How much the card should cost, usually in [code]mana[/code].
-@export var cost: int: set = _set_export
+@export var cost: int:
+	set(value):
+		if _initializing:
+			cost = value
+		else:
+			push_error("Trying to manually change an exported card field (cost) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
+			assert(false, "Trying to manually change an exported card field (cost) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
 
 # TODO: Continue documenting.
-@export var texture: Texture2D: set = _set_export
-@export var classes: Array[StringName]: set = _set_export
-@export var tags: Array[StringName]: set = _set_export
-@export var modules: Dictionary: set = _set_export
-@export var collectible: bool: set = _set_export
+@export var texture: Texture2D:
+	set(value):
+		if _initializing:
+			texture = value
+		else:
+			push_error("Trying to manually change an exported card field (texture) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
+			assert(false, "Trying to manually change an exported card field (texture) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
+
+@export var classes: Array[StringName]:
+	set(value):
+		if _initializing:
+			classes = value
+		else:
+			push_error("Trying to manually change an exported card field (classes) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
+			assert(false, "Trying to manually change an exported card field (classes) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
+
+@export var tags: Array[StringName]:
+	set(value):
+		if _initializing:
+			tags = value
+		else:
+			push_error("Trying to manually change an exported card field (tags) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
+			assert(false, "Trying to manually change an exported card field (tags) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
+
+@export var modules: Dictionary:
+	set(value):
+		if _initializing:
+			modules = value
+		else:
+			push_error("Trying to manually change an exported card field (modules) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
+			assert(false, "Trying to manually change an exported card field (modules) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
+
+@export var collectible: bool:
+	set(value):
+		if _initializing:
+			collectible = value
+		else:
+			push_error("Trying to manually change an exported card field (collectible) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
+			assert(false, "Trying to manually change an exported card field (collectible) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
 
 ## This HAS to be unique per card definition (E.g. All sheeps have the same id but a sheep and the coin have different ids).
-@export var id: int: set = _set_export
+@export var id: int:
+	set(value):
+		if _initializing:
+			id = value
+		else:
+			push_error("Trying to manually change an exported card field (id) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
+			assert(false, "Trying to manually change an exported card field (id) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
 #endregion
 
 
 #region Minion / Weapon
 @export_category("Minion / Weapon")
-@export var attack: int: set = _set_export
-@export var health: int: set = _set_export
+@export var attack: int:
+	set(value):
+		if _initializing:
+			attack = value
+		else:
+			push_error("Trying to manually change an exported card field (attack) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
+			assert(false, "Trying to manually change an exported card field (attack) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
+
+@export var health: int:
+	set(value):
+		if _initializing:
+			health = value
+		else:
+			push_error("Trying to manually change an exported card field (health) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
+			assert(false, "Trying to manually change an exported card field (health) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
 #endregion
 
 
 #region Hero
 @export_category("Hero")
-@export var armor: int: set = _set_export
+@export var armor: int:
+	set(value):
+		if _initializing:
+			armor = value
+		else:
+			push_error("Trying to manually change an exported card field (armor) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
+			assert(false, "Trying to manually change an exported card field (armor) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
+
 # TODO: Show the texure of the hero power in the bottom left corner of the card.
-@export var hero_power_id: int: set = _set_export
+@export var hero_power_id: int:
+	set(value):
+		if _initializing:
+			hero_power_id = value
+		else:
+			push_error("Trying to manually change an exported card field (hero_power_id) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
+			assert(false, "Trying to manually change an exported card field (hero_power_id) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
 #endregion
 
 
@@ -190,8 +275,21 @@ var drag_to_play_target: Variant
 @export_category("Location")
 # TODO: Add location cards.
 # TODO: Add mesh for the durability: https://hearthstone.wiki.gg/wiki/Location
-@export var durability: int: set = _set_export
-@export var cooldown: int: set = _set_export
+@export var durability: int:
+	set(value):
+		if _initializing:
+			durability = value
+		else:
+			push_error("Trying to manually change an exported card field (durability) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
+			assert(false, "Trying to manually change an exported card field (durability) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
+
+@export var cooldown: int:
+	set(value):
+		if _initializing:
+			cooldown = value
+		else:
+			push_error("Trying to manually change an exported card field (cooldown) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
+			assert(false, "Trying to manually change an exported card field (cooldown) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
 #endregion
 
 
@@ -245,11 +343,13 @@ static var Location: Array[StringName] = [
 ]
 #endregion
 #endregion
+#endregion
 
 
 #region Private Variables
 var _hover_tween: Tween
 var _should_hover: bool = true
+var _initializing: bool = true
 #endregion
 
 
@@ -284,6 +384,13 @@ var _should_hover: bool = true
 
 #region Internal Functions
 func _ready() -> void:
+	_initializing = false
+	
+	texture_sprite.texture = texture
+	name_label.text = card_name
+	cost_label.text = str(cost)
+	text_label.text = text
+	
 	Game.turn_ended.connect(func(after: bool, _player: Player, _sender_peer_id: int) -> void:
 		if not after:
 			return
@@ -320,10 +427,6 @@ func _input(event: InputEvent) -> void:
 		return
 	
 	_stop_dragging(event.button_index == MOUSE_BUTTON_LEFT)
-
-
-func _exit_tree() -> void:
-	get_parent().queue_free()
 #endregion
 
 
@@ -436,7 +539,7 @@ func tween_to(duration: float, new_position: Vector3, new_rotation: Vector3 = ro
 
 
 #region Static Functions
-## Gets all [CardNode]s for the specified player.
+## Gets all [Card]s for the specified player.
 static func get_all_owned_by(player: Player) -> Array[Card]:
 	var array: Array[Card] = []
 	
@@ -447,7 +550,7 @@ static func get_all_owned_by(player: Player) -> Array[Card]:
 	return array
 
 
-## Gets all [CardNode]s currently in the game scene.
+## Gets all [Card]s currently in the game scene.
 static func get_all() -> Array[Card]:
 	var array: Array[Card] = []
 	var tree: SceneTree = Engine.get_main_loop()
@@ -522,6 +625,8 @@ static func create_from_id(id: int, player: Player) -> Card:
 		var card: Card = load(file_path).instantiate()
 		
 		if card.id == id:
+			card.player = player
+			
 			var tree: SceneTree = Engine.get_main_loop()
 			tree.current_scene.add_child(card)
 			
@@ -539,6 +644,7 @@ static func create_from_path(path: String, player: Player) -> Card:
 ## Creates a [Card] from the specified [param packed_scene].
 static func create_from_packed_scene(packed_scene: PackedScene, player: Player) -> Card:
 	var card: Card = packed_scene.instantiate()
+	card.player = player
 	
 	var tree: SceneTree = Engine.get_main_loop()
 	tree.current_scene.add_child(card)
@@ -802,11 +908,6 @@ func _make_way_for(card: Card) -> void:
 
 func _stop_making_way() -> void:
 	Modules.request(Modules.Hook.CARD_MAKE_WAY_STOP, [self])
-
-
-func _set_export(_value: Variant) -> void:
-	push_error("Trying to manually change an exported card field. Please add an enchantment instead.")
-	assert(false, "Trying to manually change an exported card field. Please add an enchantment instead.")
 
 
 func _refund() -> void:

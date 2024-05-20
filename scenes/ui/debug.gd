@@ -138,7 +138,7 @@ func _give_card(player: Player) -> void:
 		Game.feedback("Invalid card. There is likely no card with that id.", Game.FeedbackType.ERROR)
 		return
 	
-	player.add_to_hand(card.card, player.hand.size())
+	player.add_to_hand(card, player.hand.size())
 
 
 func _on_give_player_1_button_pressed() -> void:
