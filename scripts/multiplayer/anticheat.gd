@@ -248,7 +248,7 @@ func _run_create_card_packet(
 		return false
 	
 	# Id needs to be valid.
-	if check(Card.create_from_id(id, Game.player) == null, 1):
+	if check(await Card.create_from_id(id, Game.player) == null, 1):
 		feedback("Invalid id.", sender_peer_id)
 		return false
 	

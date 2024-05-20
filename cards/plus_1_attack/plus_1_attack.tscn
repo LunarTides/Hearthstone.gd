@@ -1,0 +1,16 @@
+[gd_scene load_steps=4 format=3 uid="uid://bji1ot85bx184"]
+
+[ext_resource type="Script" path="res://cards/plus_1_attack/plus_1_attack.gd" id="1_scrip"]
+[ext_resource type="PackedScene" uid="uid://ccmb7s7hsvhju" path="res://scenes/card.tscn" id="2_cardd"]
+[ext_resource type="Texture2D" uid="uid://d30626m6lrq4g" path="res://cards/texture_template.png" id="3_atlaj"]
+
+[node name="Plus1Attack" instance=ExtResource("2_cardd")]
+script = ExtResource("1_scrip")
+card_name = "+1 Attack"
+text = "+1 Attack"
+texture = ExtResource("3_atlaj")
+classes = Array[StringName]([&"Neutral"])
+modules = {
+"types": [&"Enchantment"]
+}
+id = 6

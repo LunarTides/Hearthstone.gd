@@ -132,7 +132,7 @@ func _give_card(player: Player) -> void:
 		return
 	
 	@warning_ignore("narrowing_conversion")
-	var card: Card = Card.create_from_id(debug_buttons_card_id.value, player)
+	var card: Card = await Card.create_from_id(debug_buttons_card_id.value, player)
 	
 	if not card:
 		Game.feedback("Invalid card. There is likely no card with that id.", Game.FeedbackType.ERROR)

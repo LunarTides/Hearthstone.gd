@@ -15,6 +15,7 @@ func _dependencies() -> Array[StringName]:
 func _load() -> void:
 	register_hooks(handler)
 	
+	# TODO: Use _name()
 	TypeModule.register_type(&"Spell", false)
 
 
