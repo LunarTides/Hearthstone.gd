@@ -273,7 +273,7 @@ func send_deckcode(deckcode: String) -> void:
 	var sender_peer_id: int = multiplayer.get_remote_sender_id()
 	deckcode = deckcode if deckcode else "4/1:30/1"
 	
-	if not await Deckcode.validate(deckcode):
+	if not Deckcode.validate(deckcode):
 		server_response.rpc_id(sender_peer_id, false, "Invalid deckcode")
 		kick(sender_peer_id, true)
 		return
@@ -286,7 +286,7 @@ func send_deckcode(deckcode: String) -> void:
 @rpc("authority", "call_local", "reliable")
 func create_card_from_id(id: int, player_id: int, location: StringName, index: int) -> Card:
 	var player: Player = Player.get_from_id(player_id)
-	var card: Card = await Card.create_from_id(id, player)
+	var card: Card = Card.create_from_id(id, player)
 	card.add_to_location(location, index)
 	
 	return card
@@ -323,7 +323,7 @@ func start_game(deckcode1: String, deckcode2: String) -> void:
 		var deckcode: String = Game.player1.deckcode if i == 0 else Game.player2.deckcode
 		
 		var player: Player = Player.get_from_id(i)
-		var deck: Dictionary = await Deckcode.import(deckcode, player, is_server)
+		var deck: Dictionary = Deckcode.import(deckcode, player, is_server)
 		
 		player.hero_class = deck.hero.classes[0]
 		player.deck = deck.cards

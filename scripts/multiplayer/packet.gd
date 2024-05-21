@@ -220,7 +220,7 @@ func _accept_create_card_packet(
 	location: StringName,
 	location_index: int,
 ) -> void:
-	var card: Card = await Card.create_from_id(id, player)
+	var card: Card = Card.create_from_id(id, player)
 	card.add_to_location(location, location_index)
 	
 	Game.card_created.emit(true, card, player, sender_peer_id)

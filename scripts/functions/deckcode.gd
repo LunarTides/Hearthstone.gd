@@ -48,14 +48,14 @@ func import(deckcode: String, player: Player, validate: bool = true) -> Dictiona
 			i += 1
 		
 		for _i: int in copies:
-			var card: Card = await Card.create_from_id(id, player)
+			var card: Card = Card.create_from_id(id, player)
 			
 			if player:
 				card.add_to_location(&"Deck", player.deck.size())
 			
 			cards.append(card)
 	
-	var hero: Card = await Card.create_from_id(hero_id, player)
+	var hero: Card = Card.create_from_id(hero_id, player)
 	
 	if validate and not _validate_deck(deckcode, hero, cards):
 		hero.queue_free()
@@ -64,7 +64,7 @@ func import(deckcode: String, player: Player, validate: bool = true) -> Dictiona
 	if player:
 		hero.location = &"Hero"
 		
-		var hero_power: Card = await Card.create_from_id(hero.hero_power_id, player)
+		var hero_power: Card = Card.create_from_id(hero.hero_power_id, player)
 		hero_power.location = &"Hero Power"
 		
 		hero.hero_power_card = hero_power
@@ -74,7 +74,7 @@ func import(deckcode: String, player: Player, validate: bool = true) -> Dictiona
 
 ## Returns [code]true[/code] if [param deckcode] is a valid deckcode.
 func validate(deckcode: String) -> bool:
-	return (await import(deckcode, Player.new())).has("cards")
+	return import(deckcode, Player.new()).has("cards")
 #endregion
 
 

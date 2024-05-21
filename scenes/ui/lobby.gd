@@ -43,7 +43,7 @@ func _toggle() -> void:
 
 
 func _on_join_button_pressed() -> void:
-	if not await Deckcode.validate(deckcode.text):
+	if not Deckcode.validate(deckcode.text):
 		Game.feedback("Invalid deckcode.", Game.FeedbackType.ERROR)
 		push_warning("Invalid deckcode.")
 		return
