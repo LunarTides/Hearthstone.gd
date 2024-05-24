@@ -117,7 +117,7 @@ var exhausted: bool = false
 ## # Trigger a card's battlecry.
 ## # We don't want the card's battlecry effects to be triggered here.
 ## card.should_do_effects = false
-## card.trigger_ability(Card.Ability.BATTLECRY, false)
+## card.trigger_ability(&"Battlecry", [], false)
 ## card.should_do_effects = true
 ## [/codeblock]
 var should_do_effects: bool = true
@@ -561,8 +561,10 @@ func _ready() -> void:
 		_update()
 	)
 	
-	if "setup" in self:
-		self["setup"].call()
+	Game.game_started.connect(func() -> void:
+		if "setup" in self:
+			self["setup"].call()
+	)
 
 
 func _input(event: InputEvent) -> void:
@@ -598,7 +600,7 @@ func add_to_location(new_location: StringName, index: int) -> void:
 
 
 ## Triggers an ability.
-func trigger_ability(ability: StringName, send_packet: bool = true) -> bool:
+func trigger_ability(ability: StringName, additional_args: Array = [], send_packet: bool = true) -> bool:
 	if not abilities.has(ability):
 		return false
 	
@@ -608,7 +610,7 @@ func trigger_ability(ability: StringName, send_packet: bool = true) -> bool:
 	# Wait 1 frame so that `await wait_for_ability` can get called before the ability gets triggered.
 	await get_tree().process_frame
 	
-	Packet.send_if(send_packet, &"Trigger Ability", player.id, [location, index, ability])
+	Packet.send_if(send_packet, &"Trigger Ability", player.id, [location, index, ability, additional_args])
 	
 	return true
 

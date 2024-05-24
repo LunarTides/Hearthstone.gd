@@ -366,13 +366,14 @@ func _accept_trigger_ability_packet(
 	location: StringName,
 	location_index: int,
 	ability: StringName,
+	additional_args: Array,
 ) -> void:
 	var card: Card = Card.get_from_index(player, location, location_index)
 	
 	Game.card_ability_triggered.emit(false, card, ability, player, sender_peer_id)
 	
 	for ability_callback: Callable in card.abilities[ability]:
-		var success: int = await ability_callback.call()
+		var success: int = await ability_callback.callv(additional_args)
 		
 		if success == Card.REFUND:
 			card.refunded = true

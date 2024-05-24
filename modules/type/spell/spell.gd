@@ -50,7 +50,7 @@ func accept_play_packet(
 	if not is_spell(card):
 		return true
 	
-	card.trigger_ability(&"Cast", false)
+	card.trigger_ability(&"Cast", [], false)
 	await card._wait_for_ability(&"Cast")
 	
 	if card.refunded:

@@ -39,6 +39,13 @@ func layout_hero(card: Card) -> Dictionary:
 	else:
 		new_position = (await Game.wait_for_node("/root/Main/OpponentHero")).position
 	
+	if not is_instance_valid(card):
+		return {
+			"position": Vector3.ZERO,
+			"rotation": Vector3.ZERO,
+			"scale": Vector3.ZERO,
+		}
+	
 	return {
 		"position": new_position,
 		"rotation": card.rotation,

@@ -517,9 +517,10 @@ func _run_trigger_ability_packet(
 	location: StringName,
 	location_index: int,
 	ability: StringName,
+	additional_args: Array,
 ) -> bool:
 	# The info needs to be correct.
-	if not info_check([location, location_index, ability], [TYPE_STRING_NAME, TYPE_INT, TYPE_STRING_NAME]):
+	if not info_check([location, location_index, ability, additional_args], [TYPE_STRING_NAME, TYPE_INT, TYPE_STRING_NAME, TYPE_ARRAY]):
 		feedback("Invalid trigger ability info.", sender_peer_id)
 		return false
 	

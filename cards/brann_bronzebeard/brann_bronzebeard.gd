@@ -12,7 +12,7 @@ func battlecry() -> int:
 			# TODO: Implement better solution.
 			played_card.should_do_effects = false
 			# TODO: Change this to battlecry.
-			played_card.trigger_ability(&"Cast", false)
+			played_card.trigger_ability(&"Cast", [], false)
 			played_card.should_do_effects = true
 	
 	Game.card_played.connect(callback)

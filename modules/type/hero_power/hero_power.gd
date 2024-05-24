@@ -54,7 +54,7 @@ func accept_hero_power_packet(player: Player, sender_peer_id: int) -> bool:
 	
 	hero_power.refunded = false
 	
-	hero_power.trigger_ability(&"Hero Power", false)
+	hero_power.trigger_ability(&"Hero Power", [], false)
 	if hero_power.refunded:
 		return false
 	
@@ -79,7 +79,7 @@ func accept_play_packet(
 	if not is_hero_power(card):
 		return true
 	
-	card.trigger_ability(&"Battlecry", false)
+	card.trigger_ability(&"Battlecry", [], false)
 	await card._wait_for_ability(&"Battlecry")
 	
 	if card.refunded:

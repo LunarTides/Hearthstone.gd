@@ -52,9 +52,9 @@ func add_enchantment(card: Card, enchantment: Card) -> bool:
 		if e.location == &"None":
 			e.add_to_location(&"Deck", 0)
 		
-		e._doing_enchantment = true
-		e.trigger_ability(&"Undo", false)
-		e._doing_enchantment = false
+		card._doing_enchantment = true
+		e.trigger_ability(&"Undo", [card], false)
+		card._doing_enchantment = false
 		
 		e.add_to_location(old_location, old_index)
 	
@@ -74,9 +74,9 @@ func add_enchantment(card: Card, enchantment: Card) -> bool:
 		if e.location == &"None":
 			e.add_to_location(&"Deck", 0)
 		
-		e._doing_enchantment = true
-		await e.trigger_ability(&"Do", false)
-		e._doing_enchantment = false
+		card._doing_enchantment = true
+		await e.trigger_ability(&"Do", [card], false)
+		card._doing_enchantment = false
 		
 		e.add_to_location(old_location, old_index)
 	
