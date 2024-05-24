@@ -46,6 +46,8 @@ func add_enchantment(card: Card, enchantment: Card) -> bool:
 	for e: Card in card.modules[&"_enchantments"]:
 		var old_location: StringName = e.location
 		var old_index: int = e.index
+		if old_index == -1:
+			old_index = 0
 		
 		# The game can only find the card when it is in a valid location.
 		# Remove when replacing `Card.find_from_index` to `Card.find_from_uuid`.
@@ -68,6 +70,8 @@ func add_enchantment(card: Card, enchantment: Card) -> bool:
 	for e: Card in card.modules[&"_enchantments"]:
 		var old_location: StringName = e.location
 		var old_index: int = e.index
+		if old_index == -1:
+			old_index = 0
 		
 		# The game can only find the card when it is in a valid location.
 		# Remove when replacing `Card.find_from_index` to `Card.find_from_uuid`.
