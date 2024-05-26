@@ -59,6 +59,11 @@ const CONFIG_FILE_PATH: String = "./modules.cfg"
 #endregion
 
 
+#region Public Variables
+var suppressed_hooks: Array[Hook]
+#endregion
+
+
 #region Private Variables
 var _processing: bool = false
 
@@ -172,6 +177,9 @@ func save_config() -> void:
 
 ## Requests the modules to respond to a request.
 func request(what: Hook, info: Array = []) -> bool:
+	if what in suppressed_hooks:
+		return true
+	
 	await Modules.wait_in_queue()
 	requested.emit(what, info)
 	

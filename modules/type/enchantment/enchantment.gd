@@ -29,6 +29,8 @@ func handler(what: Modules.Hook, info: Array) -> bool:
 		card_create_hook.callv(info)
 	elif what == Modules.Hook.CARD_FIELD_CHANGE:
 		card_field_change_hook.callv(info)
+	elif what == Modules.Hook.CARD_FIELD_GET:
+		card_field_get_hook.callv(info)
 	
 	return true
 
@@ -85,10 +87,13 @@ func card_field_change_hook(card: Card, field: StringName, value: Variant) -> bo
 
 
 func card_field_get_hook(card: Card, field: StringName) -> bool:
-	if card.modules.has(&"_enchantment_changes") or card.modules[&"_enchantment_changes"].has(field):
+	Modules.suppressed_hooks.push_back(Modules.Hook.CARD_FIELD_GET)
+	
+	if not card.modules.has(&"_enchantment_changes") or not card.modules[&"_enchantment_changes"].has(field):
 		return true
 	
 	card.field_hook_changes[field] = card.modules[&"_enchantment_changes"][field]
+	Modules.suppressed_hooks.erase(Modules.Hook.CARD_FIELD_GET)
 	return false
 #endregion
 #endregion
