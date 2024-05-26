@@ -2,6 +2,7 @@ extends Card
 
 
 # Called when the card is created
+# TODO: Add _ to all ability functions.
 func setup() -> void:
 	add_ability(&"Battlecry", battlecry)
 
