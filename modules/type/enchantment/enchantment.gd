@@ -27,6 +27,8 @@ func _unload() -> void:
 func handler(what: Modules.Hook, info: Array) -> bool:
 	if what == Modules.Hook.CARD_CREATE:
 		card_create_hook.callv(info)
+	elif what == Modules.Hook.CARD_FIELD_CHANGE:
+		card_field_change_hook.callv(info)
 	
 	return true
 
@@ -64,6 +66,30 @@ func card_create_hook(card: Card) -> bool:
 		card.add_ability(&"Undo", card[&"undo"])
 	
 	return true
+
+
+func card_field_change_hook(card: Card, field: StringName, value: Variant) -> bool:
+	if card._initializing:
+		return true
+	
+	if card.modules.has(&"_doing_enchantment"):
+		if not card.modules.has(&"_enchantment_changes"):
+			card.modules[&"_enchantment_changes"] = {}
+		
+		card.modules[&"_enchantment_changes"][field] = value
+	else:
+		push_error("Trying to manually change an exported card field (%s) to %s (%s). Please add an enchantment instead." % [field, value, type_string(typeof(value))])
+		assert(false, "Trying to manually change an exported card field (%s) to %s (%s). Please add an enchantment instead." % [field, value, type_string(typeof(value))])
+	
+	return false
+
+
+func card_field_get_hook(card: Card, field: StringName) -> bool:
+	if card.modules.has(&"_enchantment_changes") or card.modules[&"_enchantment_changes"].has(field):
+		return true
+	
+	card.field_hook_changes[field] = card.modules[&"_enchantment_changes"][field]
+	return false
 #endregion
 #endregion
 
@@ -98,7 +124,7 @@ func _apply_enchantments(card: Card, before: bool) -> void:
 	else:
 		# Sort by highest priority.
 		card.modules[&"_enchantments"].sort_custom(func(a: Card, b: Card) -> bool:
-			return a.enchantment_priority > b.enchantment_priority
+			return a.modules[&"_enchantment_priority"] > b.modules[&"_enchantment_priority"]
 		)
 		
 		for e: Card in card.modules[&"_enchantments"]:
@@ -112,9 +138,9 @@ func _apply_enchantments(card: Card, before: bool) -> void:
 			if e.location == &"None":
 				e.add_to_location(&"Deck", 0)
 			
-			card._doing_enchantment = true
+			card.modules[&"_doing_enchantment"] = true
 			await e.trigger_ability(&"Do", [card], false)
-			card._doing_enchantment = false
+			card.modules[&"_doing_enchantment"] = false
 			
 			e.add_to_location(old_location, old_index)
 		

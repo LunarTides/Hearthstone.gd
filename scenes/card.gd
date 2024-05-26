@@ -138,6 +138,8 @@ var refunded: bool = false
 ## The target requested from the [code]DRAG_TO_PLAY[/code] tag. Use this in an ability.
 var drag_to_play_target: Variant
 
+var field_hook_changes: Dictionary
+
 #region Exported Variables
 #region Common
 @export_category("Common")
@@ -145,19 +147,15 @@ var drag_to_play_target: Variant
 ## The card's name. This can be anything and doesn't have to be unique.
 @export var card_name: String:
 	set(value):
-		# For some stupid reason, Godot might trigger setters when instancing scenes with exported variables.
-		if _initializing:
-			card_name = value
-		elif _doing_enchantment:
-			_enchantment_changes["card_name"] = value
-		else:
-			push_error("Trying to manually change an exported card field (card_name) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
-			assert(false, "Trying to manually change an exported card field (card_name) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
-	get:
-		if not _enchantment_changes.has("card_name"):
-			return card_name
+		if not await Modules.request(Modules.Hook.CARD_FIELD_CHANGE, [self, &"card_name", value]):
+			return
 		
-		return _enchantment_changes["card_name"]
+		card_name = value
+	get:
+		if not await Modules.request(Modules.Hook.CARD_FIELD_GET, [self, &"card_name"]):
+			return field_hook_changes[&"card_name"]
+		
+		return card_name
 
 ## The card's description. This will appear in the middle of the card and should describe what the card does.[br]
 ## Avoid going into too much detail. Use proper grammar, spelling, and punctuation.
@@ -170,126 +168,102 @@ var drag_to_play_target: Variant
 ## [/codeblock]
 @export_multiline var text: String:
 	set(value):
-		if _initializing:
-			text = value
-		elif _doing_enchantment:
-			_enchantment_changes["text"] = value
-		else:
-			push_error("Trying to manually change an exported card field (text) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
-			assert(false, "Trying to manually change an exported card field (text) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
-	get:
-		if not _enchantment_changes.has("text"):
-			return text
+		if not await Modules.request(Modules.Hook.CARD_FIELD_CHANGE, [self, &"text", value]):
+			return
 		
-		return _enchantment_changes["text"]
+		text = value
+	get:
+		if not await Modules.request(Modules.Hook.CARD_FIELD_GET, [self, &"text"]):
+			return field_hook_changes[&"text"]
+		
+		return text
 
 ## How much the card should cost, usually in [code]mana[/code].
 @export var cost: int:
 	set(value):
-		if _initializing:
-			cost = value
-		elif _doing_enchantment:
-			_enchantment_changes["cost"] = value
-		else:
-			push_error("Trying to manually change an exported card field (cost) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
-			assert(false, "Trying to manually change an exported card field (cost) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
-	get:
-		if not _enchantment_changes.has("cost"):
-			return cost
+		if not await Modules.request(Modules.Hook.CARD_FIELD_CHANGE, [self, &"cost", value]):
+			return
 		
-		return _enchantment_changes["cost"]
+		cost = value
+	get:
+		if not await Modules.request(Modules.Hook.CARD_FIELD_GET, [self, &"cost"]):
+			return field_hook_changes[&"cost"]
+		
+		return cost
 
 # TODO: Continue documenting.
 @export var texture: Texture2D:
 	set(value):
-		if _initializing:
-			texture = value
-		elif _doing_enchantment:
-			_enchantment_changes["texture"] = value
-		else:
-			push_error("Trying to manually change an exported card field (texture) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
-			assert(false, "Trying to manually change an exported card field (texture) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
-	get:
-		if not _enchantment_changes.has("texture"):
-			return texture
+		if not await Modules.request(Modules.Hook.CARD_FIELD_CHANGE, [self, &"texture", value]):
+			return
 		
-		return _enchantment_changes["texture"]
+		texture = value
+	get:
+		if not await Modules.request(Modules.Hook.CARD_FIELD_GET, [self, &"texture"]):
+			return field_hook_changes[&"texture"]
+		
+		return texture
 
 @export var classes: Array[StringName]:
 	set(value):
-		if _initializing:
-			classes = value
-		elif _doing_enchantment:
-			_enchantment_changes["classes"] = value
-		else:
-			push_error("Trying to manually change an exported card field (classes) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
-			assert(false, "Trying to manually change an exported card field (classes) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
-	get:
-		if not _enchantment_changes.has("classes"):
-			return classes
+		if not await Modules.request(Modules.Hook.CARD_FIELD_CHANGE, [self, &"classes", value]):
+			return
 		
-		return _enchantment_changes["classes"]
+		classes = value
+	get:
+		if not await Modules.request(Modules.Hook.CARD_FIELD_GET, [self, &"classes"]):
+			return field_hook_changes[&"classes"]
+		
+		return classes
 
 @export var tags: Array[StringName]:
 	set(value):
-		if _initializing:
-			tags = value
-		elif _doing_enchantment:
-			_enchantment_changes["tags"] = value
-		else:
-			push_error("Trying to manually change an exported card field (tags) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
-			assert(false, "Trying to manually change an exported card field (tags) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
-	get:
-		if not _enchantment_changes.has("tags"):
-			return tags
+		if not await Modules.request(Modules.Hook.CARD_FIELD_CHANGE, [self, &"tags", value]):
+			return
 		
-		return _enchantment_changes["tags"]
+		tags = value
+	get:
+		if not await Modules.request(Modules.Hook.CARD_FIELD_GET, [self, &"tags"]):
+			return field_hook_changes[&"tags"]
+		
+		return tags
 
 @export var modules: Dictionary:
 	set(value):
-		if _initializing:
-			modules = value
-		elif _doing_enchantment:
-			_enchantment_changes["modules"] = value
-		else:
-			push_error("Trying to manually change an exported card field (modules) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
-			assert(false, "Trying to manually change an exported card field (modules) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
-	get:
-		if not _enchantment_changes.has("modules"):
-			return modules
+		if not await Modules.request(Modules.Hook.CARD_FIELD_CHANGE, [self, &"modules", value]):
+			return
 		
-		return _enchantment_changes["modules"]
+		modules = value
+	get:
+		if not await Modules.request(Modules.Hook.CARD_FIELD_GET, [self, &"modules"]):
+			return field_hook_changes[&"modules"]
+		
+		return modules
 
 @export var collectible: bool:
 	set(value):
-		if _initializing:
-			collectible = value
-		elif _doing_enchantment:
-			_enchantment_changes["collectible"] = value
-		else:
-			push_error("Trying to manually change an exported card field (collectible) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
-			assert(false, "Trying to manually change an exported card field (collectible) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
-	get:
-		if not _enchantment_changes.has("collectible"):
-			return collectible
+		if not await Modules.request(Modules.Hook.CARD_FIELD_CHANGE, [self, &"collectible", value]):
+			return
 		
-		return _enchantment_changes["collectible"]
+		collectible = value
+	get:
+		if not await Modules.request(Modules.Hook.CARD_FIELD_GET, [self, &"collectible"]):
+			return field_hook_changes[&"collectible"]
+		
+		return collectible
 
 ## This HAS to be unique per card definition (E.g. All sheeps have the same id but a sheep and the coin have different ids).
 @export var id: int:
 	set(value):
-		if _initializing:
-			id = value
-		elif _doing_enchantment:
-			_enchantment_changes["id"] = value
-		else:
-			push_error("Trying to manually change an exported card field (id) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
-			assert(false, "Trying to manually change an exported card field (id) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
-	get:
-		if not _enchantment_changes.has("id"):
-			return id
+		if not await Modules.request(Modules.Hook.CARD_FIELD_CHANGE, [self, &"id", value]):
+			return
 		
-		return _enchantment_changes["id"]
+		id = value
+	get:
+		if not await Modules.request(Modules.Hook.CARD_FIELD_GET, [self, &"id"]):
+			return field_hook_changes[&"id"]
+		
+		return id
 #endregion
 
 
@@ -297,33 +271,27 @@ var drag_to_play_target: Variant
 @export_category("Minion / Weapon")
 @export var attack: int:
 	set(value):
-		if _initializing:
-			attack = value
-		elif _doing_enchantment:
-			_enchantment_changes["attack"] = value
-		else:
-			push_error("Trying to manually change an exported card field (attack) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
-			assert(false, "Trying to manually change an exported card field (attack) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
-	get:
-		if not _enchantment_changes.has("attack"):
-			return attack
+		if not await Modules.request(Modules.Hook.CARD_FIELD_CHANGE, [self, &"attack", value]):
+			return
 		
-		return _enchantment_changes["attack"]
+		attack = value
+	get:
+		if not await Modules.request(Modules.Hook.CARD_FIELD_GET, [self, &"attack"]):
+			return field_hook_changes[&"attack"]
+		
+		return attack
 
 @export var health: int:
 	set(value):
-		if _initializing:
-			health = value
-		elif _doing_enchantment:
-			_enchantment_changes["health"] = value
-		else:
-			push_error("Trying to manually change an exported card field (health) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
-			assert(false, "Trying to manually change an exported card field (health) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
-	get:
-		if not _enchantment_changes.has("health"):
-			return health
+		if not await Modules.request(Modules.Hook.CARD_FIELD_CHANGE, [self, &"health", value]):
+			return
 		
-		return _enchantment_changes["health"]
+		health = value
+	get:
+		if not await Modules.request(Modules.Hook.CARD_FIELD_GET, [self, &"health"]):
+			return field_hook_changes[&"health"]
+		
+		return health
 #endregion
 
 
@@ -331,34 +299,28 @@ var drag_to_play_target: Variant
 @export_category("Hero")
 @export var armor: int:
 	set(value):
-		if _initializing:
-			armor = value
-		elif _doing_enchantment:
-			_enchantment_changes["armor"] = value
-		else:
-			push_error("Trying to manually change an exported card field (armor) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
-			assert(false, "Trying to manually change an exported card field (armor) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
-	get:
-		if not _enchantment_changes.has("armor"):
-			return armor
+		if not await Modules.request(Modules.Hook.CARD_FIELD_CHANGE, [self, &"armor", value]):
+			return
 		
-		return _enchantment_changes["armor"]
+		armor = value
+	get:
+		if not await Modules.request(Modules.Hook.CARD_FIELD_GET, [self, &"armor"]):
+			return field_hook_changes[&"armor"]
+		
+		return armor
 
 # TODO: Show the texure of the hero power in the bottom left corner of the card.
 @export var hero_power_id: int:
 	set(value):
-		if _initializing:
-			hero_power_id = value
-		elif _doing_enchantment:
-			_enchantment_changes["hero_power_id"] = value
-		else:
-			push_error("Trying to manually change an exported card field (hero_power_id) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
-			assert(false, "Trying to manually change an exported card field (hero_power_id) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
-	get:
-		if not _enchantment_changes.has("hero_power_id"):
-			return hero_power_id
+		if not await Modules.request(Modules.Hook.CARD_FIELD_CHANGE, [self, &"hero_power_id", value]):
+			return
 		
-		return _enchantment_changes["hero_power_id"]
+		hero_power_id = value
+	get:
+		if not await Modules.request(Modules.Hook.CARD_FIELD_GET, [self, &"hero_power_id"]):
+			return field_hook_changes[&"hero_power_id"]
+		
+		return hero_power_id
 #endregion
 
 
@@ -368,76 +330,27 @@ var drag_to_play_target: Variant
 # TODO: Add mesh for the durability: https://hearthstone.wiki.gg/wiki/Location
 @export var durability: int:
 	set(value):
-		if _initializing:
-			durability = value
-		elif _doing_enchantment:
-			_enchantment_changes["durability"] = value
-		else:
-			push_error("Trying to manually change an exported card field (durability) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
-			assert(false, "Trying to manually change an exported card field (durability) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
-	get:
-		if not _enchantment_changes.has("durability"):
-			return durability
+		if not await Modules.request(Modules.Hook.CARD_FIELD_CHANGE, [self, &"durability", value]):
+			return
 		
-		return _enchantment_changes["durability"]
+		durability = value
+	get:
+		if not await Modules.request(Modules.Hook.CARD_FIELD_GET, [self, &"durability"]):
+			return field_hook_changes[&"durability"]
+		
+		return durability
 
 @export var cooldown: int:
 	set(value):
-		if _initializing:
-			cooldown = value
-		elif _doing_enchantment:
-			_enchantment_changes["cooldown"] = value
-		else:
-			push_error("Trying to manually change an exported card field (cooldown) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
-			assert(false, "Trying to manually change an exported card field (cooldown) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
-	get:
-		if not _enchantment_changes.has("cooldown"):
-			return cooldown
+		if not await Modules.request(Modules.Hook.CARD_FIELD_CHANGE, [self, &"cooldown", value]):
+			return
 		
-		return _enchantment_changes["cooldown"]
-#endregion
-
-
-#region Enchantment
-@export_category("Enchantment")
-
-enum EnchantmentPriority {
-	NONE = 1,
-	EQUALS,
-}
-
-## [b]Equals[/b]: An enchantment that ASSIGNS a value.
-## [br]
-## [b]None[/b]: Anything else.
-@export_flags("None", "Equals") var enchantment_priority: int = EnchantmentPriority.NONE:
-	set(value):
-		if _initializing:
-			enchantment_priority = value
-		elif _doing_enchantment:
-			_enchantment_changes["enchantment_priority"] = value
-		else:
-			push_error("Trying to manually change an exported card field (enchantment_priority) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
-			assert(false, "Trying to manually change an exported card field (enchantment_priority) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
+		cooldown = value
 	get:
-		if not _enchantment_changes.has("enchantment_priority"):
-			return enchantment_priority
+		if not await Modules.request(Modules.Hook.CARD_FIELD_GET, [self, &"cooldown"]):
+			return field_hook_changes[&"cooldown"]
 		
-		return _enchantment_changes["enchantment_priority"]
-
-@export var hidden: bool :
-	set(value):
-		if _initializing:
-			hidden = value
-		elif _doing_enchantment:
-			_enchantment_changes["hidden"] = value
-		else:
-			push_error("Trying to manually change an exported card field (hidden) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
-			assert(false, "Trying to manually change an exported card field (hidden) to %s (%s). Please add an enchantment instead." % [value, type_string(typeof(value))])
-	get:
-		if not _enchantment_changes.has("hidden"):
-			return hidden
-		
-		return _enchantment_changes["hidden"]
+		return cooldown
 #endregion
 #endregion
 
@@ -500,9 +413,6 @@ static var Location: Array[StringName] = [
 var _hover_tween: Tween
 var _should_hover: bool = true
 var _initializing: bool = true
-# TODO: Put these in the enchantment module.
-var _enchantment_changes: Dictionary
-var _doing_enchantment: bool = false
 #endregion
 
 
