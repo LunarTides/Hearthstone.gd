@@ -121,15 +121,20 @@ func _apply_enchantments(card: Card, before: bool) -> void:
 			if e.location == &"None":
 				e.add_to_location(&"Deck", 0)
 			
-			card._doing_enchantment = true
+			card.modules[&"_doing_enchantment"] = true
 			e.trigger_ability(&"Undo", [card], false)
-			card._doing_enchantment = false
+			card.modules[&"_doing_enchantment"] = false
 			
 			e.add_to_location(old_location, old_index)
 	else:
 		# Sort by highest priority.
 		card.modules[&"_enchantments"].sort_custom(func(a: Card, b: Card) -> bool:
-			return a.modules[&"_enchantment_priority"] > b.modules[&"_enchantment_priority"]
+			if not a.modules.has(&"enchantment"):
+				a.modules[&"enchantment"] = {}
+			if not b.modules.has(&"enchantment"):
+				b.modules[&"enchantment"] = {}
+			
+			return a.modules[&"enchantment"][&"priority"] > b.modules[&"enchantment"][&"priority"]
 		)
 		
 		for e: Card in card.modules[&"_enchantments"]:
