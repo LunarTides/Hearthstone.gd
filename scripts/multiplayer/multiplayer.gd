@@ -330,5 +330,6 @@ func start_game(deckcode1: String, deckcode2: String) -> void:
 		
 		player.draw_cards(3 if player.id == 0 else 4, false)
 	
+	Game.started = true
 	Game.game_started.emit()
 #endregion

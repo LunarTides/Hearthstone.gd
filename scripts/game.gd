@@ -127,6 +127,8 @@ var board_node: BoardNode:
 	get:
 		return get_tree().root.get_node("Main/Board") as BoardNode
 
+var started: bool = false
+
 var instance_num: int = -1
 #endregion
 

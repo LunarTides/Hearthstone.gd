@@ -39,9 +39,9 @@ func add_enchantment(card: Card, enchantment: Card) -> bool:
 	if not card.modules.has(&"_enchantments"):
 		card.modules[&"_enchantments"] = []
 	
-	_apply_enchantments(card, true)
+	await _apply_enchantments(card, true)
 	card.modules[&"_enchantments"].append(enchantment)
-	_apply_enchantments(card, false)
+	await _apply_enchantments(card, false)
 	
 	return true
 
@@ -50,9 +50,9 @@ func remove_enchantment(card: Card, enchantment: Card) -> bool:
 	if not card.modules.has(&"_enchantments"):
 		card.modules[&"_enchantments"] = []
 	
-	_apply_enchantments(card, true)
+	await _apply_enchantments(card, true)
 	card.modules[&"_enchantments"].erase(enchantment)
-	_apply_enchantments(card, false)
+	await _apply_enchantments(card, false)
 	
 	return true
 
@@ -101,31 +101,27 @@ func card_field_get_hook(card: Card, field: StringName) -> bool:
 
 #region Private Functions
 func _apply_enchantments(card: Card, before: bool) -> void:
-	var card_old_location: StringName = card.location
-	var card_old_index: int = card.index
-	
 	if before:
+		var card_old_location: StringName = card.location
+		var card_old_index: int = card.index
+		
 		# The game can only find the card when it is in a valid location.
 		# Remove when replacing `Card.find_from_index` to `Card.find_from_uuid`.
 		if card.location == &"None":
 			card.add_to_location(&"Deck", 0)
 		
 		for e: Card in card.modules[&"_enchantments"]:
-			var old_location: StringName = e.location
-			var old_index: int = e.index
-			if old_index == -1:
-				old_index = 0
-			
 			# The game can only find the card when it is in a valid location.
 			# Remove when replacing `Card.find_from_index` to `Card.find_from_uuid`.
-			if e.location == &"None":
-				e.add_to_location(&"Deck", 0)
+			e.add_to_location(&"Deck", e.player.deck.size())
 			
 			card.modules[&"_doing_enchantment"] = true
-			e.trigger_ability(&"Undo", [card], false)
+			await e.trigger_ability(&"Undo", [card], false)
 			card.modules[&"_doing_enchantment"] = false
 			
-			e.add_to_location(old_location, old_index)
+			e.add_to_location(&"None", 0)
+		
+		card.add_to_location(card_old_location, card_old_index)
 	else:
 		# Sort by highest priority.
 		card.modules[&"_enchantments"].sort_custom(func(a: Card, b: Card) -> bool:
@@ -138,21 +134,13 @@ func _apply_enchantments(card: Card, before: bool) -> void:
 		)
 		
 		for e: Card in card.modules[&"_enchantments"]:
-			var old_location: StringName = e.location
-			var old_index: int = e.index
-			if old_index == -1:
-				old_index = 0
-			
 			# The game can only find the card when it is in a valid location.
 			# Remove when replacing `Card.find_from_index` to `Card.find_from_uuid`.
-			if e.location == &"None":
-				e.add_to_location(&"Deck", 0)
+			e.add_to_location(&"Deck", e.player.deck.size())
 			
 			card.modules[&"_doing_enchantment"] = true
 			await e.trigger_ability(&"Do", [card], false)
 			card.modules[&"_doing_enchantment"] = false
 			
-			e.add_to_location(old_location, old_index)
-		
-		card.add_to_location(card_old_location, card_old_index)
+			e.add_to_location(&"None", 0)
 #endregion

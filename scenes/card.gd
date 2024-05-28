@@ -520,6 +520,10 @@ func trigger_ability(ability: StringName, additional_args: Array = [], send_pack
 	# Wait 1 frame so that `await wait_for_ability` can get called before the ability gets triggered.
 	await get_tree().process_frame
 	
+	# TODO: Remove this when it works.
+	if location == &"None":
+		return false
+	
 	Packet.send_if(send_packet, &"Trigger Ability", player.id, [location, index, ability, additional_args])
 	
 	return true
@@ -739,10 +743,10 @@ func _wait_for_ability(target_ability: StringName) -> bool:
 
 
 func _update() -> void:
-	if location == &"None":
-		remove_from_location()
-		queue_free()
-		return
+	#if location == &"None":
+		#destroy()
+		#queue_free()
+		#return
 	
 	is_hidden = is_hidden
 	# TODO: Put this condition into a function.
