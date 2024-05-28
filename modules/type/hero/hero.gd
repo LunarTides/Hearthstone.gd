@@ -55,7 +55,7 @@ func accept_play_packet(
 	if not is_hero(card):
 		return true
 	
-	card.trigger_ability(&"Battlecry", false)
+	card.trigger_ability(&"Battlecry", [], false)
 	await card._wait_for_ability(&"Battlecry")
 	
 	if card.refunded:

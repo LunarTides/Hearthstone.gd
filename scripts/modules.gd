@@ -24,12 +24,15 @@ enum Hook {
 	ACCEPT_PACKET,
 	ANTICHEAT,
 	ATTACK,
-	BLUEPRINT_CREATE,
 	CARD_ABILITY_ADD,
 	CARD_ABILITY_TRIGGER,
 	CARD_ADD_TO_DECK,
 	CARD_ADD_TO_HAND,
 	CARD_CHANGE_HIDDEN,
+	CARD_CREATE,
+	CARD_ENCHANTMENT_ADD,
+	CARD_FIELD_CHANGE,
+	CARD_FIELD_GET,
 	CARD_HOVER_START,
 	CARD_HOVER_STOP,
 	CARD_KILL,
@@ -53,6 +56,11 @@ enum Hook {
 
 #region Constants
 const CONFIG_FILE_PATH: String = "./modules.cfg"
+#endregion
+
+
+#region Public Variables
+var suppressed_hooks: Array[Hook]
 #endregion
 
 
@@ -144,7 +152,7 @@ func load_config() -> void:
 	print("Loading module config at '%s'..." % CONFIG_FILE_PATH)
 	
 	var config: ConfigFile = ConfigFile.new()
-	if config.load(CONFIG_FILE_PATH) == ERR_FILE_CANT_OPEN or config.get_value("Modules", "disabled") == null:
+	if config.load(CONFIG_FILE_PATH) == ERR_FILE_CANT_OPEN or config.get_value("Modules", "disabled", null) == null:
 		push_warning("No config found. Creating one...")
 		
 		save_config()
@@ -169,6 +177,9 @@ func save_config() -> void:
 
 ## Requests the modules to respond to a request.
 func request(what: Hook, info: Array = []) -> bool:
+	if what in suppressed_hooks:
+		return true
+	
 	await Modules.wait_in_queue()
 	requested.emit(what, info)
 	
@@ -242,9 +253,8 @@ func _register(module_name: StringName, dependencies: Array[StringName], on_load
 
 func _register_card_mesh(module_name: StringName, mesh: PackedScene) -> void:
 	_register_hooks(module_name, func(what: Hook, info: Array) -> bool:
-		if what == Hook.BLUEPRINT_CREATE:
-			var blueprint: Blueprint = info[0]
-			var card: Card = blueprint.card
+		if what == Hook.CARD_CREATE:
+			var card: Card = info[0]
 			
 			var root_node: Node3D = mesh.instantiate()
 			root_node.name = root_node.name.to_pascal_case()

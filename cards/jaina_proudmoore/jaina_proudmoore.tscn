@@ -4,7 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://ccmb7s7hsvhju" path="res://scenes/card.tscn" id="2_cardd"]
 [ext_resource type="Texture2D" uid="uid://c32u3jvx6byys" path="res://cards/jaina_proudmoore/jaina_proudmoore.png" id="2_ykg1a"]
 
-[node name="JainaProudmoore" type="Node3D" node_paths=PackedStringArray("card")]
+[node name="JainaProudmoore" instance=ExtResource("2_cardd")]
 script = ExtResource("1_scrip")
 card_name = "Jaina Proudmoore"
 texture = ExtResource("2_ykg1a")
@@ -16,6 +16,3 @@ modules = {
 }
 id = 4
 hero_power_id = 5
-card = NodePath("Card")
-
-[node name="Card" parent="." instance=ExtResource("2_cardd")]

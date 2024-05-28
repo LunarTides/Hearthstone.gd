@@ -1,6 +1,6 @@
 @tool
 extends EditorScript
-## A tool to create a [Blueprint] easily.
+## A tool to create a [Card] easily.
 ## @experimental
 
 
@@ -10,12 +10,12 @@ func _run() -> void:
 		return
 	
 	var script: FileAccess = FileAccess.open("res://cards/rename_me/rename_me.gd", FileAccess.WRITE)
-	script.store_string("""extends Blueprint
+	script.store_string("""extends Card
 
 
 # Called when the card is created
 func setup() -> void:
-	card.add_ability(&"Battlecry", battlecry)
+	add_ability(&"Battlecry", battlecry)
 
 
 func battlecry() -> int:
@@ -34,11 +34,8 @@ func battlecry() -> int:
 [ext_resource type="Script" path="res://cards/rename_me/rename_me.gd" id="1_scrip"]
 [ext_resource type="PackedScene" uid="uid://ccmb7s7hsvhju" path="res://scenes/card.tscn" id="2_cardd"]
 
-[node name="RenameMe" type="Node3D" node_paths=PackedStringArray("card")]
+[node name="RenameMe" instance=ExtResource("2_cardd")]
 script = ExtResource("1_scrip")
-card = NodePath("Card")
-
-[node name="Card" parent="." instance=ExtResource("2_cardd")]
 """ % uid)
 	
 	scene.close()

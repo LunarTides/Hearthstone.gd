@@ -32,8 +32,8 @@ func register(module_name: StringName) -> void:
 
 
 func handler(what: Modules.Hook, info: Array) -> bool:
-	if what == Modules.Hook.BLUEPRINT_CREATE:
-		return blueprint_create_hook.callv(info)
+	if what == Modules.Hook.CARD_CREATE:
+		return card_create_hook.callv(info)
 	elif what == Modules.Hook.CARD_CHANGE_HIDDEN:
 		return card_change_hidden_hook.callv(info)
 	elif what == Modules.Hook.CARD_UPDATE:
@@ -44,9 +44,9 @@ func handler(what: Modules.Hook, info: Array) -> bool:
 
 
 #region Hooks
-func blueprint_create_hook(blueprint: Blueprint) -> bool:
+func card_create_hook(card: Card) -> bool:
 	var attack_label: Label3D = ATTACK_LABEL.instantiate()
-	blueprint.card.add_child(attack_label, true)
+	card.add_child(attack_label, true)
 	
 	return true
 
@@ -63,7 +63,7 @@ func card_change_hidden_hook(card: Card, value: bool) -> bool:
 
 func card_update_hook(card: Card) -> bool:
 	# Attack
-	var attack_visible: bool = card.attack > 0 or card.blueprint.attack > 0
+	var attack_visible: bool = card.attack > 0
 	
 	var attack_mesh: MeshInstance3D = card.get_node_or_null("Mesh/Attack/Attack")
 	if attack_mesh:

@@ -1,13 +1,13 @@
-# meta-name: Blueprint
+# meta-name: Card
 # meta-description: Card script
 # meta-default: true
-extends Blueprint
+extends Card
 
 
 #region Internal Functions
-# Called when the card is created
+# Called when the card is created.
 func setup() -> void:
-	card.add_ability(&"Battlecry", battlecry)
+	add_ability(&"Battlecry", battlecry)
 #endregion
 
 

@@ -5,6 +5,14 @@ extends Area3D
 ## @experimental
 
 
+#region Enums
+enum {
+	REFUND,
+	SUCCESS,
+}
+#endregion
+
+
 #region Signals
 ## Emits when the node is released from a drag.
 signal released(position: Vector3)
@@ -14,12 +22,6 @@ signal released(position: Vector3)
 #region Public Variables
 ## The player that owns this card.
 var player: Player
-
-## The blueprint of this card.
-var blueprint: Blueprint:
-	set(new_blueprint):
-		blueprint = new_blueprint
-		update_blueprint()
 
 ## Whether or not the player is hovering over this card.
 var is_hovering: bool = false
@@ -115,7 +117,7 @@ var exhausted: bool = false
 ## # Trigger a card's battlecry.
 ## # We don't want the card's battlecry effects to be triggered here.
 ## card.should_do_effects = false
-## card.trigger_ability(Card.Ability.BATTLECRY, false)
+## card.trigger_ability(&"Battlecry", [], false)
 ## card.should_do_effects = true
 ## [/codeblock]
 var should_do_effects: bool = true
@@ -128,7 +130,7 @@ var is_dying: bool = false
 var should_die: bool = true
 
 ## The card's hero power. Only set if this card is a [code]Hero[/code] and the [member hero_power_id] is set.
-var hero_power: Card
+var hero_power_card: Card
 
 ## Whether or not the card has been refunded. Don't set manually.
 var refunded: bool = false
@@ -136,43 +138,273 @@ var refunded: bool = false
 ## The target requested from the [code]DRAG_TO_PLAY[/code] tag. Use this in an ability.
 var drag_to_play_target: Variant
 
-#region Blueprint Fields
+var field_hook_changes: Dictionary
+
+#region Exported Variables
 #region Common
-var card_name: String
-var text: String
-var cost: int
-var texture: Texture2D
-var types: Array[StringName]
-var classes: Array[StringName]
-var tags: Array[StringName]
-var modules: Dictionary
-var collectible: bool
-var id: int
+@export_category("Common")
+
+## The card's name. This can be anything and doesn't have to be unique.
+@export var card_name: String:
+	set(value):
+		if not await Modules.request(Modules.Hook.CARD_FIELD_CHANGE, [self, &"card_name", value]):
+			return
+		
+		card_name = value
+	get:
+		if not await Modules.request(Modules.Hook.CARD_FIELD_GET, [self, &"card_name"]):
+			return field_hook_changes[&"card_name"]
+		
+		return card_name
+
+## The card's description. This will appear in the middle of the card and should describe what the card does.[br]
+## Avoid going into too much detail. Use proper grammar, spelling, and punctuation.
+## [codeblock]
+## # Bad
+## "every time someone play a minion triger it's battlecry abilty 2 times (actually only 1 additional time since the battlecry alredy happens when palying the card first) the exact interacions / combos with other cards are ..."
+## 
+## # Good
+## "Your Battlecries trigger twice."
+## [/codeblock]
+@export_multiline var text: String:
+	set(value):
+		if not await Modules.request(Modules.Hook.CARD_FIELD_CHANGE, [self, &"text", value]):
+			return
+		
+		text = value
+	get:
+		if not await Modules.request(Modules.Hook.CARD_FIELD_GET, [self, &"text"]):
+			return field_hook_changes[&"text"]
+		
+		return text
+
+## How much the card should cost, usually in [code]mana[/code].
+@export var cost: int:
+	set(value):
+		if not await Modules.request(Modules.Hook.CARD_FIELD_CHANGE, [self, &"cost", value]):
+			return
+		
+		cost = value
+	get:
+		if not await Modules.request(Modules.Hook.CARD_FIELD_GET, [self, &"cost"]):
+			return field_hook_changes[&"cost"]
+		
+		return cost
+
+# TODO: Continue documenting.
+@export var texture: Texture2D:
+	set(value):
+		if not await Modules.request(Modules.Hook.CARD_FIELD_CHANGE, [self, &"texture", value]):
+			return
+		
+		texture = value
+	get:
+		if not await Modules.request(Modules.Hook.CARD_FIELD_GET, [self, &"texture"]):
+			return field_hook_changes[&"texture"]
+		
+		return texture
+
+@export var classes: Array[StringName]:
+	set(value):
+		if not await Modules.request(Modules.Hook.CARD_FIELD_CHANGE, [self, &"classes", value]):
+			return
+		
+		classes = value
+	get:
+		if not await Modules.request(Modules.Hook.CARD_FIELD_GET, [self, &"classes"]):
+			return field_hook_changes[&"classes"]
+		
+		return classes
+
+@export var tags: Array[StringName]:
+	set(value):
+		if not await Modules.request(Modules.Hook.CARD_FIELD_CHANGE, [self, &"tags", value]):
+			return
+		
+		tags = value
+	get:
+		if not await Modules.request(Modules.Hook.CARD_FIELD_GET, [self, &"tags"]):
+			return field_hook_changes[&"tags"]
+		
+		return tags
+
+@export var modules: Dictionary:
+	set(value):
+		if not await Modules.request(Modules.Hook.CARD_FIELD_CHANGE, [self, &"modules", value]):
+			return
+		
+		modules = value
+	get:
+		if not await Modules.request(Modules.Hook.CARD_FIELD_GET, [self, &"modules"]):
+			return field_hook_changes[&"modules"]
+		
+		return modules
+
+@export var collectible: bool:
+	set(value):
+		if not await Modules.request(Modules.Hook.CARD_FIELD_CHANGE, [self, &"collectible", value]):
+			return
+		
+		collectible = value
+	get:
+		if not await Modules.request(Modules.Hook.CARD_FIELD_GET, [self, &"collectible"]):
+			return field_hook_changes[&"collectible"]
+		
+		return collectible
+
+## This HAS to be unique per card definition (E.g. All sheeps have the same id but a sheep and the coin have different ids).
+@export var id: int:
+	set(value):
+		if not await Modules.request(Modules.Hook.CARD_FIELD_CHANGE, [self, &"id", value]):
+			return
+		
+		id = value
+	get:
+		if not await Modules.request(Modules.Hook.CARD_FIELD_GET, [self, &"id"]):
+			return field_hook_changes[&"id"]
+		
+		return id
 #endregion
 
 
 #region Minion / Weapon
-# TODO: Add weapon cards.
-var attack: int
-var health: int
-#endregion
+@export_category("Minion / Weapon")
+@export var attack: int:
+	set(value):
+		if not await Modules.request(Modules.Hook.CARD_FIELD_CHANGE, [self, &"attack", value]):
+			return
+		
+		attack = value
+	get:
+		if not await Modules.request(Modules.Hook.CARD_FIELD_GET, [self, &"attack"]):
+			return field_hook_changes[&"attack"]
+		
+		return attack
+
+@export var health: int:
+	set(value):
+		if not await Modules.request(Modules.Hook.CARD_FIELD_CHANGE, [self, &"health", value]):
+			return
+		
+		health = value
+	get:
+		if not await Modules.request(Modules.Hook.CARD_FIELD_GET, [self, &"health"]):
+			return field_hook_changes[&"health"]
+		
+		return health
 #endregion
 
 
 #region Hero
-var armor: int
+@export_category("Hero")
+@export var armor: int:
+	set(value):
+		if not await Modules.request(Modules.Hook.CARD_FIELD_CHANGE, [self, &"armor", value]):
+			return
+		
+		armor = value
+	get:
+		if not await Modules.request(Modules.Hook.CARD_FIELD_GET, [self, &"armor"]):
+			return field_hook_changes[&"armor"]
+		
+		return armor
 
 # TODO: Show the texure of the hero power in the bottom left corner of the card.
-var hero_power_id: int
+@export var hero_power_id: int:
+	set(value):
+		if not await Modules.request(Modules.Hook.CARD_FIELD_CHANGE, [self, &"hero_power_id", value]):
+			return
+		
+		hero_power_id = value
+	get:
+		if not await Modules.request(Modules.Hook.CARD_FIELD_GET, [self, &"hero_power_id"]):
+			return field_hook_changes[&"hero_power_id"]
+		
+		return hero_power_id
 #endregion
 
 
 #region Location
+@export_category("Location")
 # TODO: Add location cards.
 # TODO: Add mesh for the durability: https://hearthstone.wiki.gg/wiki/Location
-var durability: int
-var cooldown: int
+@export var durability: int:
+	set(value):
+		if not await Modules.request(Modules.Hook.CARD_FIELD_CHANGE, [self, &"durability", value]):
+			return
+		
+		durability = value
+	get:
+		if not await Modules.request(Modules.Hook.CARD_FIELD_GET, [self, &"durability"]):
+			return field_hook_changes[&"durability"]
+		
+		return durability
+
+@export var cooldown: int:
+	set(value):
+		if not await Modules.request(Modules.Hook.CARD_FIELD_CHANGE, [self, &"cooldown", value]):
+			return
+		
+		cooldown = value
+	get:
+		if not await Modules.request(Modules.Hook.CARD_FIELD_GET, [self, &"cooldown"]):
+			return field_hook_changes[&"cooldown"]
+		
+		return cooldown
 #endregion
+#endregion
+
+#region Enum-likes
+# TODO: Remove all these.
+static var all_tags: Array[StringName] = [
+	&"Drag To Play",
+	&"Starting Hero",
+]
+
+static var all_abilities: Array[StringName] = [
+	&"Adapt",
+	&"Battlecry",
+	&"Cast",
+	&"Combo",
+	&"Deathrattle",
+	&"Do",
+	&"Finale",
+	&"Frenzy",
+	&"Honorable Kill",
+	&"Infuse",
+	&"Inspire",
+	&"Invoke",
+	&"Outcast",
+	&"Overheal",
+	&"Overkill",
+	&"Passive",
+	&"Spellburst",
+	&"Start Of Game",
+	&"Undo",
+	&"Hero Power",
+	&"Use",
+	&"Placeholder",
+	&"Condition",
+	&"Remove",
+	&"Tick",
+	&"Test",
+]
+
+static var all_cost_types: Array[StringName] = [
+	&"Mana",
+	&"Armor",
+	&"Health",
+]
+
+static var Location: Array[StringName] = [
+	&"None",
+	&"Hand",
+	&"Deck",
+	&"Board",
+	&"Graveyard",
+	&"Hero",
+	&"Hero Power",
+]
 #endregion
 #endregion
 
@@ -180,6 +412,7 @@ var cooldown: int
 #region Private Variables
 var _hover_tween: Tween
 var _should_hover: bool = true
+var _initializing: bool = true
 #endregion
 
 
@@ -214,6 +447,13 @@ var _should_hover: bool = true
 
 #region Internal Functions
 func _ready() -> void:
+	_initializing = false
+	
+	texture_sprite.texture = texture
+	name_label.text = card_name
+	cost_label.text = str(cost)
+	text_label.text = text
+	
 	Game.turn_ended.connect(func(after: bool, _player: Player, _sender_peer_id: int) -> void:
 		if not after:
 			return
@@ -228,10 +468,12 @@ func _ready() -> void:
 	
 	# Use a timer to improve performance.
 	update_timer.timeout.connect(func() -> void:
-		if not card_name and blueprint:
-			update_blueprint()
-		
 		_update()
+	)
+	
+	Game.game_started.connect(func() -> void:
+		if "setup" in self:
+			self["setup"].call()
 	)
 
 
@@ -250,22 +492,10 @@ func _input(event: InputEvent) -> void:
 		return
 	
 	_stop_dragging(event.button_index == MOUSE_BUTTON_LEFT)
-
-
-func _exit_tree() -> void:
-	get_parent().queue_free()
 #endregion
 
 
 #region Public Functions
-## Update the Blueprint fields like [member name] to the blueprint.
-func update_blueprint() -> void:
-	# Assign the blueprint properties to this card
-	for prop: Dictionary in blueprint.get_property_list():
-		if prop.usage & PROPERTY_USAGE_SCRIPT_VARIABLE != 0 and prop.name in self:
-			self[prop.name] = blueprint[prop.name]
-
-
 ## Removes the card from its [member location].
 func remove_from_location() -> void:
 	location_array.erase(self)
@@ -280,7 +510,7 @@ func add_to_location(new_location: StringName, index: int) -> void:
 
 
 ## Triggers an ability.
-func trigger_ability(ability: StringName, send_packet: bool = true) -> bool:
+func trigger_ability(ability: StringName, additional_args: Array = [], send_packet: bool = true) -> bool:
 	if not abilities.has(ability):
 		return false
 	
@@ -290,7 +520,11 @@ func trigger_ability(ability: StringName, send_packet: bool = true) -> bool:
 	# Wait 1 frame so that `await wait_for_ability` can get called before the ability gets triggered.
 	await get_tree().process_frame
 	
-	Packet.send_if(send_packet, &"Trigger Ability", player.id, [location, index, ability])
+	# TODO: Remove this when it works.
+	if location == &"None":
+		return false
+	
+	Packet.send_if(send_packet, &"Trigger Ability", player.id, [location, index, ability, additional_args])
 	
 	return true
 
@@ -374,7 +608,7 @@ func tween_to(duration: float, new_position: Vector3, new_rotation: Vector3 = ro
 
 
 #region Static Functions
-## Gets all [CardNode]s for the specified player.
+## Gets all [Card]s for the specified player.
 static func get_all_owned_by(player: Player) -> Array[Card]:
 	var array: Array[Card] = []
 	
@@ -385,7 +619,7 @@ static func get_all_owned_by(player: Player) -> Array[Card]:
 	return array
 
 
-## Gets all [CardNode]s currently in the game scene.
+## Gets all [Card]s currently in the game scene.
 static func get_all() -> Array[Card]:
 	var array: Array[Card] = []
 	var tree: SceneTree = Engine.get_main_loop()
@@ -410,10 +644,83 @@ static func get_from_index(player: Player, location: StringName, index: int) -> 
 		&"Hero":
 			return player.hero
 		&"Hero Power":
-			return player.hero.hero_power
+			return player.hero.hero_power_card
 		_:
 			#assert(false, "The card doesn't exist at this location.")
 			return null
+
+
+## Gets all [Card]s registered in the game. This function is very slow, so don't use it often.
+static func get_all_registered() -> Array:
+	var files: Array[String] = Card.get_all_filenames()
+	
+	var cards: Array = files.map(func(file_path: String) -> Card: return load(file_path).instantiate())
+	return cards
+
+
+## Returns all filenames from the specified [param path].
+static func get_all_filenames_from_path(path: String) -> Array[String]:
+	var file_paths: Array[String] = []  
+	var dir: DirAccess = DirAccess.open(path)  
+	
+	dir.list_dir_begin()  
+	var file_name: String = dir.get_next()  
+
+	while file_name != "":  
+		var file_path: String = path + "/" + file_name  
+		if dir.current_is_dir():  
+			file_paths += Card.get_all_filenames_from_path(file_path)  
+		else:
+			if file_path.ends_with(".tscn.remap"):
+				file_path = file_path.replace(".remap", "")
+			file_paths.append(file_path)  
+		
+		file_name = dir.get_next()  
+	
+	return file_paths
+
+
+static func get_all_filenames() -> Array[String]:
+	return Card.get_all_filenames_from_path("res://cards").filter(func(file_path: String) -> bool:
+		return file_path.contains(".tscn")
+	)
+
+
+## Creates a [Card] from the specified [param id]. Returns [code]null[/code] if no such card exists.
+static func create_from_id(id: int, player: Player) -> Card:
+	var files: Array[String] = Card.get_all_filenames()
+	
+	for file_path: String in files:
+		var card: Card = load(file_path).instantiate()
+		
+		if card.id == id:
+			card.player = player
+			
+			var tree: SceneTree = Engine.get_main_loop()
+			tree.current_scene.add_child(card)
+			
+			Modules.request(Modules.Hook.CARD_CREATE, [card])
+			return card
+	
+	return null
+
+
+## Creates a [Card] from the specified [param path].
+static func create_from_path(path: String, player: Player) -> Card:
+	return Card.create_from_packed_scene(load(path), player)
+
+
+## Creates a [Card] from the specified [param packed_scene].
+static func create_from_packed_scene(packed_scene: PackedScene, player: Player) -> Card:
+	var card: Card = packed_scene.instantiate()
+	card.player = player
+	
+	var tree: SceneTree = Engine.get_main_loop()
+	tree.current_scene.add_child(card)
+	
+	Modules.request(Modules.Hook.CARD_CREATE, [card])
+	
+	return card
 #endregion
 
 
@@ -436,10 +743,10 @@ func _wait_for_ability(target_ability: StringName) -> bool:
 
 
 func _update() -> void:
-	if location == &"None":
-		remove_from_location()
-		queue_free()
-		return
+	#if location == &"None":
+		#destroy()
+		#queue_free()
+		#return
 	
 	is_hidden = is_hidden
 	# TODO: Put this condition into a function.
@@ -448,11 +755,6 @@ func _update() -> void:
 		return
 	
 	show()
-	
-	texture_sprite.texture = blueprint.texture
-	name_label.text = blueprint.card_name
-	cost_label.text = str(blueprint.cost)
-	text_label.text = blueprint.text
 	
 	# Cost
 	#card.get_node("Mesh/Crystal").visible = lookup.cost > 0

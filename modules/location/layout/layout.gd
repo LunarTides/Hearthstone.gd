@@ -53,6 +53,9 @@ func layout(card: Card, instant: bool = false) -> bool:
 	var new_rotation: Vector3 = result.rotation
 	var new_scale: Vector3 = result.scale
 	
+	if not card:
+		return false
+	
 	if instant:
 		card.position = new_position
 		card.rotation = new_rotation

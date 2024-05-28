@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c31i20s2lv01o"
-path="res://.godot/imported/blueprint_manager.svg-8fb790446ea926061622d2cb72e48b27.ctex"
+uid="uid://cqotndyac2sbi"
+path="res://.godot/imported/card_manager_optimized.svg-3edda17081b1d831f26e2515898d1c34.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/icons/blueprint_manager.svg"
-dest_files=["res://.godot/imported/blueprint_manager.svg-8fb790446ea926061622d2cb72e48b27.ctex"]
+source_file="res://assets/icons/card_manager_optimized.svg"
+dest_files=["res://.godot/imported/card_manager_optimized.svg-3edda17081b1d831f26e2515898d1c34.ctex"]
 
 [params]
 

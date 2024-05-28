@@ -1,10 +1,10 @@
 [gd_scene load_steps=6 format=3 uid="uid://c0cfpv6wh8gg5"]
 
 [ext_resource type="Script" path="res://cards/the_coin/the_coin.gd" id="1_bcjpn"]
-[ext_resource type="Texture2D" uid="uid://cj3i2247n3cjl" path="res://cards/the_coin/the_coin.png" id="2_rv7d8"]
 [ext_resource type="PackedScene" uid="uid://ccmb7s7hsvhju" path="res://scenes/card.tscn" id="3_cjwpy"]
+[ext_resource type="Texture2D" uid="uid://cj3i2247n3cjl" path="res://cards/the_coin/the_coin.png" id="3_oaaei"]
 
-[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_nd1wu"]
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_bb8hm"]
 lifetime_randomness = 0.5
 radial_velocity_min = 10.0
 radial_velocity_max = 10.0
@@ -12,15 +12,15 @@ gravity = Vector3(0, 0, 0)
 scale_min = 0.3
 scale_max = 0.5
 
-[sub_resource type="BoxMesh" id="BoxMesh_2hhy5"]
+[sub_resource type="BoxMesh" id="BoxMesh_88k4n"]
 
-[node name="TheCoin" type="Node3D" node_paths=PackedStringArray("cast_particles", "card")]
+[node name="TheCoin" node_paths=PackedStringArray("cast_particles") instance=ExtResource("3_cjwpy")]
 script = ExtResource("1_bcjpn")
 cast_particles = NodePath("CastParticles")
 card_name = "The Coin"
 text = "Gain 1 Mana Crystal
 this turn only."
-texture = ExtResource("2_rv7d8")
+texture = ExtResource("3_oaaei")
 classes = Array[StringName]([&"Neutral"])
 modules = {
 "rarities": [&"Free"],
@@ -28,15 +28,12 @@ modules = {
 "types": [&"Spell"]
 }
 id = 2
-card = NodePath("Card")
 
-[node name="Card" parent="." instance=ExtResource("3_cjwpy")]
-
-[node name="CastParticles" type="GPUParticles3D" parent="."]
+[node name="CastParticles" type="GPUParticles3D" parent="." index="0"]
 emitting = false
 amount = 200
 lifetime = 2.0
 one_shot = true
 explosiveness = 1.0
-process_material = SubResource("ParticleProcessMaterial_nd1wu")
-draw_pass_1 = SubResource("BoxMesh_2hhy5")
+process_material = SubResource("ParticleProcessMaterial_bb8hm")
+draw_pass_1 = SubResource("BoxMesh_88k4n")

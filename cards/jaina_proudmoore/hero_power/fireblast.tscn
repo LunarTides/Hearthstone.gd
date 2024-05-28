@@ -4,7 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://ccmb7s7hsvhju" path="res://scenes/card.tscn" id="2_51yga"]
 [ext_resource type="Texture2D" uid="uid://7jwy1pmelk2j" path="res://cards/jaina_proudmoore/hero_power/fireblast.png" id="2_g4x2h"]
 
-[node name="Fireblast" type="Node3D" node_paths=PackedStringArray("card")]
+[node name="Fireblast" instance=ExtResource("2_51yga")]
 script = ExtResource("1_rm0rv")
 card_name = "Fireblast"
 text = "Hero Power
@@ -18,6 +18,3 @@ modules = {
 "types": [&"Hero Power"]
 }
 id = 5
-card = NodePath("Card")
-
-[node name="Card" parent="." instance=ExtResource("2_51yga")]
