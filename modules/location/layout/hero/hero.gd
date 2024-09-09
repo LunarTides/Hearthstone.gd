@@ -61,9 +61,11 @@ func card_update_hook(card: Card) -> bool:
 	if not Game.started:
 		return true
 	
-	# TODO: Set the undo values to the non-enchantment version.
-	await _add_dynamic_enchantment(card, &"health", card.player.health, card.player.health)
-	await _add_dynamic_enchantment(card, &"armor", card.player.armor, card.player.armor)
+	if not card.modules.has(&"_layout_hero_has_dynamic_hero_layout_enchantments"):
+		# TODO: Set the undo values to the non-enchantment version.
+		await _add_dynamic_enchantment(card, &"health", card.player.health, card.player.health)
+		await _add_dynamic_enchantment(card, &"armor", card.player.armor, card.player.armor)
+		card.modules[&"_layout_hero_has_dynamic_hero_layout_enchantments"] = true
 	
 	return true
 #endregion
@@ -80,7 +82,6 @@ func _add_dynamic_enchantment(card: Card, field: StringName, do_value: Variant, 
 		if is_instance_valid(dynamic_enchantment):
 			dynamic_enchantment.destroy()
 			dynamic_enchantment.queue_free()
-	
 	
 	var dynamic_enchantment: DynamicEnchantment = DynamicEnchantment.create(card.player, field, do_value, undo_value)
 	await TypeEnchantmentModule.add_enchantment(card, dynamic_enchantment)
