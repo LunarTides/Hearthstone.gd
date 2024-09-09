@@ -72,18 +72,17 @@ func card_update_hook(card: Card) -> bool:
 
 #region Private Functions
 func _add_dynamic_enchantment(card: Card, field: StringName, do_value: Variant, undo_value: Variant) -> void:
-	if card.modules.has(&"_layout_hero_last_%s_dynamic_enchantment" % field):
+	if card.modules.has(&"_layout_hero_last_%s_dynamic_enchantment" % field) and is_instance_valid(card.modules[&"_layout_hero_last_%s_dynamic_enchantment" % field]):
 		var dynamic_enchantment: DynamicEnchantment = card.modules[&"_layout_hero_last_%s_dynamic_enchantment" % field]
 		
 		await TypeEnchantmentModule.remove_enchantment(card, dynamic_enchantment)
-		dynamic_enchantment.destroy()
-		dynamic_enchantment.queue_free()
+		
+		if is_instance_valid(dynamic_enchantment):
+			dynamic_enchantment.destroy()
+			dynamic_enchantment.queue_free()
 	
-	var dynamic_enchantment: DynamicEnchantment = Card.create_from_id(7, card.player)
-	dynamic_enchantment.field = field
-	dynamic_enchantment.do_value = do_value
-	dynamic_enchantment.undo_value = undo_value
 	
+	var dynamic_enchantment: DynamicEnchantment = DynamicEnchantment.create(card.player, field, do_value, undo_value)
 	await TypeEnchantmentModule.add_enchantment(card, dynamic_enchantment)
 	
 	card.modules[&"_layout_hero_last_%s_dynamic_enchantment" % field] = dynamic_enchantment
