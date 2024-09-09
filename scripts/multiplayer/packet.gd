@@ -151,6 +151,9 @@ func __send(packet_type: StringName, player_id: int, info: Array) -> StringName:
 @rpc("authority", "call_local", "reliable")
 func _accept(packet_type: StringName, sender_peer_id: int, player_id: int, info: Array) -> void:
 	var player: Player = Player.get_from_id(player_id)
+	if not is_instance_valid(player):
+		await get_tree().create_timer(1.0).timeout
+		player = Player.get_from_id(player_id)
 	
 	packet_received.emit(sender_peer_id, packet_type, player_id, info)
 	history.append([sender_peer_id, packet_type, player_id, info])
@@ -368,6 +371,10 @@ func _accept_trigger_ability_packet(
 	ability: StringName,
 	additional_args: Array,
 ) -> void:
+	# HACK
+	if not is_instance_valid(player):
+		return
+	
 	var card: Card = Card.get_from_index(player, location, location_index)
 	
 	Game.card_ability_triggered.emit(false, card, ability, player, sender_peer_id)

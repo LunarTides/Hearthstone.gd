@@ -108,12 +108,12 @@ func _apply_enchantments(card: Card, before: bool) -> void:
 		# The game can only find the card when it is in a valid location.
 		# Remove when replacing `Card.find_from_index` to `Card.find_from_uuid`.
 		if card.location == &"None":
-			card.add_to_location(&"Deck", 0)
+			card.add_to_location(&"Graveyard", 0)
 		
 		for e: Card in card.modules[&"_enchantments"]:
 			# The game can only find the card when it is in a valid location.
 			# Remove when replacing `Card.find_from_index` to `Card.find_from_uuid`.
-			e.add_to_location(&"Deck", e.player.deck.size())
+			e.add_to_location(&"Graveyard", e.player.graveyard.size())
 			
 			card.modules[&"_doing_enchantment"] = true
 			await e.trigger_ability(&"Undo", [card], false)
@@ -126,17 +126,17 @@ func _apply_enchantments(card: Card, before: bool) -> void:
 		# Sort by highest priority.
 		card.modules[&"_enchantments"].sort_custom(func(a: Card, b: Card) -> bool:
 			if not a.modules.has(&"enchantment"):
-				a.modules[&"enchantment"] = {}
+				a.modules[&"enchantment"] = {&"priority": 0}
 			if not b.modules.has(&"enchantment"):
-				b.modules[&"enchantment"] = {}
+				b.modules[&"enchantment"] = {&"priority": 0}
 			
-			return a.modules[&"enchantment"][&"priority"] > b.modules[&"enchantment"][&"priority"]
+			return a.modules[&"enchantment"][&"priority"] >= b.modules[&"enchantment"][&"priority"]
 		)
 		
 		for e: Card in card.modules[&"_enchantments"]:
 			# The game can only find the card when it is in a valid location.
-			# Remove when replacing `Card.find_from_index` to `Card.find_from_uuid`.
-			e.add_to_location(&"Deck", e.player.deck.size())
+			# TODO: Remove when replacing `Card.find_from_index` to `Card.find_from_uuid`.
+			e.add_to_location(&"Graveyard", e.player.graveyard.size())
 			
 			card.modules[&"_doing_enchantment"] = true
 			await e.trigger_ability(&"Do", [card], false)

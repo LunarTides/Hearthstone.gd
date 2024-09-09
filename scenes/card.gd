@@ -699,6 +699,9 @@ static func create_from_id(id: int, player: Player) -> Card:
 			var tree: SceneTree = Engine.get_main_loop()
 			tree.current_scene.add_child(card)
 			
+			if "setup" in card:
+				card.setup()
+			
 			Modules.request(Modules.Hook.CARD_CREATE, [card])
 			return card
 	
@@ -748,7 +751,6 @@ func _update() -> void:
 		#queue_free()
 		#return
 	
-	is_hidden = is_hidden
 	# TODO: Put this condition into a function.
 	if is_hidden and location != &"Hand" and location != &"Board" and location != &"Hero" and location != &"Hero Power":
 		hide()
