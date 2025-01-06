@@ -503,9 +503,11 @@ func remove_from_location() -> void:
 
 ## Add the card to the correct [param index] in it's [member location].
 func add_to_location(new_location: StringName, index: int) -> void:
-	remove_from_location()
-	
 	location = new_location
+	
+	if new_location == &"None":
+		return
+	
 	location_array.insert(min(index, location_array.size()), self)
 
 
