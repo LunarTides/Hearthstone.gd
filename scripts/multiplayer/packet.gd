@@ -105,7 +105,7 @@ func __send(packet_type: StringName, player_id: int, info: Array) -> StringName:
 	var sender_peer_id: int = multiplayer.get_remote_sender_id()
 	
 	var sender_player: Player = Player.get_from_peer_id(sender_peer_id)
-	var actor_player: Player = Multiplayer.players.values().filter(func(player: Player) -> bool: return player.id == player_id)[0]
+	var actor_player: Player = Player.get_from_id(player_id)
 	
 	print(get_readable(sender_peer_id, packet_type, player_id, info))
 	
@@ -151,6 +151,9 @@ func __send(packet_type: StringName, player_id: int, info: Array) -> StringName:
 @rpc("authority", "call_local", "reliable")
 func _accept(packet_type: StringName, sender_peer_id: int, player_id: int, info: Array) -> void:
 	var player: Player = Player.get_from_id(player_id)
+	if not is_instance_valid(player):
+		await get_tree().create_timer(1.0).timeout
+		player = Player.get_from_id(player_id)
 	
 	packet_received.emit(sender_peer_id, packet_type, player_id, info)
 	history.append([sender_peer_id, packet_type, player_id, info])
@@ -220,7 +223,7 @@ func _accept_create_card_packet(
 	location: StringName,
 	location_index: int,
 ) -> void:
-	var card: Card = Blueprint.create_from_id(id, player).card
+	var card: Card = Card.create_from_id(id, player)
 	card.add_to_location(location, location_index)
 	
 	Game.card_created.emit(true, card, player, sender_peer_id)
@@ -366,15 +369,20 @@ func _accept_trigger_ability_packet(
 	location: StringName,
 	location_index: int,
 	ability: StringName,
+	additional_args: Array,
 ) -> void:
+	# HACK
+	if not is_instance_valid(player):
+		return
+	
 	var card: Card = Card.get_from_index(player, location, location_index)
 	
 	Game.card_ability_triggered.emit(false, card, ability, player, sender_peer_id)
 	
 	for ability_callback: Callable in card.abilities[ability]:
-		var success: int = await ability_callback.call()
+		var success: int = await ability_callback.callv(additional_args)
 		
-		if success == Blueprint.REFUND:
+		if success == Card.REFUND:
 			card.refunded = true
 			break
 	

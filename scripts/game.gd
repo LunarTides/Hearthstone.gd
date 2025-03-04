@@ -127,6 +127,8 @@ var board_node: BoardNode:
 	get:
 		return get_tree().root.get_node("Main/Board") as BoardNode
 
+var started: bool = false
+
 var instance_num: int = -1
 #endregion
 
@@ -266,7 +268,7 @@ func start_game() -> void:
 	while player2.hand.size() < 4:
 		await get_tree().create_timer(0.5).timeout
 	
-	Multiplayer.create_blueprint_from_id.rpc(2, player2.id, &"Hand", player2.hand.size())
+	Multiplayer.create_card_from_id.rpc(2, player2.id, &"Hand", player2.hand.size())
 
 
 ## Sends a packet to end the [member current_player]'s turn. Returns if a packet was sent.

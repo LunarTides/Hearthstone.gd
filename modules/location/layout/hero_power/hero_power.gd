@@ -34,6 +34,13 @@ func layout_hero_power(card: Card) -> Dictionary:
 	
 	var new_rotation: Vector3 = Vector3.ZERO
 	
+	if not is_instance_valid(card):
+		return {
+			"position": Vector3.ZERO,
+			"rotation": Vector3.ZERO,
+			"scale": Vector3.ZERO,
+		}
+	
 	if card.player.has_used_hero_power_this_turn:
 		card.force_cover_visible = true
 		card.cover.position.y = -0.5

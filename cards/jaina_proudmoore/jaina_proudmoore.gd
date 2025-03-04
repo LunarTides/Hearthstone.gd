@@ -1,1 +1,1 @@
-extends Blueprint
+extends Card

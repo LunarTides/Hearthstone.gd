@@ -13,7 +13,7 @@ config_version=5
 config/name="Hearthstone.gd"
 config/version="0.1.0"
 run/main_scene="res://scenes/ui/main_menu.tscn"
-config/features=PackedStringArray("4.2", "Forward Plus")
+config/features=PackedStringArray("4.4", "Forward Plus")
 config/icon="res://icon.svg"
 
 [autoload]
@@ -41,6 +41,7 @@ LayoutHeroModule="*res://modules/location/layout/hero/hero.gd"
 LayoutHeroPowerModule="*res://modules/location/layout/hero_power/hero_power.gd"
 RarityModule="*res://modules/rarity/rarity.gd"
 TypeModule="*res://modules/type/type.gd"
+TypeEnchantmentModule="*res://modules/type/enchantment/enchantment.gd"
 TypeHeroModule="*res://modules/type/hero/hero.gd"
 TypeHeroPowerModule="*res://modules/type/hero_power/hero_power.gd"
 TypeMinionModule="*res://modules/type/minion/minion.gd"

@@ -1,14 +1,14 @@
-extends Blueprint
+extends Card
 
 
 # Called when the card is created
 func setup() -> void:
-	card.add_ability(&"Hero Power", hero_power)
+	add_ability(&"Hero Power", hero_power)
 
 
 func hero_power() -> int:
 	# Deal 1 damage.
-	var target: Variant = card.drag_to_play_target
+	var target: Variant = drag_to_play_target
 	
 	if target is Card:
 		target.health -= 1

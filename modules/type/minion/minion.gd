@@ -54,7 +54,7 @@ func accept_play_packet(
 		return true
 	
 	if card.abilities.has(&"Battlecry"):
-		card.trigger_ability(&"Battlecry", false)
+		card.trigger_ability(&"Battlecry", [], false)
 		await card._wait_for_ability(&"Battlecry")
 		
 		if card.refunded:

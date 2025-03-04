@@ -32,8 +32,8 @@ func register(module_name: StringName) -> void:
 
 
 func handler(what: Modules.Hook, info: Array) -> bool:
-	if what == Modules.Hook.BLUEPRINT_CREATE:
-		return blueprint_create_hook.callv(info)
+	if what == Modules.Hook.CARD_CREATE:
+		return card_create_hook.callv(info)
 	elif what == Modules.Hook.CARD_CHANGE_HIDDEN:
 		return card_change_hidden_hook.callv(info)
 	elif what == Modules.Hook.CARD_UPDATE:
@@ -44,9 +44,9 @@ func handler(what: Modules.Hook, info: Array) -> bool:
 
 
 #region Hooks
-func blueprint_create_hook(blueprint: Blueprint) -> bool:
+func card_create_hook(card: Card) -> bool:
 	var armor_label: Label3D = ARMOR_LABEL.instantiate()
-	blueprint.card.add_child(armor_label, true)
+	card.add_child(armor_label, true)
 	
 	return true
 
@@ -63,7 +63,7 @@ func card_change_hidden_hook(card: Card, value: bool) -> bool:
 
 func card_update_hook(card: Card) -> bool:
 	# Armor
-	var armor_visible: bool = card.armor > 0 or card.blueprint.armor > 0 or card.location == &"Hero"
+	var armor_visible: bool = card.armor > 0 or card.location == &"Hero"
 	
 	var armor_mesh: MeshInstance3D = card.get_node_or_null("Mesh/Armor/Armor")
 	if armor_mesh:
@@ -78,7 +78,7 @@ func card_update_hook(card: Card) -> bool:
 	armor_label.text = str(card.armor)
 	
 	if Modules.has_module(&"Health"):
-		var health_visible: bool = card.health > 0 or card.blueprint.health > 0
+		var health_visible: bool = card.health > 0
 		
 		# Move armor to the other side if health is visible.
 		if armor_mesh:

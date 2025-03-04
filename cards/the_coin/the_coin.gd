@@ -1,4 +1,4 @@
-extends Blueprint
+extends Card
 
 
 @export var cast_particles: GPUParticles3D
@@ -8,7 +8,7 @@ extends Blueprint
 func setup() -> void:
 	cast_particles.emitting = false
 	
-	card.add_ability(&"Cast", cast)
+	add_ability(&"Cast", cast)
 
 
 func cast() -> int:
@@ -16,18 +16,18 @@ func cast() -> int:
 	# We don't need to send a packet since this will get run on all clients and the server.
 	player.mana += 1
 	
-	await card.do_effects(cast_effects)
+	await do_effects(cast_effects)
 	return SUCCESS
 
 
 func cast_effects() -> void:
 	# Particles
-	cast_particles.global_position = card.global_position
+	cast_particles.global_position = global_position
 	cast_particles.emitting = true
 	
 	# Scale tween
 	var tween: Tween = create_tween().set_trans(Tween.TRANS_BOUNCE)
-	tween.tween_property(card, "scale", Vector3(3.0, 3.0, 3.0), 0.1)
-	tween.tween_property(card, "scale", Vector3.ONE, 1).set_delay(0.9).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_EXPO)
+	tween.tween_property(self, "scale", Vector3(3.0, 3.0, 3.0), 0.1)
+	tween.tween_property(self, "scale", Vector3.ONE, 1).set_delay(0.9).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_EXPO)
 	
 	await cast_particles.finished

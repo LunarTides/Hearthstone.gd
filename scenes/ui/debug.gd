@@ -132,13 +132,13 @@ func _give_card(player: Player) -> void:
 		return
 	
 	@warning_ignore("narrowing_conversion")
-	var blueprint: Blueprint = Blueprint.create_from_id(debug_buttons_card_id.value, player)
+	var card: Card = Card.create_from_id(debug_buttons_card_id.value, player)
 	
-	if not blueprint:
+	if not card:
 		Game.feedback("Invalid card. There is likely no card with that id.", Game.FeedbackType.ERROR)
 		return
 	
-	player.add_to_hand(blueprint.card, player.hand.size())
+	player.add_to_hand(card, player.hand.size())
 
 
 func _on_give_player_1_button_pressed() -> void:
