@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://dpvynuv28s5sb"]
 
-[ext_resource type="Script" path="res://cards/brann_bronzebeard/brann_bronzebeard.gd" id="1_o78kn"]
+[ext_resource type="Script" uid="uid://cgedqyfr2gdp5" path="res://cards/brann_bronzebeard/brann_bronzebeard.gd" id="1_o78kn"]
 [ext_resource type="Texture2D" uid="uid://b6htnjcsqpj4k" path="res://cards/brann_bronzebeard/brann_bronzebeard.png" id="2_1w15u"]
 [ext_resource type="PackedScene" uid="uid://ccmb7s7hsvhju" path="res://scenes/card.tscn" id="2_3gdj7"]
 

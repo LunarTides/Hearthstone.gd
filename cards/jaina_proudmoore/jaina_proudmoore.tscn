@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://cjnhuauhjaka6"]
 
-[ext_resource type="Script" path="res://cards/jaina_proudmoore/jaina_proudmoore.gd" id="1_scrip"]
+[ext_resource type="Script" uid="uid://cq5k570xljvuq" path="res://cards/jaina_proudmoore/jaina_proudmoore.gd" id="1_scrip"]
 [ext_resource type="PackedScene" uid="uid://ccmb7s7hsvhju" path="res://scenes/card.tscn" id="2_cardd"]
 [ext_resource type="Texture2D" uid="uid://c32u3jvx6byys" path="res://cards/jaina_proudmoore/jaina_proudmoore.png" id="2_ykg1a"]
 

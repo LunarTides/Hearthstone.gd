@@ -1,6 +1,6 @@
 [gd_scene load_steps=6 format=3 uid="uid://c0cfpv6wh8gg5"]
 
-[ext_resource type="Script" path="res://cards/the_coin/the_coin.gd" id="1_bcjpn"]
+[ext_resource type="Script" uid="uid://c18kb1im8k5ip" path="res://cards/the_coin/the_coin.gd" id="1_bcjpn"]
 [ext_resource type="PackedScene" uid="uid://ccmb7s7hsvhju" path="res://scenes/card.tscn" id="3_cjwpy"]
 [ext_resource type="Texture2D" uid="uid://cj3i2247n3cjl" path="res://cards/the_coin/the_coin.png" id="3_oaaei"]
 
